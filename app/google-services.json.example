@@ -1,0 +1,22 @@
+{
+  "_comment": "Android Firebase config. Do NOT edit by hand — download the real file from Firebase Console → Project settings → Your Android app (package com.jelly.supplement) → google-services.json, then save it next to this file as 'google-services.json'. The example below only shows the expected shape.",
+  "project_info": {
+    "project_number": "000000000000",
+    "project_id": "your-firebase-project-id",
+    "storage_bucket": "your-firebase-project-id.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
+        "android_client_info": {
+          "package_name": "com.jelly.supplement"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [{ "current_key": "REPLACE_WITH_REAL_KEY" }],
+      "services": { "appinvite_service": { "other_platform_oauth_client": [] } }
+    }
+  ],
+  "configuration_version": "1"
+}
