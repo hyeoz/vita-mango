@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gamja+Flower&display=swap" rel="stylesheet">
+<style>
+  body { background:#e9e7e2; }
+</style>
+</helmet>
+
+<div style="position:absolute;left:80px;top:30px;font-family:'Gaegu',cursive;color:#2b2b2b">
+  <div style="font-size:34px;font-weight:700">영양제 앱 · 와이어프레임 탐색</div>
+  <div style="font-size:17px;color:#6b6b6b;margin-top:2px;font-family:'Gamja Flower',cursive">3가지 방향 × 4화면 — 레이아웃 · 일정 표현 · 캐릭터 역할 · AI 추천 · 컨디션 입력을 다르게</div>
+</div>
+
+<!-- ============ ROW A — 타임라인 중심 ============ -->
+<div style="position:absolute;left:80px;top:110px;font-family:'Gaegu',cursive">
+  <div style="font-size:24px;font-weight:700;color:#7c5cff">방향 A · 타임라인 중심</div>
+  <div style="font-size:15px;color:#777;font-family:'Gamja Flower',cursive">하루 흐름을 세로 타임라인으로 · AI는 캐릭터와의 채팅으로</div>
+</div>
+
+<!-- A1 온보딩 -->
+<div style="position:absolute;left:80px;top:175px;width:280px">
+  <div data-drags-parent="1" style="position:absolute;top:-22px;font-family:'Gaegu',cursive;font-size:13px;font-weight:700;color:#555">A1 · 온보딩 — 영양제 등록</div>
+  <div style="background:#fbfbfb;border:2px solid #2b2b2b;border-radius:30px;height:560px;padding:16px;font-family:'Gamja Flower',cursive;color:#333;position:relative;overflow:hidden">
+    <div style="width:46px;height:5px;background:#ccc;border-radius:3px;margin:2px auto 14px"></div>
+    <div style="font-family:'Gaegu',cursive;font-size:19px;font-weight:700;margin-bottom:3px">어떤 영양제를 드세요?</div>
+    <div style="font-size:13px;color:#888;margin-bottom:12px">검색하거나 골라서 추가해요</div>
+    <div style="border:1.5px dashed #b5b5b5;border-radius:14px;height:38px;display:flex;align-items:center;padding:0 12px;color:#aaa;font-size:13px;margin-bottom:14px">🔍 영양제 이름 검색…</div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="display:flex;align-items:center;gap:10px;border:1.5px solid #e0e0e0;border-radius:14px;padding:10px"><div style="width:32px;height:15px;border-radius:8px;background:linear-gradient(90deg,#ff7eb6 50%,#7c5cff 50%);border:1.5px solid #2b2b2b"></div><div style="flex:1"><div style="height:8px;width:70%;background:#ddd;border-radius:4px"></div></div><div style="width:24px;height:24px;border-radius:50%;border:1.5px solid #7c5cff;color:#7c5cff;display:flex;align-items:center;justify-content:center;font-size:16px">+</div></div>
+      <div style="display:flex;align-items:center;gap:10px;border:1.5px solid #e0e0e0;border-radius:14px;padding:10px"><div style="width:32px;height:15px;border-radius:8px;background:#3bc9db;border:1.5px solid #2b2b2b"></div><div style="flex:1"><div style="height:8px;width:55%;background:#ddd;border-radius:4px"></div></div><div style="width:24px;height:24px;border-radius:50%;border:1.5px solid #7c5cff;color:#7c5cff;display:flex;align-items:center;justify-content:center;font-size:16px">+</div></div>
+      <div style="display:flex;align-items:center;gap:10px;border:1.5px solid #2b2b2b;border-radius:14px;padding:10px;background:#fff3f8"><div style="width:32px;height:15px;border-radius:8px;background:#ffb400;border:1.5px solid #2b2b2b"></div><div style="flex:1"><div style="height:8px;width:62%;background:#ccc;border-radius:4px"></div></div><div style="width:24px;height:24px;border-radius:50%;background:#7c5cff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px">✓</div></div>
+    </div>
+    <div style="position:absolute;left:16px;right:16px;bottom:16px;display:flex;align-items:center;gap:10px">
+      <div style="width:40px;height:40px;background:linear-gradient(165deg,#ffd23f 0%,#ff9e2c 100%);border-radius:46% 46% 40% 40%/58% 58% 42% 42%;border:1.5px solid #2b2b2b;position:relative;flex:none"><div style="position:absolute;width:5px;height:5px;background:#2b2b2b;border-radius:50%;top:14px;left:11px"></div><div style="position:absolute;width:5px;height:5px;background:#2b2b2b;border-radius:50%;top:14px;right:11px"></div></div>
+      <div style="flex:1;height:42px;background:#2b2b2b;color:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Gaegu',cursive;font-size:16px;font-weight:700">3개 등록하기</div>
+    </div>
+  </div>
+</div>
+
+<!-- A2 홈 타임라인 -->
+<div style="position:absolute;left:440px;top:175px;width:280px">
+  <div data-drags-parent="1" style="position:absolute;top:-22px;font-family:'Gaegu',cursive;font-size:13px;font-weight:700;color:#555">A2 · 홈 — 오늘의 복용 타임라인</div>
+  <div style="background:#fbfbfb;border:2px solid #2b2b2b;border-radius:30px;height:560px;padding:16px;font-family:'Gamja Flower',cursive;color:#333;position:relative;overflow:hidden">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <div style="width:44px;height:42px;background:linear-gradient(165deg,#ffd23f 0%,#ff9e2c 100%);border-radius:46% 46% 40% 40%/58% 58% 42% 42%;border:1.5px solid #2b2b2b;position:relative;flex:none"><div style="position:absolute;width:5px;height:5px;background:#2b2b2b;border-radius:50%;top:15px;left:12px"></div><div style="position:absolute;width:5px;height:5px;background:#2b2b2b;border-radius:50%;top:15px;right:12px"></div><div style="position:absolute;width:10px;height:5px;border-bottom:2px solid #2b2b2b;border-radius:50%;bottom:11px;left:17px"></div></div>
+      <div><div style="font-family:'Gaegu',cursive;font-size:17px;font-weight:700">좋은 아침! 💊</div><div style="font-size:12px;color:#888">오늘 2/5 복용 완료</div></div>
+    </div>
+    <div style="position:relative;padding-left:22px">
+      <div style="position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:#ddd"></div>
+      <div style="margin-bottom:14px;position:relative"><div style="position:absolute;left:-22px;top:3px;width:14px;height:14px;border-radius:50%;background:#7c5cff;border:2px solid #2b2b2b"></div><div style="font-family:'Gaegu',cursive;font-size:14px;font-weight:700;color:#7c5cff">아침 · 식후</div><div style="display:flex;gap:6px;margin-top:6px"><div style="width:30px;height:14px;border-radius:7px;background:linear-gradient(90deg,#ff7eb6 50%,#7c5cff 50%);border:1.5px solid #2b2b2b"></div><div style="width:30px;height:14px;border-radius:7px;background:#3bc9db;border:1.5px solid #2b2b2b"></div></div></div>
+      <div style="margin-bottom:14px;position:relative"><div style="position:absolute;left:-22px;top:3px;width:14px;height:14px;border-radius:50%;background:#ffb400;border:2px solid #2b2b2b"></div><div style="font-family:'Gaegu',cursive;font-size:14px;font-weight:700;color:#d99000">점심 · 식전</div><div style="background:#fff;border:1.5px solid #2b2b2b;border-radius:12px;padding:8px;margin-top:6px;display:flex;align-items:center;gap:8px"><div style="width:28px;height:14px;border-radius:7px;background:#ffb400;border:1.5px solid #2b2b2b"></div><div style="height:7px;width:50%;background:#ddd;border-radius:4px"></div><div style="margin-left:auto;font-size:11px;color:#aaa">12:00</div></div></div>
+      <div style="position:relative"><div style="position:absolute;left:-22px;top:3px;width:14px;height:14px;border-radius:50%;background:#3bc9db;border:2px solid #2b2b2b"></div><div style="font-family:'Gaegu',cursive;font-size:14px;font-weight:700;color:#2aa5b5">저녁 · 자기전</div><div style="display:flex;gap:6px;margin-top:6px"><div style="width:30px;height:14px;border-radius:7px;background:#7c5cff;border:1.5px solid #2b2b2b"></div></div></div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:52px;border-top:1.5px solid #e0e0e0;display:flex;align-items:center;justify-content:space-around;background:#fff"><div style="font-family:'Gaegu',cursive;font-size:13px;color:#7c5cff;font-weight:700">홈</div><div style="font-size:12px;color:#aaa">컨디션</div><div style="font-size:12px;color:#aaa">AI</div><div style="font-size:12px;color:#aaa">나</div></div>
+  </div>
+</div>
+
+<!-- A3 AI 추천 채팅 -->
+<div style="position:absolute;left:800px;top:175px;width:280px">
+  <div data-drags-parent="1" style="position:absolute;top:-22px;font-family:'Gaegu',cursive;font-size:13px;font-weight:700;color:#555">A3 · AI 추천 — 캐릭터와 채팅</div>
+  <div style="background:#f4f1ff;border:2px solid #2b2b2b;border-radius:30px;height:560px;padding:16px;font-family:'Gamja Flower',cursive;color:#333;position:relative;overflow:hidden">
+    <div style="font-family:'Gaegu',cursive;font-size:17px;font-weight:700;text-align:center;margin-bottom:14px">젤리의 추천 💬</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <div style="width:36px;height:34px;background:linear-gradient(165deg,#ffd23f 0%,#ff9e2c 100%);border-radius:46% 46% 40% 40%/58% 58% 42% 42%;border:1.5px solid #2b2b2b;position:relative;flex:none"><div style="position:absolute;width:4px;height:4px;background:#2b2b2b;border-radius:50%;top:12px;left:10px"></div><div style="position:absolute;width:4px;height:4px;background:#2b2b2b;border-radius:50%;top:12px;right:10px"></div></div>
+      <div style="background:#fff;border:1.5px solid #2b2b2b;border-radius:14px;border-top-left-radius:4px;padding:10px;font-size:13px;max-width:180px">요즘 "피곤하다"고 자주 쓰셨네요 🥱</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px"><div style="background:#7c5cff;color:#fff;border:1.5px solid #2b2b2b;border-radius:14px;border-top-right-radius:4px;padding:8px 10px;font-size:13px">맞아 요즘 너무 피곤해</div></div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <div style="width:36px;height:34px;background:linear-gradient(165deg,#ffd23f 0%,#ff9e2c 100%);border-radius:46% 46% 40% 40%/58% 58% 42% 42%;border:1.5px solid #2b2b2b;flex:none"></div>
+      <div style="background:#fff;border:1.5px solid #2b2b2b;border-radius:14px;border-top-left-radius:4px;padding:10px;max-width:190px"><div style="font-size:13px;margin-bottom:8px">마그네슘을 추가해보면 어때요?</div><div style="border:1.5px dashed #7c5cff;border-radius:12px;padding:8px;display:flex;align-items:center;gap:8px;background:#faf8ff"><div style="width:28px;height:14px;border-radius:7px;background:#ffb400;border:1.5px solid #2b2b2b"></div><div><div style="font-family:'Gaegu',cursive;font-size:13px;font-weight:700">마그네슘</div><div style="font-size:10px;color:#999">피로·수면에 도움</div></div></div></div>
+    </div>
+    <div style="position:absolute;left:16px;right:16px;bottom:16px;display:flex;gap:8px"><div style="flex:1;height:40px;border:1.5px solid #2b2b2b;border-radius:14px;background:#fff;display:flex;align-items:center;padding:0 12px;color:#aaa;font-size:12px">메시지…</div><div style="width:40px;height:40px;background:#2b2b2b;border-radius:14px;color:#fff;display:flex;align-items:center;justify-content:center">↑</div></div>
+  </div>
+</div>
+
+<!-- A4 마이페이지 -->
+<div style="position:absolute;left:1160px;top:175px;width:280px">
+  <div data-drags-parent="1" style="position:absolute;top:-22px;font-family:'Gaegu',cursive;font-size:13px;font-weight:700;color:#555">A4 · 마이페이지 — 캐릭터+통계</div>
+  <div style="background:#fbfbfb;border:2px solid #2b2b2b;border-radius:30px;height:560px;padding:16px;font-family:'Gamja Flower',cursive;color:#333;position:relative;overflow:hidden">
+    <div style="text-align:center;margin-top:8px">
+      <div style="width:96px;height:90px;background:linear-gradient(165deg,#ffd23f 0%,#ff9e2c 100%);border-radius:46% 46% 40% 40%/58% 58% 42% 42%;border:2px solid #2b2b2b;position:relative;margin:0 auto"><div style="position:absolute;width:26px;height:17px;background:rgba(255,255,255,.55);border-radius:50%;top:13px;left:18px"></div><div style="position:absolute;width:8px;height:8px;background:#2b2b2b;border-radius:50%;top:34px;left:28px"></div><div style="position:absolute;width:8px;height:8px;background:#2b2b2b;border-radius:50%;top:34px;right:28px"></div><div style="position:absolute;width:18px;height:9px;border-bottom:3px solid #2b2b2b;border-radius:50%;bottom:24px;left:39px"></div><div style="position:absolute;width:12px;height:12px;background:#ffb59c;border-radius:50%;bottom:30px;left:16px"></div><div style="position:absolute;width:12px;height:12px;background:#ffb59c;border-radius:50%;bottom:30px;right:16px"></div></div>
+      <div style="font-family:'Gaegu',cursive;font-size:20px;font-weight:700;margin-top:8px">젤리 · Lv.3</div>
+      <div style="font-size:12px;color:#888">함께한 지 24일째 🎉</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <div style="flex:1;border:1.5px solid #2b2b2b;border-radius:14px;padding:10px;text-align:center;background:#fff"><div style="font-family:'Gaegu',cursive;font-size:22px;font-weight:700;color:#7c5cff">12</div><div style="font-size:11px;color:#888">연속일</div></div>
+      <div style="flex:1;border:1.5px solid #2b2b2b;border-radius:14px;padding:10px;text-align:center;background:#fff"><div style="font-family:'Gaegu',cursive;font-size:22px;font-weight:700;color:#3bc9db">5</div><div style="font-size:11px;color:#888">영양제</div></div>
+      <div style="flex:1;border:1.5px solid #2b2b2b;border-radius:14px;padding:10px;text-align:center;background:#fff"><div style="font-family:'Gaegu',cursive;font-size:22px;font-weight:700;color:#ffb400">92%</div><div style="font-size:11px;color:#888">달성률</div></div>
+    </div>
+    <div style="margin-top:16px"><div style="font-family:'Gaegu',cursive;font-size:14px;font-weight:700;margin-bottom:8px">이번 주 복용</div><div style="display:flex;justify-content:space-between">
+      <div style="width:24px;height:60px;background:#eee;border-radius:8px;position:relative;border:1.5px solid #ddd"><div style="position:absolute;bottom:0;left:0;right:0;height:48px;background:#ff7eb6;border-radius:8px"></div></div>
+      <div style="width:24px;height:60px;background:#eee;border-radius:8px;position:relative;border:1.5px solid #ddd"><div style="position:absolute;bottom:0;left:0;right:0;height:60px;background:#7c5cff;border-radius:8px"></div></div>
+      <div style="width:24px;height:60px;background:#eee;border-radius:8px;position:relative;border:1.5px solid #ddd"><div style="position:absolute;bottom:0;left:0;right:0;height:36px;background:#3bc9db;border-radius:8px"></div></div>
+      <div style="width:24px;height:60px;background:#eee;border-radius:8px;position:relative;border:1.5px solid #ddd"><div style="position:absolute;bottom:0;left:0;right:0;height:54px;background:#ffb400;border-radius:8px"></div></div>
+      <div style="width:24px;height:60px;background:#eee;border-radius:8px;position:relative;border:1.5px solid #ddd"><div style="position:absolute;bottom:0;left:0;right:0;height:42px;background:#ff7eb6;border-radius:8px"></div></div>
+      <div style="width:24px;height:60px;background:#eee;border-radius:8px;position:relative;border:1.5px solid #ddd"><div style="position:absolute;bottom:0;left:0;right:0;height:24px;background:#7c5cff;border-radius:8px"></div></div>
+      <div style="width:24px;height:60px;background:#eee;border-radius:8px;position:relative;border:1.5px solid #ddd"><div style="position:absolute;bottom:0;left:0;right:0;height:30px;background:#3bc9db;border-radius:8px"></div></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ============ ROW B — 카드 덱 중심 ============ -->
+<div style="position:absolute;left:80px;top:810px;font-family:'Gaegu',cursive">
+  <div style="font-size:24px;font-weight:700;color:#ff7eb6">방향 B · 카드 덱 중심</div>
+  <div style="font-size:15px;color:#777;font-family:'Gamja Flower',cursive">'지금 먹을 것'을 스와이프 카드로 · AI 추천은 이유 태그가 붙은 결과 카드</div>
+</div>
+
+<!-- B1 온보딩 그리드 -->
+<div style="position:absolute;left:80px;top:875px;width:280px">
+  <div data-drags-parent="1" style="position:absolute;top:-22px;font-family:'Gaegu',cursive;font-size:13px;font-weight:700;color:#555">B1 · 온보딩 — 카테고리 선택</div>
+  <div style="background:#fbfbfb;border:2px solid #2b2b2b;border-radius:30px;height:560px;padding:16px;font-family:'Gamja Flower',cursive;color:#333;position:relative;overflow:hidden">
+    <div style="width:46px;height:5px;background:#ccc;border-radius:3px;margin:2px auto 14px"></div>
+    <div style="font-family:'Gaegu',cursive;font-size:19px;font-weight:700;margin-bottom:3px">관심 있는 영역을 골라요</div>
+    <div style="font-size:13px;color:#888;margin-bottom:14px">선택하면 영양제를 추천해드려요</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="border:2px solid #2b2b2b;border-radius:16px;padding:14px 10px;text-align:center;background:#fff3f8"><div style="font-size:24px">😴</div><div style="font-family:'Gaegu',cursive;font-size:13px;font-weight:700;margin-top:4px">수면</div></div>
+      <div style="border:1.5px solid #e0e0e0;border-radius:16px;padding:14px 10px;text-align:center"><div style="font-size:24px">⚡</div><div style="font-family:'Gaegu',cursive;font-size:13px;font-weight:700;margin-top:4px">피로</div></div>
+      <div style="border:2px solid #2b2b2b;border-radius:16px;padding:14px 10px;text-align:center;background:#eefcff"><div style="font-size:24px">🛡️</div><div style="font-family:'Gaegu',cursive;font-size:13px;font-weight:700;margin-top:4px">면역</div></div>
+      <div style="border:1.5px solid #e0e0e0;border-radius:16px;padding:14px 10px;text-align:center"><div style="font-size:24px">💪</div><div style="font-family:'Gaegu',cursive;font-size:13px;font-weight:700;margin-top:4px">근력</div></div>
+      <div style="border:1.5px solid #e0e0e0;border-radius:16px;padding:14px 10px;text-align:center"><div style="font-size:24px">✨</div><div style="font-family:'Gaegu',cursive;font-size:13px;font-weight:700;margin-top:4px">피부</div></div>
+      <div style="border:1.5px solid #e0e0e0;border-radius:16px;padding:14px 10px;text-align:center"><div style="font-size:24px">🧠</div><div style="font-family:'Gaegu',cursive;font-size:13px;font-weight:700;margin-top:4px">집중</div></div>
+    </div>
+    <div style="position:absolute;left:16px;right:16px;bottom:16px;height:44px;background:#2b2b2b;color:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Gaegu',cursive;font-size:16px;font-weight:700">다음 (2개 선택됨)</div>
+  </div>
+</div>
+
+<!-- B2 홈 카드 덱 -->
+<div style="position:absolute;left:440px;top:875px;width:280px">
+  <div data-drags-parent="1" style="position:absolute;top:-22px;font-family:'Gaegu',cursive;font-size:13px;font-weight:700;color:#555">B2 · 홈 — 지금 먹을 카드</div>
+  <div style="background:#fbfbfb;border:2px solid #2b2b2b;border-radius:30px;height:560px;padding:16px;font-family:'Gamja Flower',cursive;color:#333;position:relative;overflow:hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><div style="font-family:'Gaegu',cursive;font-size:17px;font-weight:700">지금 먹을 시간 ⏰</div>
+      <div style="width:36px;height:36px;border-radius:50%;border:2.5px solid #eee;position:relative;display:flex;align-items:center;justify-content:center"><div style="position:absolute;inset:-2.5px;border-radius:50%;border:2.5px solid #7c5cff;border-right-color:transparent;border-bottom-color:transparent;transform:rotate(45deg)"></div><span style="font-family:'Gaegu',cursive;font-size:11px;font-weight:700">2/5</span></div>
+    </div>
+    <div style="position:relative;height:300px">
+      <div style="position:absolute;left:14px;right:14px;top:18px;height:270px;background:#eee;border:1.5px solid #ddd;border-radius:22px"></div>
+      <div style="position:absolute;left:7px;right:7px;top:9px;height:280px;background:#f4f4f4;border:1.5px solid #ccc;border-radius:22px"></div>
+      <div style="position:absolute;left:0;right:0;top:0;height:290px;background:#fff;border:2px solid #2b2b2b;border-radius:22px;padding:18px;display:flex;flex-direction:column;align-items:center;text-align:center">
+        <div style="width:70px;height:34px;border-radius:18px;background:linear-gradient(90deg,#ff7eb6 50%,#7c5cff 50%);border:2px solid #2b2b2b;margin-top:8px"></div>
+        <div style="font-family:'Gaegu',cursive;font-size:22px;font-weight:700;margin-top:14px">오메가-3</div>
+        <div style="font-size:13px;color:#888;margin-top:2px">아침 식후 · 1정</div>
+        <div style="background:#fff3f8;border:1.5px dashed #ff7eb6;border-radius:12px;padding:6px 12px;font-size:12px;margin-top:12px">기름진 식사 후 흡수율 ↑</div>
+        <div style="display:flex;gap:10px;margin-top:auto;width:100%">
+          <div style="flex:1;height:42px;border:1.5px solid #2b2b2b;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Gaegu',cursive;font-size:14px">나중에</div>
+          <div style="flex:1;height:42px;background:#7c5cff;color:#fff;border:1.5px solid #2b2b2b;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Gaegu',cursive;font-size:14px;font-weight:700">먹었어요 ✓</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:6px;margin-top:14px"><div style="width:8px;height:8px;border-radius:50%;background:#7c5cff"></div><div style="width:8px;height:8px;border-radius:50%;background:#ddd"></div><div style="width:8px;height:8px;border-radius:50%;background:#ddd"></div></div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:52px;border-top:1.5px solid #e0e0e0;display:flex;align-items:center;justify-content:space-around;background:#fff"><div style="font-family:'Gaegu',cursive;font-size:13px;color:#7c5cff;font-weight:700">홈</div><div style="font-size:12px;color:#aaa">컨디션</div><div style="font-size:12px;color:#aaa">AI</div><div style="font-size:12px;color:#aaa">나</div></div>
+  </div>
+</div>
+
+<!-- B3 AI 추천 결과 카드 -->
+<div style="position:absolute;left:800px;top:875px;width:280px">
+  <div data-drags-parent="1" style="position:absolute;top:-22px;font-family:'Gaegu',cursive;font-size:13px;font-weight:700;color:#555">B3 · AI 추천 — 결과 카드 + 이유</div>
+  <div style="background:#fbfbfb;border:2px solid #2b2b2b;border-radius:30px;height:560px;padding:16px;font-family:'Gamja Flower',cursive;color:#333;position:relative;overflow:hidden">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><div style="width:36px;height:34px;background:linear-gradient(165deg,#ffd23f 0%,#ff9e2c 100%);border-radius:46% 46% 40% 40%/58% 58% 42% 42%;border:1.5px solid #2b2b2b;flex:none"></div><div><div style="font-family:'Gaegu',cursive;font-size:16px;font-weight:700">오늘의 AI 추천</div><div style="font-size:11px;color:#888">최근 7일 컨디션 분석</div></div></div>
+    <div style="border:2px solid #2b2b2b;border-radius:18px;padding:14px;background:#fff;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px"><div style="width:40px;height:20px;border-radius:10px;background:#ffb400;border:1.5px solid #2b2b2b"></div><div><div style="font-family:'Gaegu',cursive;font-size:17px;font-weight:700">마그네슘</div><div style="font-size:11px;color:#7c5cff">추천도 92%</div></div></div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px"><span style="background:#f4f1ff;border:1.5px solid #7c5cff;border-radius:20px;padding:3px 10px;font-size:11px">#피로 7일↑</span><span style="background:#fff3f8;border:1.5px solid #ff7eb6;border-radius:20px;padding:3px 10px;font-size:11px">#수면부족</span></div>
+    </div>
+    <div style="border:1.5px solid #e0e0e0;border-radius:18px;padding:14px;background:#fff">
+      <div style="display:flex;align-items:center;gap:10px"><div style="width:40px;height:20px;border-radius:10px;background:#3bc9db;border:1.5px solid #2b2b2b"></div><div><div style="font-family:'Gaegu',cursive;font-size:17px;font-weight:700">비타민 D</div><div style="font-size:11px;color:#7c5cff">추천도 80%</div></div></div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px"><span style="background:#eefcff;border:1.5px solid #3bc9db;border-radius:20px;padding:3px 10px;font-size:11px">#실내활동</span><span style="background:#fffbe6;border:1.5px solid #ffb400;border-radius:20px;padding:3px 10px;font-size:11px">#면역</span></div>
+    </div>
+    <div style="position:absolute;left:16px;right:16px;bottom:16px;height:44px;background:#2b2b2b;color:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Gaegu',cursive;font-size:15px;font-weight:700">내 영양제에 추가하기</div>
+  </div>
+</div>
+
+<!-- B4 마이페이지 캘린더 -->
+<div style="position:absolute;left:1160px;top:875px;width:280px">
+  <div data-drags-parent="1" style="position:absolute;top:-22px;font-family:'Gaegu',cursive;font-size:13px;font-weight:700;color:#555">B4 · 마이페이지 — 스트릭 캘린더</div>
+  <div style="background:#fbfbfb;border:2px solid #2b2b2b;border-radius:30px;height:560px;padding:16px;font-family:'Gamja Flower',cursive;color:#333;position:relative;overflow:hidden">
+    <div style="display:flex;align-items:center;gap:12px;background:#f4f1ff;border:2px solid #2b2b2b;border-radius:18px;padding:12px;margin-bottom:14px">
+      <div style="width:54px;height:50px;background:linear-gradient(165deg,#ffd23f 0%,#ff9e2c 100%);border-radius:46% 46% 40% 40%/58% 58% 42% 42%;border:1.5px solid #2b2b2b;position:relative;flex:none"><div style="position:absolute;width:6px;height:6px;background:#2b2b2b;border-radius:50%;top:18px;left:14px"></div><div style="position:absolute;width:6px;height:6px;background:#2b2b2b;border-radius:50%;top:18px;right:14px"></div></div>
+      <div><div style="font-family:'Gaegu',cursive;font-size:18px;font-weight:700">12일 연속 🔥</div><div style="font-size:12px;color:#888">젤리가 무럭무럭 자라요</div></div>
+    </div>
+    <div style="font-family:'Gaegu',cursive;font-size:14px;font-weight:700;margin-bottom:8px">6월</div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px">
+      <div style="aspect-ratio:1;border-radius:7px;background:#ddeccd;border:1px solid #cdddbd"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#7c5cff"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#7c5cff"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#ffd6e6"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#7c5cff"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#7c5cff"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#7c5cff"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#7c5cff"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#7c5cff"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#ffd6e6"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#7c5cff"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#7c5cff"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#7c5cff"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#7c5cff"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#7c5cff"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#7c5cff"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#eee;border:1px solid #ddd"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#eee;border:1px solid #ddd"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#eee;border:1px solid #ddd"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#eee;border:1px solid #ddd"></div>
+      <div style="aspect-ratio:1;border-radius:7px;background:#eee;border:1px solid #ddd"></div>
+    </div>
+    <div style="margin-top:16px;border:1.5px solid #e0e0e0;border-radius:14px;padding:12px"><div style="font-family:'Gaegu',cursive;font-size:13px;font-weight:700;margin-bottom:8px">내 영양제 5</div><div style="display:flex;gap:6px;flex-wrap:wrap"><div style="width:32px;height:16px;border-radius:8px;background:#ff7eb6;border:1.5px solid #2b2b2b"></div><div style="width:32px;height:16px;border-radius:8px;background:#7c5cff;border:1.5px solid #2b2b2b"></div><div style="width:32px;height:16px;border-radius:8px;background:#3bc9db;border:1.5px solid #2b2b2b"></div><div style="width:32px;height:16px;border-radius:8px;background:#ffb400;border:1.5px solid #2b2b2b"></div><div style="width:32px;height:16px;border-radius:8px;background:#ff7eb6;border:1.5px solid #2b2b2b"></div></div></div>
+  </div>
+</div>
+
+<!-- ============ ROW C — 캐릭터 중심 ============ -->
+<div style="position:absolute;left:80px;top:1510px;font-family:'Gaegu',cursive">
+  <div style="font-size:24px;font-weight:700;color:#3bc9db">방향 C · 캐릭터 중심</div>
+  <div style="font-size:15px;color:#777;font-family:'Gamja Flower',cursive">젤리가 화면 주인공 · 알약이 주변을 둥둥 · 컨디션은 한 줄 일기로</div>
+</div>
+
+<!-- C1 온보딩 채팅형 -->
+<div style="position:absolute;left:80px;top:1575px;width:280px">
+  <div data-drags-parent="1" style="position:absolute;top:-22px;font-family:'Gaegu',cursive;font-size:13px;font-weight:700;color:#555">C1 · 온보딩 — 젤리가 물어봐요</div>
+  <div style="background:#eefcff;border:2px solid #2b2b2b;border-radius:30px;height:560px;padding:16px;font-family:'Gamja Flower',cursive;color:#333;position:relative;overflow:hidden">
+    <div style="text-align:center;margin-top:10px">
+      <div style="width:84px;height:80px;background:linear-gradient(165deg,#ffd23f 0%,#ff9e2c 100%);border-radius:46% 46% 40% 40%/58% 58% 42% 42%;border:2px solid #2b2b2b;position:relative;margin:0 auto"><div style="position:absolute;width:22px;height:15px;background:rgba(255,255,255,.55);border-radius:50%;top:12px;left:16px"></div><div style="position:absolute;width:7px;height:7px;background:#2b2b2b;border-radius:50%;top:30px;left:24px"></div><div style="position:absolute;width:7px;height:7px;background:#2b2b2b;border-radius:50%;top:30px;right:24px"></div><div style="position:absolute;width:16px;height:8px;border-bottom:3px solid #2b2b2b;border-radius:50%;bottom:22px;left:34px"></div></div>
+    </div>
+    <div style="background:#fff;border:1.5px solid #2b2b2b;border-radius:16px;padding:12px;margin-top:14px;text-align:center;position:relative"><div style="position:absolute;top:-7px;left:50%;transform:translateX(-50%) rotate(45deg);width:12px;height:12px;background:#fff;border-left:1.5px solid #2b2b2b;border-top:1.5px solid #2b2b2b"></div><div style="font-family:'Gaegu',cursive;font-size:16px;font-weight:700">안녕! 나는 젤리야 🫧</div><div style="font-size:13px;color:#666;margin-top:4px">지금 어떤 영양제를 먹고 있어?</div></div>
+    <div style="display:flex;flex-direction:column;gap:9px;margin-top:16px">
+      <div style="border:1.5px solid #2b2b2b;border-radius:14px;padding:11px;background:#fff;display:flex;align-items:center;gap:10px"><div style="width:28px;height:14px;border-radius:7px;background:#ff7eb6;border:1.5px solid #2b2b2b"></div><span style="font-family:'Gaegu',cursive;font-size:14px">비타민 C 먹어</span></div>
+      <div style="border:1.5px solid #2b2b2b;border-radius:14px;padding:11px;background:#fff;display:flex;align-items:center;gap:10px"><div style="width:28px;height:14px;border-radius:7px;background:#7c5cff;border:1.5px solid #2b2b2b"></div><span style="font-family:'Gaegu',cursive;font-size:14px">오메가-3 먹어</span></div>
+      <div style="border:1.5px dashed #999;border-radius:14px;padding:11px;text-align:center;color:#888;font-size:13px">+ 직접 검색해서 추가</div>
+    </div>
+    <div style="position:absolute;left:16px;right:16px;bottom:16px;height:44px;background:#2b2b2b;color:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Gaegu',cursive;font-size:15px;font-weight:700">다 골랐어!</div>
+  </div>
+</div>
+
+<!-- C2 홈 캐릭터 중심 + 한줄일기 -->
+<div style="position:absolute;left:440px;top:1575px;width:280px">
+  <div data-drags-parent="1" style="position:absolute;top:-22px;font-family:'Gaegu',cursive;font-size:13px;font-weight:700;color:#555">C2 · 홈 — 젤리 + 한 줄 일기</div>
+  <div style="background:#fff7fb;border:2px solid #2b2b2b;border-radius:30px;height:560px;padding:16px;font-family:'Gamja Flower',cursive;color:#333;position:relative;overflow:hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between"><div style="font-family:'Gaegu',cursive;font-size:15px;font-weight:700">6월 29일 · 오늘</div><div style="font-size:12px;color:#888">3/5 💊</div></div>
+    <div style="position:relative;height:230px;margin-top:6px">
+      <div style="position:absolute;top:24px;left:18px;width:34px;height:17px;border-radius:9px;background:#ff7eb6;border:1.5px solid #2b2b2b;transform:rotate(-18deg)"></div>
+      <div style="position:absolute;top:60px;right:14px;width:34px;height:17px;border-radius:9px;background:#3bc9db;border:1.5px solid #2b2b2b;transform:rotate(20deg)"></div>
+      <div style="position:absolute;bottom:36px;left:30px;width:34px;height:17px;border-radius:9px;background:#ffb400;border:1.5px solid #2b2b2b;transform:rotate(12deg)"></div>
+      <div style="position:absolute;bottom:50px;right:30px;width:34px;height:17px;border-radius:9px;background:#7c5cff;border:1.5px solid #2b2b2b;transform:rotate(-10deg)"></div>
+      <div style="position:absolute;top:40px;left:50%;transform:translateX(-50%);width:120px;height:114px;background:linear-gradient(165deg,#ffd23f 0%,#ff9e2c 100%);border-radius:46% 46% 40% 40%/58% 58% 42% 42%;border:2px solid #2b2b2b">
+        <div style="position:absolute;width:34px;height:22px;background:rgba(255,255,255,.55);border-radius:50%;top:16px;left:22px"></div><div style="position:absolute;width:10px;height:10px;background:#2b2b2b;border-radius:50%;top:44px;left:34px"></div><div style="position:absolute;width:10px;height:10px;background:#2b2b2b;border-radius:50%;top:44px;right:34px"></div><div style="position:absolute;width:22px;height:11px;border-bottom:3px solid #2b2b2b;border-radius:50%;bottom:32px;left:49px"></div><div style="position:absolute;width:14px;height:14px;background:#ffb59c;border-radius:50%;bottom:40px;left:18px"></div><div style="position:absolute;width:14px;height:14px;background:#ffb59c;border-radius:50%;bottom:40px;right:18px"></div>
+      </div>
+    </div>
+    <div style="background:#fff;border:1.5px solid #2b2b2b;border-radius:14px;padding:10px;text-align:center;font-size:13px;margin-top:4px">"점심 영양제 잊지마! 곧 시간이야 ⏰"</div>
+    <div style="margin-top:12px"><div style="font-family:'Gaegu',cursive;font-size:14px;font-weight:700;margin-bottom:6px">오늘 컨디션은? ✍️</div><div style="border:1.5px dashed #ff7eb6;border-radius:14px;background:#fff;padding:11px;color:#aaa;font-size:13px">한 줄로 적어줘 (예: 아침에 좀 피곤했어)</div></div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:52px;border-top:1.5px solid #e0e0e0;display:flex;align-items:center;justify-content:space-around;background:#fff"><div style="font-family:'Gaegu',cursive;font-size:13px;color:#ff7eb6;font-weight:700">홈</div><div style="font-size:12px;color:#aaa">기록</div><div style="font-size:12px;color:#aaa">AI</div><div style="font-size:12px;color:#aaa">나</div></div>
+  </div>
+</div>
+
+<!-- C3 AI 추천 캐릭터 말풍선 -->
+<div style="position:absolute;left:800px;top:1575px;width:280px">
+  <div data-drags-parent="1" style="position:absolute;top:-22px;font-family:'Gaegu',cursive;font-size:13px;font-weight:700;color:#555">C3 · AI 추천 — 젤리가 말해줘요</div>
+  <div style="background:#f4f1ff;border:2px solid #2b2b2b;border-radius:30px;height:560px;padding:16px;font-family:'Gamja Flower',cursive;color:#333;position:relative;overflow:hidden">
+    <div style="font-family:'Gaegu',cursive;font-size:17px;font-weight:700;text-align:center;margin-bottom:8px">젤리의 분석 🔮</div>
+    <div style="position:relative;height:150px">
+      <div style="position:absolute;top:14px;left:50%;transform:translateX(-50%);width:100px;height:96px;background:linear-gradient(165deg,#ffd23f 0%,#ff9e2c 100%);border-radius:46% 46% 40% 40%/58% 58% 42% 42%;border:2px solid #2b2b2b"><div style="position:absolute;width:26px;height:17px;background:rgba(255,255,255,.5);border-radius:50%;top:15px;left:18px"></div><div style="position:absolute;width:9px;height:9px;background:#2b2b2b;border-radius:50%;top:36px;left:28px"></div><div style="position:absolute;width:9px;height:9px;background:#2b2b2b;border-radius:50%;top:36px;right:28px"></div><div style="position:absolute;width:18px;height:9px;border-bottom:3px solid #2b2b2b;border-radius:50%;bottom:26px;left:41px"></div></div>
+      <div style="position:absolute;top:20px;left:14px;width:28px;height:14px;border-radius:7px;background:#ffb400;border:1.5px solid #2b2b2b;transform:rotate(-20deg)"></div>
+      <div style="position:absolute;top:30px;right:14px;width:28px;height:14px;border-radius:7px;background:#3bc9db;border:1.5px solid #2b2b2b;transform:rotate(18deg)"></div>
+    </div>
+    <div style="background:#fff;border:1.5px solid #2b2b2b;border-radius:16px;padding:12px;text-align:center;font-size:13px">최근 일기에서 <b>피로</b>와 <b>수면 부족</b>이 자주 보였어. <b>마그네슘</b>을 추천해! 🌙</div>
+    <div style="border:2px solid #2b2b2b;border-radius:16px;padding:12px;background:#fff;margin-top:12px;display:flex;align-items:center;gap:10px">
+      <div style="width:42px;height:21px;border-radius:11px;background:#ffb400;border:1.5px solid #2b2b2b;flex:none"></div>
+      <div style="flex:1"><div style="font-family:'Gaegu',cursive;font-size:16px;font-weight:700">마그네슘</div><div style="font-size:11px;color:#888">자기 전 · 수면·피로 회복</div></div>
+      <div style="font-family:'Gaegu',cursive;font-size:13px;color:#7c5cff;font-weight:700">92%</div>
+    </div>
+    <div style="display:flex;gap:10px;position:absolute;left:16px;right:16px;bottom:16px">
+      <div style="flex:1;height:44px;border:1.5px solid #2b2b2b;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Gaegu',cursive;font-size:14px">나중에</div>
+      <div style="flex:1;height:44px;background:#7c5cff;color:#fff;border:1.5px solid #2b2b2b;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Gaegu',cursive;font-size:14px;font-weight:700">추가할래</div>
+    </div>
+  </div>
+</div>
+
+<!-- C4 마이페이지 도감 -->
+<div style="position:absolute;left:1160px;top:1575px;width:280px">
+  <div data-drags-parent="1" style="position:absolute;top:-22px;font-family:'Gaegu',cursive;font-size:13px;font-weight:700;color:#555">C4 · 마이페이지 — 영양제 도감</div>
+  <div style="background:#fbfbfb;border:2px solid #2b2b2b;border-radius:30px;height:560px;padding:16px;font-family:'Gamja Flower',cursive;color:#333;position:relative;overflow:hidden">
+    <div style="font-family:'Gaegu',cursive;font-size:18px;font-weight:700;margin-bottom:3px">젤리 도감 📒</div>
+    <div style="font-size:12px;color:#888;margin-bottom:14px">모은 영양제 5 / 함께한 날 24</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <div style="border:1.5px solid #2b2b2b;border-radius:14px;padding:10px 6px;text-align:center;background:#fff"><div style="width:34px;height:17px;border-radius:9px;background:#ff7eb6;border:1.5px solid #2b2b2b;margin:0 auto"></div><div style="font-family:'Gaegu',cursive;font-size:11px;margin-top:6px">비타민C</div></div>
+      <div style="border:1.5px solid #2b2b2b;border-radius:14px;padding:10px 6px;text-align:center;background:#fff"><div style="width:34px;height:17px;border-radius:9px;background:#7c5cff;border:1.5px solid #2b2b2b;margin:0 auto"></div><div style="font-family:'Gaegu',cursive;font-size:11px;margin-top:6px">오메가3</div></div>
+      <div style="border:1.5px solid #2b2b2b;border-radius:14px;padding:10px 6px;text-align:center;background:#fff"><div style="width:34px;height:17px;border-radius:9px;background:#3bc9db;border:1.5px solid #2b2b2b;margin:0 auto"></div><div style="font-family:'Gaegu',cursive;font-size:11px;margin-top:6px">비타민D</div></div>
+      <div style="border:1.5px solid #2b2b2b;border-radius:14px;padding:10px 6px;text-align:center;background:#fff"><div style="width:34px;height:17px;border-radius:9px;background:#ffb400;border:1.5px solid #2b2b2b;margin:0 auto"></div><div style="font-family:'Gaegu',cursive;font-size:11px;margin-top:6px">마그네슘</div></div>
+      <div style="border:1.5px solid #2b2b2b;border-radius:14px;padding:10px 6px;text-align:center;background:#fff"><div style="width:34px;height:17px;border-radius:9px;background:#ff7eb6;border:1.5px solid #2b2b2b;margin:0 auto"></div><div style="font-family:'Gaegu',cursive;font-size:11px;margin-top:6px">유산균</div></div>
+      <div style="border:1.5px dashed #bbb;border-radius:14px;padding:10px 6px;text-align:center;color:#bbb"><div style="width:34px;height:17px;border-radius:9px;background:#eee;border:1.5px dashed #bbb;margin:0 auto"></div><div style="font-size:18px;margin-top:2px">?</div></div>
+    </div>
+    <div style="margin-top:16px;background:#f4f1ff;border:1.5px solid #2b2b2b;border-radius:16px;padding:12px;display:flex;align-items:center;gap:10px">
+      <div style="width:48px;height:46px;background:linear-gradient(165deg,#ffd23f 0%,#ff9e2c 100%);border-radius:46% 46% 40% 40%/58% 58% 42% 42%;border:1.5px solid #2b2b2b;flex:none;position:relative"><div style="position:absolute;width:5px;height:5px;background:#2b2b2b;border-radius:50%;top:16px;left:13px"></div><div style="position:absolute;width:5px;height:5px;background:#2b2b2b;border-radius:50%;top:16px;right:13px"></div></div>
+      <div><div style="font-family:'Gaegu',cursive;font-size:14px;font-weight:700">젤리가 자랐어요!</div><div style="font-size:11px;color:#888">7일 더 모으면 새 표정 해금 🎁</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- post-its -->
+<div style="position:absolute;left:1480px;top:200px;width:170px;background:#fef4a8;padding:12px;font-family:'Gamja Flower',cursive;font-size:13px;color:#5a4a00;box-shadow:0 1px 3px rgba(0,0,0,.12);transform:rotate(2deg);border-radius:2px">타임라인은 '하루 흐름'이 한눈에. 영양제 많은 사람에게 강점 👍</div>
+<div style="position:absolute;left:1480px;top:920px;width:170px;background:#fef4a8;padding:12px;font-family:'Gamja Flower',cursive;font-size:13px;color:#5a4a00;box-shadow:0 1px 3px rgba(0,0,0,.12);transform:rotate(-2deg);border-radius:2px">카드 덱은 '지금 이거 먹어'가 명확. 하나씩 집중 ✓</div>
+<div style="position:absolute;left:1480px;top:1620px;width:170px;background:#fef4a8;padding:12px;font-family:'Gamja Flower',cursive;font-size:13px;color:#5a4a00;box-shadow:0 1px 3px rgba(0,0,0,.12);transform:rotate(1.5deg);border-radius:2px">캐릭터 중심은 정서적 애착·꾸준함에 강점. 비비드 알약과 가장 잘 어울려요 🫧</div>
+
+</x-dc>
+</body>
+</html>

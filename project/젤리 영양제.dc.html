@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:radial-gradient(120% 120% at 50% 0%, #fff4ea 0%, #ffe9f3 45%, #efe9ff 100%); }
+  @keyframes bob { 0%,100%{transform:translateY(0) rotate(-1deg)} 50%{transform:translateY(-10px) rotate(1deg)} }
+  @keyframes blink { 0%,90%,100%{transform:scaleY(1)} 95%{transform:scaleY(.08)} }
+  @keyframes floatA { 0%,100%{transform:translateY(0) rotate(-14deg)} 50%{transform:translateY(-12px) rotate(-8deg)} }
+  @keyframes floatB { 0%,100%{transform:translateY(0) rotate(16deg)} 50%{transform:translateY(-14px) rotate(22deg)} }
+  @keyframes floatC { 0%,100%{transform:translateY(0) rotate(10deg)} 50%{transform:translateY(-9px) rotate(4deg)} }
+  @keyframes floatD { 0%,100%{transform:translateY(0) rotate(-8deg)} 50%{transform:translateY(-11px) rotate(-14deg)} }
+  @keyframes popin { 0%{transform:scale(.96);opacity:0} 100%{transform:scale(1);opacity:1} }
+  @keyframes shadowpulse { 0%,100%{transform:scaleX(1);opacity:.18} 50%{transform:scaleX(.82);opacity:.12} }
+  *{box-sizing:border-box}
+  .scr::-webkit-scrollbar{width:0}
+</style>
+</helmet>
+
+<div style="display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:28px 16px;font-family:'Gowun Dodum',sans-serif">
+  <div style="position:relative;width:390px;height:844px;background:#1b1226;border-radius:54px;padding:11px;box-shadow:0 34px 70px -24px rgba(80,40,90,.5), 0 0 0 2px rgba(255,255,255,.4) inset;flex:none">
+    <div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:#fffaf4">
+
+      <!-- status bar -->
+      <div style="position:absolute;top:0;left:0;right:0;height:50px;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-family:'Jua',sans-serif;font-size:15px;color:#2b2335;pointer-events:none">
+        <span>9:41</span>
+        <div style="position:absolute;left:50%;top:11px;transform:translateX(-50%);width:108px;height:30px;background:#1b1226;border-radius:16px"></div>
+        <span style="font-size:13px">📶 🔋</span>
+      </div>
+
+      <!-- screens -->
+      <div class="scr" style="position:absolute;inset:0;overflow-y:auto;overflow-x:hidden">
+
+        <!-- ===================== HOME ===================== -->
+        <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+        <div style="min-height:100%;padding:62px 20px 110px;background:radial-gradient(130% 80% at 50% 8%, #fff0f6 0%, #fffaf4 60%)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div>
+              <div style="font-family:'Jua',sans-serif;font-size:21px;color:#2b2335">6월 29일 · 오늘</div>
+              <div style="font-size:13px;color:#9b8fae">해가 떴어요. 천천히 시작해요 🌤️</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;background:#fff;border:2px solid #2b2335;border-radius:22px;padding:6px 12px;font-family:'Jua',sans-serif;font-size:15px;color:#2b2335;box-shadow:3px 3px 0 #ffce4d">
+              <span style="font-size:15px">💊</span><span>{{ progress }}</span>
+            </div>
+          </div>
+
+          <!-- hero -->
+          <div style="position:relative;height:248px;margin-top:4px">
+            <div style="position:absolute;top:42px;left:26px;width:46px;height:23px;border-radius:13px;background:linear-gradient(90deg,#ff7eb6 50%,#7c5cff 50%);border:2.5px solid #2b2335;box-shadow:2px 3px 0 rgba(43,35,53,.18);animation:floatA 4.6s ease-in-out infinite"></div>
+            <div style="position:absolute;top:30px;right:30px;width:42px;height:21px;border-radius:12px;background:#3bc9db;border:2.5px solid #2b2335;box-shadow:2px 3px 0 rgba(43,35,53,.18);animation:floatB 5.2s ease-in-out infinite"></div>
+            <div style="position:absolute;bottom:64px;left:14px;width:40px;height:20px;border-radius:11px;background:#ffd23f;border:2.5px solid #2b2335;box-shadow:2px 3px 0 rgba(43,35,53,.18);animation:floatC 5.8s ease-in-out infinite"></div>
+            <div style="position:absolute;bottom:78px;right:18px;width:44px;height:22px;border-radius:12px;background:#7c5cff;border:2.5px solid #2b2335;box-shadow:2px 3px 0 rgba(43,35,53,.18);animation:floatD 5s ease-in-out infinite"></div>
+
+            <!-- jelly -->
+            <div style="position:absolute;left:50%;top:24px;transform:translateX(-50%);width:172px;height:160px">
+              <dc-import name="Jelly" base-expr="{{ jellyMood }}" scale="1" hint-size="172px,160px"></dc-import>
+            </div>
+            <div style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);width:120px;height:18px;background:rgba(43,35,53,.18);border-radius:50%;filter:blur(3px);animation:shadowpulse 3.6s ease-in-out infinite"></div>
+          </div>
+
+          <!-- speech -->
+          <div style="position:relative;background:#fff;border:2.5px solid #2b2335;border-radius:20px;padding:14px 16px;text-align:center;font-size:15px;color:#2b2335;box-shadow:4px 5px 0 rgba(43,35,53,.1);margin-top:2px">
+            <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%) rotate(45deg);width:15px;height:15px;background:#fff;border-left:2.5px solid #2b2335;border-top:2.5px solid #2b2335"></div>
+            {{ speech }}
+          </div>
+
+          <!-- diary -->
+          <div style="background:linear-gradient(135deg,#fff6fa,#fdefff);border:2.5px solid #2b2335;border-radius:22px;padding:16px;margin-top:18px;box-shadow:4px 5px 0 rgba(43,35,53,.1)">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px">
+              <span style="font-size:17px">✍️</span>
+              <span style="font-family:'Jua',sans-serif;font-size:16px;color:#2b2335">오늘 컨디션, 한 줄로 알려줘</span>
+            </div>
+            <div style="display:flex;gap:8px">
+              <input value="{{ diary }}" onInput="{{ onDiary }}" onKeyDown="{{ onDiaryKey }}" placeholder="예) 아침에 좀 피곤했어" style="flex:1;height:44px;border:2px solid #2b2335;border-radius:14px;padding:0 14px;font-family:'Gowun Dodum',sans-serif;font-size:14px;background:#fff;outline:none;color:#2b2335" />
+              <button onClick="{{ submitDiary }}" style="width:48px;height:44px;border:2px solid #2b2335;border-radius:14px;background:#7c5cff;color:#fff;font-size:19px;cursor:pointer;box-shadow:2px 3px 0 rgba(43,35,53,.25)">↑</button>
+            </div>
+            <sc-if value="{{ hasDiary }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px">
+                <sc-for list="{{ recentDiaries }}" as="d" hint-placeholder-count="1">
+                  <span style="background:#fff;border:1.8px solid #ffb43d;border-radius:16px;padding:5px 11px;font-size:12px;color:#5a4a2a">🥭 {{ d }}</span>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+
+          <!-- today schedule -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin:22px 2px 12px">
+            <span style="font-family:'Jua',sans-serif;font-size:18px;color:#2b2335">오늘의 복용</span>
+            <span style="font-size:13px;color:#9b8fae">탭하면 완료 ✓</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ supps }}" as="item" hint-placeholder-count="4">
+              <button onClick="{{ item.toggle }}" style="display:flex;align-items:center;gap:13px;width:100%;text-align:left;border:2.5px solid #2b2335;border-radius:18px;padding:13px 14px;background:{{ item.bg }};cursor:pointer;box-shadow:3px 4px 0 rgba(43,35,53,.1)">
+                <span style="width:48px;height:24px;border-radius:13px;border:2.5px solid #2b2335;flex:none;background:{{ item.color }}"></span>
+                <span style="flex:1">
+                  <span style="display:block;font-family:'Jua',sans-serif;font-size:16px;color:#2b2335">{{ item.name }}</span>
+                  <span style="display:block;font-size:12.5px;color:#7d7390">{{ item.time }}</span>
+                </span>
+                <span style="width:30px;height:30px;border-radius:50%;border:2.5px solid #2b2335;display:flex;align-items:center;justify-content:center;font-size:15px;flex:none;background:{{ item.checkBg }};color:{{ item.checkColor }}">{{ item.checkMark }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ===================== AI ===================== -->
+        <sc-if value="{{ isAi }}" hint-placeholder-val="{{ true }}">
+        <div style="min-height:100%;padding:62px 20px 110px;background:radial-gradient(130% 80% at 50% 6%, #f1ecff 0%, #fbf7ff 60%)">
+          <div style="text-align:center">
+            <div style="display:inline-block;white-space:nowrap;background:#fff;border:2px solid #2b2335;border-radius:20px;padding:6px 16px;font-family:'Jua',sans-serif;font-size:13px;color:#7c5cff;box-shadow:3px 3px 0 #ffce4d">🔮 젤리의 AI 분석</div>
+          </div>
+
+          <!-- jelly thinking -->
+          <div style="position:relative;height:150px;margin-top:6px">
+            <div style="position:absolute;top:18px;left:46px;width:34px;height:17px;border-radius:10px;background:#ffd23f;border:2.5px solid #2b2335;animation:floatA 5s ease-in-out infinite"></div>
+            <div style="position:absolute;top:24px;right:50px;width:34px;height:17px;border-radius:10px;background:#3bc9db;border:2.5px solid #2b2335;animation:floatB 5.4s ease-in-out infinite"></div>
+            <div style="position:absolute;left:50%;top:18px;transform:translateX(-50%);width:124px;height:116px">
+              <dc-import name="Jelly" base-expr="excited" scale="0.72" hint-size="124px,116px"></dc-import>
+            </div>
+          </div>
+
+          <!-- analysis summary -->
+          <div style="background:#fff;border:2.5px solid #2b2335;border-radius:22px;padding:16px;box-shadow:4px 5px 0 rgba(43,35,53,.1)">
+            <div style="font-family:'Jua',sans-serif;font-size:15px;color:#2b2335;margin-bottom:6px">최근 7일 일기를 읽어봤어 👀</div>
+            <div style="font-size:14px;color:#5a5168;line-height:1.65">"피곤하다", "잠을 설쳤다"는 말이 자주 보였어. 지금 식단엔 <b style="color:#7c5cff">수면·피로 회복</b>을 도와줄 영양소가 부족한 것 같아.</div>
+            <div style="display:flex;gap:7px;margin-top:12px">
+              <span style="white-space:nowrap;background:#f1ecff;border:1.8px solid #7c5cff;border-radius:16px;padding:4px 11px;font-size:12px;color:#5a3fd6">😮‍💨 피로 7일↑</span>
+              <span style="white-space:nowrap;background:#fff3f8;border:1.8px solid #ff7eb6;border-radius:16px;padding:4px 11px;font-size:12px;color:#c4407f">🌙 수면 부족</span>
+            </div>
+          </div>
+
+          <div style="font-family:'Jua',sans-serif;font-size:17px;color:#2b2335;margin:22px 2px 12px">너에게 맞는 추천 💊</div>
+
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <sc-for list="{{ recItems }}" as="item" hint-placeholder-count="2">
+              <div style="background:#fff;border:2.5px solid #2b2335;border-radius:22px;padding:16px;box-shadow:4px 5px 0 rgba(43,35,53,.1)">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <span style="width:54px;height:27px;border-radius:15px;border:2.5px solid #2b2335;flex:none;background:{{ item.color }}"></span>
+                  <div style="flex:1">
+                    <div style="font-family:'Jua',sans-serif;font-size:18px;color:#2b2335">{{ item.name }}</div>
+                    <div style="font-size:12.5px;color:#7d7390">{{ item.time }}</div>
+                  </div>
+                  <div style="text-align:center">
+                    <div style="font-family:'Jua',sans-serif;font-size:19px;color:#7c5cff">{{ item.score }}</div>
+                    <div style="font-size:10px;color:#b3a9c2">추천도</div>
+                  </div>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px">
+                  <sc-for list="{{ item.tags }}" as="tag" hint-placeholder-count="2">
+                    <span style="white-space:nowrap;background:#f7f5ff;border:1.6px solid #d9cffb;border-radius:14px;padding:3px 10px;font-size:11.5px;color:#6a5acb">{{ tag }}</span>
+                  </sc-for>
+                </div>
+                <button onClick="{{ item.add }}" style="width:100%;margin-top:14px;height:44px;border:2.5px solid #2b2335;border-radius:14px;background:{{ item.addBg }};color:#fff;font-family:'Jua',sans-serif;font-size:15px;cursor:pointer;box-shadow:3px 3px 0 rgba(43,35,53,.18)">{{ item.addLabel }}</button>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ===================== RECORD ===================== -->
+        <sc-if value="{{ isRecord }}" hint-placeholder-val="{{ true }}">
+        <div style="min-height:100%;padding:62px 20px 110px;background:radial-gradient(130% 80% at 50% 6%, #eafaf6 0%, #fbfdfb 60%)">
+          <div style="font-family:'Jua',sans-serif;font-size:22px;color:#2b2335">한 줄 일기 📔</div>
+          <div style="font-size:13px;color:#9b8fae;margin-bottom:16px">매일의 컨디션이 젤리의 추천을 똑똑하게 만들어요</div>
+
+          <div style="background:linear-gradient(135deg,#fff6fa,#fdefff);border:2.5px solid #2b2335;border-radius:22px;padding:16px;box-shadow:4px 5px 0 rgba(43,35,53,.1)">
+            <div style="font-family:'Jua',sans-serif;font-size:15px;color:#2b2335;margin-bottom:10px">오늘은 어땠어?</div>
+            <div style="display:flex;gap:8px">
+              <input value="{{ diary }}" onInput="{{ onDiary }}" onKeyDown="{{ onDiaryKey }}" placeholder="예) 아침에 좀 피곤했어" style="flex:1;height:44px;border:2px solid #2b2335;border-radius:14px;padding:0 14px;font-family:'Gowun Dodum',sans-serif;font-size:14px;background:#fff;outline:none;color:#2b2335" />
+              <button onClick="{{ submitDiary }}" style="width:48px;height:44px;border:2px solid #2b2335;border-radius:14px;background:#7c5cff;color:#fff;font-size:19px;cursor:pointer;box-shadow:2px 3px 0 rgba(43,35,53,.25)">↑</button>
+            </div>
+          </div>
+
+          <div style="font-family:'Jua',sans-serif;font-size:16px;color:#2b2335;margin:22px 2px 12px">지난 기록</div>
+          <div style="position:relative;padding-left:26px">
+            <div style="position:absolute;left:9px;top:8px;bottom:8px;width:2.5px;background:#d8eee7"></div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <sc-for list="{{ diaryItems }}" as="d" hint-placeholder-count="3">
+                <div style="position:relative">
+                  <div style="position:absolute;left:-26px;top:14px;width:18px;height:18px;border-radius:50%;background:#fff;border:2.5px solid #3bc9db;display:flex;align-items:center;justify-content:center;font-size:9px">{{ d.mood }}</div>
+                  <div style="background:#fff;border:2px solid #2b2335;border-radius:16px;padding:12px 14px;font-size:14px;color:#3b3348;box-shadow:3px 3px 0 rgba(43,35,53,.08)">{{ d.text }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ===================== MY ===================== -->
+        <sc-if value="{{ isMy }}" hint-placeholder-val="{{ true }}">
+        <div style="min-height:100%;padding:62px 20px 110px;background:radial-gradient(130% 80% at 50% 6%, #fff3e6 0%, #fffaf4 60%)">
+          <!-- hero -->
+          <div style="position:relative;height:170px">
+            <div style="position:absolute;left:50%;top:6px;transform:translateX(-50%);width:142px;height:132px">
+              <dc-import name="Jelly" base-expr="love" scale="0.825" hint-size="142px,132px"></dc-import>
+            </div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-family:'Jua',sans-serif;font-size:22px;color:#2b2335">젤리 · Lv.3</div>
+            <div style="font-size:13px;color:#9b8fae">함께한 지 24일째 🎉</div>
+          </div>
+
+          <!-- stats -->
+          <div style="display:flex;gap:10px;margin-top:18px">
+            <div style="flex:1;background:#fff;border:2.5px solid #2b2335;border-radius:18px;padding:13px 6px;text-align:center;box-shadow:3px 4px 0 rgba(43,35,53,.1)"><div style="font-family:'Jua',sans-serif;font-size:23px;color:#ff7eb6">12</div><div style="font-size:11px;color:#9b8fae">연속일 🔥</div></div>
+            <div style="flex:1;background:#fff;border:2.5px solid #2b2335;border-radius:18px;padding:13px 6px;text-align:center;box-shadow:3px 4px 0 rgba(43,35,53,.1)"><div style="font-family:'Jua',sans-serif;font-size:23px;color:#3bc9db">5</div><div style="font-size:11px;color:#9b8fae">영양제</div></div>
+            <div style="flex:1;background:#fff;border:2.5px solid #2b2335;border-radius:18px;padding:13px 6px;text-align:center;box-shadow:3px 4px 0 rgba(43,35,53,.1)"><div style="font-family:'Jua',sans-serif;font-size:23px;color:#ffb43d">92%</div><div style="font-size:11px;color:#9b8fae">달성률</div></div>
+          </div>
+
+          <!-- collection -->
+          <div style="font-family:'Jua',sans-serif;font-size:17px;color:#2b2335;margin:22px 2px 12px">영양제 도감 📒</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+            <sc-for list="{{ supps }}" as="item" hint-placeholder-count="5">
+              <div style="background:#fff;border:2.5px solid #2b2335;border-radius:16px;padding:12px 6px;text-align:center;box-shadow:3px 3px 0 rgba(43,35,53,.08)">
+                <span style="display:block;width:42px;height:21px;border-radius:12px;border:2.5px solid #2b2335;margin:0 auto;background:{{ item.color }}"></span>
+                <span style="display:block;font-family:'Jua',sans-serif;font-size:12px;color:#2b2335;margin-top:8px">{{ item.name }}</span>
+              </div>
+            </sc-for>
+            <div style="background:#faf7ff;border:2.5px dashed #c9bce8;border-radius:16px;padding:12px 6px;text-align:center;color:#c0b4dc"><span style="display:block;width:42px;height:21px;border-radius:12px;border:2.5px dashed #c9bce8;margin:0 auto"></span><span style="display:block;font-size:18px;margin-top:4px">?</span></div>
+          </div>
+
+          <!-- growth -->
+          <div style="display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#f4f1ff,#ffeef7);border:2.5px solid #2b2335;border-radius:20px;padding:14px;margin-top:18px;box-shadow:4px 5px 0 rgba(43,35,53,.1)">
+            <div style="font-size:30px;flex:none">🎁</div>
+            <div style="flex:1">
+              <div style="font-family:'Jua',sans-serif;font-size:15px;color:#2b2335">7일 더 모으면 새 표정 해금!</div>
+              <div style="height:10px;background:#fff;border:2px solid #2b2335;border-radius:6px;margin-top:7px;overflow:hidden"><div style="width:64%;height:100%;background:#ffb43d"></div></div>
+            </div>
+          </div>
+
+          <button onClick="{{ goOnb }}" style="width:100%;margin-top:16px;height:46px;border:2.5px solid #2b2335;border-radius:16px;background:#fff;color:#2b2335;font-family:'Jua',sans-serif;font-size:14px;cursor:pointer;box-shadow:3px 4px 0 rgba(43,35,53,.1)">＋ 영양제 다시 등록하기</button>
+        </div>
+        </sc-if>
+
+        <!-- ===================== ONBOARDING ===================== -->
+        <sc-if value="{{ isOnboarding }}" hint-placeholder-val="{{ true }}">
+        <div style="min-height:100%;padding:62px 22px 30px;background:radial-gradient(130% 80% at 50% 8%, #e7f8ff 0%, #f6fcff 60%);display:flex;flex-direction:column">
+          <!-- jelly greeting -->
+          <div style="position:relative;height:140px;margin-top:6px">
+            <div style="position:absolute;left:50%;top:6px;transform:translateX(-50%);width:120px;height:112px">
+              <dc-import name="Jelly" base-expr="happy" scale="0.698" hint-size="120px,112px"></dc-import>
+            </div>
+          </div>
+          <div style="position:relative;background:#fff;border:2.5px solid #2b2335;border-radius:20px;padding:14px 16px;text-align:center;box-shadow:4px 5px 0 rgba(43,35,53,.1)">
+            <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%) rotate(45deg);width:15px;height:15px;background:#fff;border-left:2.5px solid #2b2335;border-top:2.5px solid #2b2335"></div>
+            <div style="font-family:'Jua',sans-serif;font-size:18px;color:#2b2335">안녕! 나는 젤리야 🫧</div>
+            <div style="font-size:14px;color:#5a5168;margin-top:4px">지금 챙겨 먹는 영양제를 골라줘</div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px">
+            <sc-for list="{{ onbItems }}" as="item" hint-placeholder-count="6">
+              <button onClick="{{ item.toggle }}" style="display:flex;align-items:center;gap:10px;border:2.5px solid #2b2335;border-radius:16px;padding:12px;cursor:pointer;text-align:left;background:{{ item.cardBg }};box-shadow:3px 3px 0 rgba(43,35,53,.08)">
+                <span style="width:36px;height:18px;border-radius:10px;border:2px solid #2b2335;flex:none;background:{{ item.color }}"></span>
+                <span style="flex:1;font-family:'Jua',sans-serif;font-size:13.5px;color:#2b2335">{{ item.name }}</span>
+                <span style="width:24px;height:24px;border-radius:50%;border:2px solid #2b2335;display:flex;align-items:center;justify-content:center;font-size:13px;flex:none;background:{{ item.checkBg }};color:{{ item.checkColor }}">{{ item.check }}</span>
+              </button>
+            </sc-for>
+          </div>
+
+          <button onClick="{{ finishOnb }}" style="margin-top:auto;width:100%;height:52px;border:2.5px solid #2b2335;border-radius:18px;background:#7c5cff;color:#fff;font-family:'Jua',sans-serif;font-size:17px;cursor:pointer;box-shadow:4px 5px 0 rgba(43,35,53,.22)">{{ onbLabel }}</button>
+          <div style="text-align:center;font-size:12px;color:#9bb6c0;margin-top:10px">언제든 마이페이지에서 추가할 수 있어요</div>
+        </div>
+        </sc-if>
+
+        <!--SCREENS-->
+
+      </div>
+
+      <!-- bottom nav -->
+      <sc-if value="{{ showNav }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute;bottom:0;left:0;right:0;height:86px;z-index:20;background:rgba(255,250,244,.92);backdrop-filter:blur(8px);border-top:2.5px solid #2b2335;display:flex;align-items:flex-start;padding:11px 8px 0">
+        <button onClick="{{ goHome }}" style="flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:'Jua',sans-serif;font-size:11px;color:{{ tabHome }}"><span style="font-size:21px">🏠</span>홈</button>
+        <button onClick="{{ goRecord }}" style="flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:'Jua',sans-serif;font-size:11px;color:{{ tabRecord }}"><span style="font-size:21px">📔</span>기록</button>
+        <button onClick="{{ goAi }}" style="flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:'Jua',sans-serif;font-size:11px;color:{{ tabAi }}"><span style="font-size:21px">🔮</span>AI추천</button>
+        <button onClick="{{ goMy }}" style="flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:'Jua',sans-serif;font-size:11px;color:{{ tabMy }}"><span style="font-size:21px">🥭</span>젤리</button>
+      </div>
+      </sc-if>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = {
+    screen: 'home',
+    diary: '',
+    diaries: ['어젯밤 잠을 설쳤어', '점심 먹고 졸렸어'],
+    justLogged: false,
+    recAdded: false,
+    addedRecs: [],
+    onbSelected: ['비타민 C', '오메가-3'],
+    supps: [
+      { name: '오메가-3', time: '아침 식후 · 1정', color: 'linear-gradient(90deg,#ff7eb6 50%,#7c5cff 50%)', taken: true },
+      { name: '비타민 C', time: '아침 식후 · 1정', color: '#ffb43d', taken: true },
+      { name: '비타민 D', time: '아침 식후 · 1정', color: '#ffd23f', taken: true },
+      { name: '마그네슘', time: '자기 전 · 1정', color: '#7c5cff', taken: false },
+      { name: '유산균', time: '자기 전 · 1정', color: '#3bc9db', taken: false },
+    ],
+  };
+
+  go(s) { this.setState({ screen: s }); }
+
+  toggleSupp(i) {
+    this.setState(st => {
+      const supps = st.supps.map((s, idx) => idx === i ? { ...s, taken: !s.taken } : s);
+      return { supps };
+    });
+  }
+
+  onDiary(e) { this.setState({ diary: e.target.value }); }
+  onDiaryKey(e) { if (e.key === 'Enter') this.submitDiary(); }
+  submitDiary() {
+    const t = this.state.diary.trim();
+    if (!t) return;
+    this.setState(st => ({ diaries: [t, ...st.diaries], diary: '', justLogged: true }));
+  }
+
+  addRec(name) { this.setState(st => st.addedRecs.includes(name) ? null : ({ addedRecs: [...st.addedRecs, name] })); }
+  toggleOnb(name) { this.setState(st => ({ onbSelected: st.onbSelected.includes(name) ? st.onbSelected.filter(n => n !== name) : [...st.onbSelected, name] })); }
+
+  renderVals() {
+    const { screen, supps, diary, diaries, justLogged, addedRecs, onbSelected } = this.state;
+    const recDefs = [
+      { name: '마그네슘', time: '자기 전 · 수면·피로 회복', score: '92%', color: '#7c5cff', tags: ['#피로 7일↑', '#수면 부족'] },
+      { name: '비타민 D', time: '아침 식후 · 면역·기분', score: '80%', color: '#ffd23f', tags: ['#실내 활동', '#기분 저하'] },
+    ];
+    const catalog = [
+      { name: '비타민 C', color: '#ffb43d' }, { name: '오메가-3', color: 'linear-gradient(90deg,#ff7eb6 50%,#7c5cff 50%)' },
+      { name: '비타민 D', color: '#ffd23f' }, { name: '마그네슘', color: '#7c5cff' },
+      { name: '유산균', color: '#3bc9db' }, { name: '아연', color: '#ff7eb6' },
+    ];
+    const moodFor = (t) => /피곤|졸|설|피로|아프|힘들/.test(t) ? '😮‍💨' : (/좋|개운|상쾌|괜찮|행복/.test(t) ? '😊' : '🙂');
+    const taken = supps.filter(s => s.taken).length;
+    const tab = (name) => screen === name ? '#7c5cff' : '#b3a9c2';
+    const lastDiary = diaries[0] || '';
+    const jellyMood = justLogged ? 'love'
+      : (taken === supps.length ? 'excited'
+      : (/피곤|졸|설|피로|아프|힘들/.test(lastDiary) ? 'sleepy' : 'happy'));
+    return {
+      jellyMood,
+      isHome: screen === 'home',
+      isRecord: screen === 'record',
+      isAi: screen === 'ai',
+      isMy: screen === 'my',
+      isOnboarding: screen === 'onboarding',
+      showNav: screen !== 'onboarding',
+      progress: taken + '/' + supps.length,
+      speech: justLogged
+        ? '기록 고마워! 잘 기억해둘게 🥭'
+        : (taken < supps.length ? '자기 전 영양제 2개 남았어 🌙 잊지마!' : '오늘 영양제 다 챙겼어! 최고야 🎉'),
+      diary,
+      onDiary: (e) => this.onDiary(e),
+      onDiaryKey: (e) => this.onDiaryKey(e),
+      submitDiary: () => this.submitDiary(),
+      hasDiary: diaries.length > 0,
+      recentDiaries: diaries.slice(0, 3),
+      supps: supps.map((s, i) => ({
+        name: s.name, time: s.time, color: s.color,
+        bg: s.taken ? '#f4fff4' : '#fff',
+        checkBg: s.taken ? '#3bc9db' : '#fff',
+        checkColor: s.taken ? '#fff' : '#cfc6da',
+        checkMark: s.taken ? '✓' : '○',
+        toggle: () => this.toggleSupp(i),
+      })),
+      recItems: recDefs.map(r => ({
+        name: r.name, time: r.time, score: r.score, color: r.color, tags: r.tags,
+        added: addedRecs.includes(r.name),
+        addLabel: addedRecs.includes(r.name) ? '내 영양제에 추가됨 ✓' : '+ 내 영양제에 추가',
+        addBg: addedRecs.includes(r.name) ? '#3bc9db' : '#7c5cff',
+        add: () => this.addRec(r.name),
+      })),
+      diaryItems: diaries.map(d => ({ text: d, mood: moodFor(d) })),
+      onbItems: catalog.map(c => ({
+        name: c.name, color: c.color,
+        selected: onbSelected.includes(c.name),
+        cardBg: onbSelected.includes(c.name) ? '#fff3f8' : '#fff',
+        check: onbSelected.includes(c.name) ? '✓' : '+',
+        checkBg: onbSelected.includes(c.name) ? '#7c5cff' : '#fff',
+        checkColor: onbSelected.includes(c.name) ? '#fff' : '#cfc6da',
+        toggle: () => this.toggleOnb(c.name),
+      })),
+      onbLabel: '다 골랐어!  (' + onbSelected.length + '개)',
+      onbReady: onbSelected.length > 0,
+      finishOnb: () => this.go('home'),
+      goOnb: () => this.go('onboarding'),
+      goHome: () => this.go('home'),
+      goRecord: () => this.go('record'),
+      goAi: () => this.go('ai'),
+      goMy: () => this.go('my'),
+      tabHome: tab('home'), tabRecord: tab('record'), tabAi: tab('ai'), tabMy: tab('my'),
+    };
+  }
+}
+</script>
+</body>
+</html>

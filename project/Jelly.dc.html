@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  @keyframes jbob { 0%,100%{transform:translateY(0) rotate(-1deg)} 50%{transform:translateY(-9px) rotate(1deg)} }
+  @keyframes jblink { 0%,90%,100%{transform:scaleY(1)} 95%{transform:scaleY(.08)} }
+  @keyframes jburst { 0%{transform:translateY(0) scale(.4);opacity:0} 25%{opacity:1} 100%{transform:translateY(-54px) scale(1.1);opacity:0} }
+  @keyframes jtwinkle { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.18);opacity:.7} }
+</style>
+</helmet>
+
+<div onClick="{{ onTap }}" style="position:absolute;inset:0;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent">
+  <div style="position:absolute;top:0;left:0;width:172px;height:160px;transform-origin:top left;transform:scale({{ scale }})">
+    <div style="position:absolute;inset:0;animation:jbob 3.6s ease-in-out infinite">
+      <div ref="{{ squishRef }}" style="position:absolute;inset:0;transform-origin:bottom center">
+
+        <!-- body -->
+        <div style="position:absolute;inset:0;background:linear-gradient(168deg,#ffe07a 0%,#ffb43d 60%,#ff9e2c 100%);border:3px solid #2b2335;border-radius:46% 46% 42% 42%/56% 56% 44% 44%;box-shadow:inset -10px -14px 0 rgba(214,120,20,.18), 6px 8px 0 rgba(43,35,53,.12)"></div>
+        <div style="position:absolute;top:24px;left:30px;width:46px;height:30px;background:rgba(255,255,255,.6);border-radius:50%;filter:blur(.4px)"></div>
+
+        <!-- cheeks (all expressions) -->
+        <div style="position:absolute;top:96px;left:30px;width:18px;height:13px;background:#ff7a7a;opacity:.5;border-radius:50%"></div>
+        <div style="position:absolute;top:96px;right:30px;width:18px;height:13px;background:#ff7a7a;opacity:.5;border-radius:50%"></div>
+
+        <!-- HAPPY -->
+        <sc-if value="{{ isHappy }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;top:70px;left:44px;width:15px;height:22px;background:#2b2335;border-radius:50%;transform-origin:center;animation:jblink 5s infinite"></div>
+          <div style="position:absolute;top:70px;right:44px;width:15px;height:22px;background:#2b2335;border-radius:50%;transform-origin:center;animation:jblink 5s infinite"></div>
+          <div style="position:absolute;top:75px;left:48px;width:7px;height:7px;background:#fff;border-radius:50%"></div>
+          <div style="position:absolute;top:75px;right:53px;width:7px;height:7px;background:#fff;border-radius:50%"></div>
+          <div style="position:absolute;top:100px;left:50%;transform:translateX(-50%);width:30px;height:16px;border:3px solid #2b2335;border-top:none;border-radius:0 0 18px 18px"></div>
+        </sc-if>
+
+        <!-- SLEEPY -->
+        <sc-if value="{{ isSleepy }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;top:76px;left:43px;width:22px;height:11px;border:3px solid #2b2335;border-bottom:none;border-radius:16px 16px 0 0"></div>
+          <div style="position:absolute;top:76px;right:43px;width:22px;height:11px;border:3px solid #2b2335;border-bottom:none;border-radius:16px 16px 0 0"></div>
+          <div style="position:absolute;top:104px;left:50%;transform:translateX(-50%);width:16px;height:9px;border:3px solid #2b2335;border-top:none;border-radius:0 0 10px 10px"></div>
+          <div style="position:absolute;top:50px;right:14px;font-family:'Jua',sans-serif;font-size:15px;color:#7c5cff;animation:jtwinkle 2.4s infinite">💤</div>
+        </sc-if>
+
+        <!-- EXCITED -->
+        <sc-if value="{{ isExcited }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;top:58px;left:38px;font-size:26px;line-height:1;color:#2b2335;animation:jtwinkle 1.6s infinite">✦</div>
+          <div style="position:absolute;top:58px;right:38px;font-size:26px;line-height:1;color:#2b2335;animation:jtwinkle 1.6s infinite .3s">✦</div>
+          <div style="position:absolute;top:98px;left:50%;transform:translateX(-50%);width:32px;height:20px;background:#2b2335;border-radius:7px 7px 18px 18px;overflow:hidden">
+            <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:16px;height:9px;background:#ff7a7a;border-radius:8px 8px 0 0"></div>
+          </div>
+        </sc-if>
+
+        <!-- LOVE -->
+        <sc-if value="{{ isLove }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;top:64px;left:40px;font-size:20px;line-height:1;color:#ff5d8f;animation:jtwinkle 1.8s infinite">♥</div>
+          <div style="position:absolute;top:64px;right:40px;font-size:20px;line-height:1;color:#ff5d8f;animation:jtwinkle 1.8s infinite .25s">♥</div>
+          <div style="position:absolute;top:101px;left:50%;transform:translateX(-50%);width:24px;height:13px;border:3px solid #2b2335;border-top:none;border-radius:0 0 16px 16px"></div>
+        </sc-if>
+
+        <!-- WINK -->
+        <sc-if value="{{ isWink }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;top:70px;left:44px;width:15px;height:22px;background:#2b2335;border-radius:50%"></div>
+          <div style="position:absolute;top:75px;left:48px;width:7px;height:7px;background:#fff;border-radius:50%"></div>
+          <div style="position:absolute;top:78px;right:43px;width:22px;height:11px;border:3px solid #2b2335;border-bottom:none;border-radius:16px 16px 0 0"></div>
+          <div style="position:absolute;top:101px;left:52%;transform:translateX(-50%) rotate(-8deg);width:28px;height:14px;border:3px solid #2b2335;border-top:none;border-radius:0 0 16px 16px"></div>
+        </sc-if>
+
+      </div>
+    </div>
+
+    <!-- tap burst -->
+    <sc-if value="{{ burstShow }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;pointer-events:none">
+        <div style="position:absolute;top:50px;left:36px;font-size:18px;animation:jburst .75s ease-out forwards">💛</div>
+        <div style="position:absolute;top:40px;left:50%;font-size:14px;animation:jburst .75s ease-out .08s forwards">✨</div>
+        <div style="position:absolute;top:52px;right:34px;font-size:18px;animation:jburst .75s ease-out .04s forwards">💛</div>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:172,&quot;height&quot;:160},&quot;baseExpr&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;happy&quot;,&quot;sleepy&quot;,&quot;excited&quot;,&quot;love&quot;,&quot;wink&quot;],&quot;default&quot;:&quot;happy&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;scale&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:1,&quot;min&quot;:0.4,&quot;max&quot;:2,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  state = { exprIndex: null, burstShow: false };
+  squishRef = React.createRef();
+
+  exprList = ['happy', 'sleepy', 'excited', 'love', 'wink'];
+
+  baseIndex() {
+    const i = this.exprList.indexOf(this.props.baseExpr);
+    return i < 0 ? 0 : i;
+  }
+
+  onTap() {
+    const el = this.squishRef.current;
+    if (el) {
+      el.animate(
+        [
+          { transform: 'scale(1,1)' },
+          { transform: 'scale(1.18,0.8)' },
+          { transform: 'scale(0.88,1.14)' },
+          { transform: 'scale(1.06,0.95)' },
+          { transform: 'scale(1,1)' },
+        ],
+        { duration: 520, easing: 'cubic-bezier(.34,1.56,.64,1)' }
+      );
+    }
+    const cur = this.state.exprIndex == null ? this.baseIndex() : this.state.exprIndex;
+    const next = (cur + 1) % this.exprList.length;
+    clearTimeout(this._t);
+    this.setState({ exprIndex: next, burstShow: false }, () => this.setState({ burstShow: true }));
+    this._t = setTimeout(() => this.setState({ burstShow: false }), 780);
+  }
+
+  componentWillUnmount() { clearTimeout(this._t); }
+
+  renderVals() {
+    const idx = this.state.exprIndex == null ? this.baseIndex() : this.state.exprIndex;
+    const expr = this.exprList[idx];
+    return {
+      scale: this.props.scale ?? 1,
+      squishRef: this.squishRef,
+      onTap: () => this.onTap(),
+      burstShow: this.state.burstShow,
+      isHappy: expr === 'happy',
+      isSleepy: expr === 'sleepy',
+      isExcited: expr === 'excited',
+      isLove: expr === 'love',
+      isWink: expr === 'wink',
+    };
+  }
+}
+</script>
+</body>
+</html>
