@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "젤리 영양제",
+    "slug": "jelly-supplement",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "scheme": "jelly",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#fff4ea"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.jelly.supplement",
+      "googleServicesFile": "./GoogleService-Info.plist"
+    },
+    "android": {
+      "edgeToEdgeEnabled": true,
+      "package": "com.jelly.supplement",
+      "googleServicesFile": "./google-services.json"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      [
+        "expo-build-properties",
+        {
+          "ios": { "useFrameworks": "static" }
+        }
+      ],
+      "@react-native-google-signin/google-signin"
+    ]
+  }
+}

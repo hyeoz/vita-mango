@@ -1,0 +1,27 @@
+# dependencies
+node_modules/
+app/node_modules/
+server/node_modules/
+
+# expo
+app/.expo/
+app/dist/
+app/web-build/
+*.tsbuildinfo
+
+# env / secrets
+.env
+app/.env
+server/.env
+*.local
+
+# firebase native config (download real ones from the console; keep *.example tracked)
+app/google-services.json
+app/GoogleService-Info.plist
+
+# logs
+*.log
+npm-debug.*
+
+# os
+.DS_Store
