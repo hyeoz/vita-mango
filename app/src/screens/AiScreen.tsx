@@ -17,30 +17,78 @@ import { useApp } from "../state/AppContext";
 import { fetchRecommendation, RecommendResult } from "../api/recommend";
 import { suppColor } from "../theme/colors";
 
+// Cost guards: only the most recent diaries are analysed, and manual
+// re-analysis is rate-limited. Cache + cooldown live at module scope so they
+// survive the tab remounting — re-opening the AI tab with unchanged inputs
+// serves the previous result instead of re-hitting the paid API.
+const MAX_DIARIES = 14;
+const COOLDOWN_MS = 15_000;
+
+let cachedKey: string | null = null;
+let cachedResult: RecommendResult | null = null;
+let lastCallAt = 0;
+
+function inputKey(diaries: string[], supps: { name: string; time: string }[]) {
+  return JSON.stringify({ d: diaries, s: supps });
+}
+
 export default function AiScreen() {
   const { diaries, supps, addedRecs, addRec } = useApp();
-  const [state, setState] = useState<"loading" | "done" | "error">("loading");
-  const [result, setResult] = useState<RecommendResult | null>(null);
 
-  const load = useCallback(async () => {
-    setState("loading");
-    try {
-      const data = await fetchRecommendation(
-        diaries,
-        supps.map((s) => ({ name: s.name, time: s.time }))
-      );
-      setResult(data);
-      setState("done");
-    } catch (e) {
-      console.warn("[ai] recommend error", e);
-      setState("error");
-    }
+  const recentDiaries = diaries.slice(0, MAX_DIARIES);
+  const suppInput = supps.map((s) => ({ name: s.name, time: s.time }));
+  const key = inputKey(recentDiaries, suppInput);
+
+  const [state, setState] = useState<"loading" | "done" | "error">(
+    cachedKey === key && cachedResult ? "done" : "loading"
+  );
+  const [result, setResult] = useState<RecommendResult | null>(
+    cachedKey === key ? cachedResult : null
+  );
+  const [cooldownLeft, setCooldownLeft] = useState(0);
+
+  const load = useCallback(
+    async (manual = false) => {
+      // Unchanged inputs → serve the cached result, no API call.
+      if (!manual && cachedKey === key && cachedResult) {
+        setResult(cachedResult);
+        setState("done");
+        return;
+      }
+      // Rate-limit manual re-analysis to stop runaway paid calls.
+      const waitMs = COOLDOWN_MS - (Date.now() - lastCallAt);
+      if (manual && waitMs > 0) {
+        setCooldownLeft(Math.ceil(waitMs / 1000));
+        return;
+      }
+      lastCallAt = Date.now();
+      setState("loading");
+      try {
+        const data = await fetchRecommendation(recentDiaries, suppInput);
+        cachedKey = key;
+        cachedResult = data;
+        setResult(data);
+        setState("done");
+      } catch (e) {
+        console.warn("[ai] recommend error", e);
+        setState("error");
+      }
+    },
+    // recentDiaries / suppInput derive deterministically from key
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    [key]
+  );
 
   useEffect(() => {
     load();
   }, [load]);
+
+  // Tick the manual-retry cooldown down to zero.
+  useEffect(() => {
+    if (cooldownLeft <= 0) return;
+    const t = setTimeout(() => setCooldownLeft((s) => Math.max(0, s - 1)), 1000);
+    return () => clearTimeout(t);
+  }, [cooldownLeft]);
 
   return (
     <LinearGradient colors={["#f1ecff", "#fbf7ff"]} locations={[0, 0.6]} style={styles.fill}>
@@ -73,8 +121,14 @@ export default function AiScreen() {
             <Text style={styles.summaryBody}>
               서버에 연결하지 못했어. 백엔드가 켜져 있는지 확인하고 다시 시도해줘.
             </Text>
-            <Pressable style={styles.retry} onPress={load}>
-              <Text style={styles.retryText}>다시 분석하기</Text>
+            <Pressable
+              style={[styles.retry, cooldownLeft > 0 && styles.disabled]}
+              onPress={() => load(true)}
+              disabled={cooldownLeft > 0}
+            >
+              <Text style={styles.retryText}>
+                {cooldownLeft > 0 ? `${cooldownLeft}초 후 다시 시도` : "다시 분석하기"}
+              </Text>
             </Pressable>
           </View>
         )}
@@ -153,8 +207,14 @@ export default function AiScreen() {
               })}
             </View>
 
-            <Pressable style={styles.refresh} onPress={load}>
-              <Text style={styles.refreshText}>🔄 다시 분석하기</Text>
+            <Pressable
+              style={[styles.refresh, cooldownLeft > 0 && styles.disabled]}
+              onPress={() => load(true)}
+              disabled={cooldownLeft > 0}
+            >
+              <Text style={styles.refreshText}>
+                {cooldownLeft > 0 ? `${cooldownLeft}초 후 다시 분석` : "🔄 다시 분석하기"}
+              </Text>
             </Pressable>
           </>
         )}
@@ -263,4 +323,5 @@ const styles = StyleSheet.create({
     ...hardShadow(3, 4),
   },
   refreshText: { fontFamily: fonts.display, fontSize: 14, color: colors.ink },
+  disabled: { opacity: 0.5 },
 });

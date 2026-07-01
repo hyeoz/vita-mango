@@ -35,6 +35,7 @@ export default function RecordScreen() {
               onChangeText={setDiary}
               onSubmitEditing={submitDiary}
               returnKeyType="send"
+              maxLength={200}
               placeholder="예) 아침에 좀 피곤했어"
               placeholderTextColor={colors.muted}
               style={styles.input}

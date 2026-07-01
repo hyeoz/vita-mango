@@ -145,7 +145,8 @@ export function AppProvider({
   const takenCount = useMemo(() => supps.filter((s) => s.taken).length, [supps]);
 
   const submitDiary = () => {
-    const t = diary.trim();
+    // Clamp length as a safety net even if the input's maxLength is bypassed.
+    const t = diary.trim().slice(0, 200);
     if (!t) return;
     setDiaries((prev) => [t, ...prev]);
     setDiary("");
