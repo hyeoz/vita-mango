@@ -34,7 +34,7 @@ export default function LoginScreen() {
           </View>
         </View>
 
-        <Text style={styles.title}>젤리 영양제</Text>
+        <Text style={styles.title}>비타망고</Text>
         <Text style={styles.subtitle}>
           매일의 컨디션을 기록하면{"\n"}젤리가 딱 맞는 영양제를 추천해줘 🥭
         </Text>

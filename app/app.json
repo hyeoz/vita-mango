@@ -1,23 +1,23 @@
 {
   "expo": {
-    "name": "젤리 영양제",
-    "slug": "jelly-supplement",
+    "name": "비타망고",
+    "slug": "vita-mango",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "scheme": "jelly",
+    "scheme": "vitamango",
     "newArchEnabled": true,
     "splash": {
       "backgroundColor": "#fff4ea"
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.jelly.supplement",
+      "bundleIdentifier": "com.vitamango.app",
       "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "edgeToEdgeEnabled": true,
-      "package": "com.jelly.supplement",
+      "package": "com.vitamango.app",
       "googleServicesFile": "./google-services.json"
     },
     "web": {

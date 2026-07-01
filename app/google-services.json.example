@@ -1,5 +1,5 @@
 {
-  "_comment": "Android Firebase config. Do NOT edit by hand — download the real file from Firebase Console → Project settings → Your Android app (package com.jelly.supplement) → google-services.json, then save it next to this file as 'google-services.json'. The example below only shows the expected shape.",
+  "_comment": "Android Firebase config. Do NOT edit by hand — download the real file from Firebase Console → Project settings → Your Android app (package com.vitamango.app) → google-services.json, then save it next to this file as 'google-services.json'. The example below only shows the expected shape.",
   "project_info": {
     "project_number": "000000000000",
     "project_id": "your-firebase-project-id",
@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
         "android_client_info": {
-          "package_name": "com.jelly.supplement"
+          "package_name": "com.vitamango.app"
         }
       },
       "oauth_client": [],

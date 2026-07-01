@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   iOS Firebase config. Do NOT edit by hand — download the real file from
-  Firebase Console → Project settings → Your iOS app (bundle com.jelly.supplement)
+  Firebase Console → Project settings → Your iOS app (bundle com.vitamango.app)
   → GoogleService-Info.plist, then save it next to this file as
   'GoogleService-Info.plist'. The keys below only show the expected shape.
 -->
@@ -17,7 +17,7 @@
   <key>GCM_SENDER_ID</key>
   <string>000000000000</string>
   <key>BUNDLE_ID</key>
-  <string>com.jelly.supplement</string>
+  <string>com.vitamango.app</string>
   <key>PROJECT_ID</key>
   <string>your-firebase-project-id</string>
   <key>STORAGE_BUCKET</key>

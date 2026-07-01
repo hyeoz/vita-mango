@@ -1,4 +1,4 @@
-# 젤리 영양제 — Jelly Supplement App
+# 비타망고 (vita-mango) — Jelly Supplement App
 
 A cute, character-centric supplement-tracking mobile app. A mango-slime mascot
 named **젤리 (Jelly)** reminds you to take your supplements, reacts to your daily
@@ -59,7 +59,7 @@ firestore.rules   Firestore security rules
 1. Create a project at <https://console.firebase.google.com>.
 2. **Authentication → Sign-in method → enable Google.**
 3. **Firestore Database → create** (production mode).
-4. Register apps with bundle id / package **`com.jelly.supplement`**:
+4. Register apps with bundle id / package **`com.vitamango.app`**:
    - iOS → download `GoogleService-Info.plist` → save to `app/GoogleService-Info.plist`
    - Android → download `google-services.json` → save to `app/google-services.json`
    - (templates are in `app/*.example`; the real files are git-ignored)

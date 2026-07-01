@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Backend proxy for 젤리 영양제 — calls the Claude API for AI supplement recommendations.",
+  "description": "Backend proxy for 비타망고 (vita-mango) — calls the Claude API for AI supplement recommendations.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

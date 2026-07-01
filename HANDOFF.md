@@ -86,7 +86,7 @@ RN 앱(dev build) ──Google 로그인──▶ Firebase Auth
 - **Firebase 콘솔 값은 비어 있음(placeholder).** 사용자가 채워야 함:
   - `app/google-services.json`, `app/GoogleService-Info.plist` (콘솔에서 다운로드, git 제외)
   - `app/.env`의 `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`
-  - 번들ID/패키지 = `com.jelly.supplement`
+  - 번들ID/패키지 = `com.vitamango.app`
   - 자세한 단계는 `README.md` → Setup.
 - **알림 없음**: "자기 전 2개 남았어"는 화면 문구일 뿐. 실제 푸시 미구현
   (expo-notifications 후보).
