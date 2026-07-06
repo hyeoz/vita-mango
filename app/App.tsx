@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import mobileAds from "react-native-google-mobile-ads";
 import {
@@ -20,14 +20,7 @@ import AiScreen from "./src/screens/AiScreen";
 import MyScreen from "./src/screens/MyScreen";
 import OnboardingScreen from "./src/screens/OnboardingScreen";
 import LoginScreen from "./src/screens/LoginScreen";
-
-function Loading() {
-  return (
-    <View style={styles.loading}>
-      <ActivityIndicator color={colors.purple} />
-    </View>
-  );
-}
+import SplashScreen from "./src/screens/SplashScreen";
 
 function Screens() {
   const { screen, subscribed } = useApp();
@@ -53,9 +46,12 @@ function Screens() {
 function Gate() {
   const { user, initializing } = useAuth();
 
+  // While auth resolves, show the branded splash (full-bleed, own gradient).
+  if (initializing) return <SplashScreen />;
+
   // The login screen is full-bleed: its gradient fills the whole screen and it
   // handles safe-area insets internally, so it renders outside the SafeAreaView.
-  if (!user && !initializing) {
+  if (!user) {
     return (
       <>
         <LoginScreen />
@@ -66,13 +62,9 @@ function Gate() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
-      {initializing ? (
-        <Loading />
-      ) : (
-        <AppProvider uid={user!.uid}>
-          <Screens />
-        </AppProvider>
-      )}
+      <AppProvider uid={user.uid}>
+        <Screens />
+      </AppProvider>
       <StatusBar style="dark" />
     </SafeAreaView>
   );
@@ -98,7 +90,7 @@ export default function App() {
           <Gate />
         </AuthProvider>
       ) : (
-        <Loading />
+        <SplashScreen />
       )}
     </SafeAreaProvider>
   );
@@ -107,10 +99,4 @@ export default function App() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.cream },
   flex: { flex: 1 },
-  loading: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.cream,
-  },
 });
