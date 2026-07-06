@@ -30,7 +30,8 @@
         "expo-build-properties",
         {
           "ios": {
-            "useFrameworks": "static"
+            "useFrameworks": "static",
+            "buildReactNativeFromSource": true
           }
         }
       ],
@@ -42,7 +43,8 @@
           "iosAppId": "ca-app-pub-3940256099942544~1458002511",
           "userTrackingUsageDescription": "관심사에 맞는 광고를 보여주기 위해 사용돼요. 언제든 설정에서 끌 수 있어요."
         }
-      ]
+      ],
+      "./plugins/withFirebaseStaticFrameworkFix"
     ]
   }
 }
