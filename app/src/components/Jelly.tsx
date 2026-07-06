@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Haptics from "expo-haptics";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/fonts";
 import type { JellyMood } from "../state/AppContext";
@@ -77,6 +78,16 @@ export default function Jelly({ mood, width, interactive = true }: Props) {
 
   const onTap = () => {
     if (!interactive) return;
+
+    // Squishy haptic: a soft impact on touch, then a lighter one as it bounces
+    // back — mirrors the squish animation. Guarded so web / unsupported devices
+    // no-op instead of throwing.
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft).catch(() => {});
+    setTimeout(
+      () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {}),
+      150
+    );
+
     const step = (toX: number, toY: number, d: number) =>
       Animated.parallel([
         Animated.timing(sx, { toValue: toX, duration: d, useNativeDriver: true }),
