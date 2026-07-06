@@ -53,19 +53,26 @@ function Screens() {
 function Gate() {
   const { user, initializing } = useAuth();
 
-  let body: React.ReactNode;
-  if (initializing) body = <Loading />;
-  else if (!user) body = <LoginScreen />;
-  else
-    body = (
-      <AppProvider uid={user.uid}>
-        <Screens />
-      </AppProvider>
+  // The login screen is full-bleed: its gradient fills the whole screen and it
+  // handles safe-area insets internally, so it renders outside the SafeAreaView.
+  if (!user && !initializing) {
+    return (
+      <>
+        <LoginScreen />
+        <StatusBar style="dark" />
+      </>
     );
+  }
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
-      {body}
+      {initializing ? (
+        <Loading />
+      ) : (
+        <AppProvider uid={user!.uid}>
+          <Screens />
+        </AppProvider>
+      )}
       <StatusBar style="dark" />
     </SafeAreaView>
   );

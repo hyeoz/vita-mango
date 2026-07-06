@@ -7,6 +7,7 @@ import {
   View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/fonts";
 import { hardShadow } from "../theme/ui";
@@ -16,6 +17,7 @@ import { useAuth } from "../state/AuthContext";
 
 export default function LoginScreen() {
   const { signIn, signingIn, error } = useAuth();
+  const insets = useSafeAreaInsets();
 
   return (
     <LinearGradient
@@ -23,7 +25,12 @@ export default function LoginScreen() {
       locations={[0, 0.5, 1]}
       style={styles.fill}
     >
-      <View style={styles.content}>
+      <View
+        style={[
+          styles.content,
+          { paddingTop: 70 + insets.top, paddingBottom: 40 + insets.bottom },
+        ]}
+      >
         <View style={styles.hero}>
           <FloatingPill color="mixed" size={44} rotate={-14} delay={0} style={{ position: "absolute", top: 30, left: 36 }} />
           <FloatingPill color="cyan" size={40} rotate={16} delay={400} style={{ position: "absolute", top: 20, right: 40 }} />
@@ -73,8 +80,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 28,
-    paddingTop: 70,
-    paddingBottom: 40,
     alignItems: "center",
   },
   hero: { height: 200, width: "100%" },
