@@ -65,6 +65,8 @@ type AppState = {
   jellyMood: JellyMood;
   speech: string;
   progress: string;
+
+  subscribed: boolean;
 };
 
 const Ctx = createContext<AppState | null>(null);
@@ -85,6 +87,8 @@ export function AppProvider({
   const [onbSelected, setOnbSelected] = useState<string[]>(DEFAULT_ONB);
   const [onboarded, setOnboarded] = useState(false);
   const [supps, setSupps] = useState<Supplement[]>(DEFAULT_SUPPS);
+  // Server-controlled; read-only on the client. Drives whether ads show.
+  const [subscribed, setSubscribed] = useState(false);
 
   // ── hydrate from Firestore for this user ──
   useEffect(() => {
@@ -100,6 +104,7 @@ export function AppProvider({
           setOnbSelected(data.onbSelected);
           setAddedRecs(data.addedRecs);
           setOnboarded(data.onboarded);
+          setSubscribed(data.subscribed);
           setScreen(data.onboarded ? "home" : "onboarding");
         } else {
           // new account → seed defaults and start onboarding
@@ -205,6 +210,7 @@ export function AppProvider({
     jellyMood,
     speech,
     progress: `${takenCount}/${supps.length}`,
+    subscribed,
   };
 
   if (!hydrated) {

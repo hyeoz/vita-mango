@@ -16,6 +16,7 @@ import { FloatingPill, PillSwatch } from "../components/Pill";
 import { useApp } from "../state/AppContext";
 import { fetchRecommendation, RecommendResult } from "../api/recommend";
 import { suppColor } from "../theme/colors";
+import { useInterstitial } from "../ads/useInterstitial";
 
 // Cost guards: only the most recent diaries are analysed, and manual
 // re-analysis is rate-limited. Cache + cooldown live at module scope so they
@@ -33,7 +34,8 @@ function inputKey(diaries: string[], supps: { name: string; time: string }[]) {
 }
 
 export default function AiScreen() {
-  const { diaries, supps, addedRecs, addRec } = useApp();
+  const { diaries, supps, addedRecs, addRec, subscribed } = useApp();
+  const interstitial = useInterstitial();
 
   const recentDiaries = diaries.slice(0, MAX_DIARIES);
   const suppInput = supps.map((s) => ({ name: s.name, time: s.time }));
@@ -62,6 +64,10 @@ export default function AiScreen() {
         return;
       }
       lastCallAt = Date.now();
+      // Manual re-analysis is a natural break — show an interstitial if one is
+      // ready (no-op otherwise, so it never blocks the analysis). Subscribers
+      // never see ads.
+      if (manual && !subscribed) interstitial.show();
       setState("loading");
       try {
         const data = await fetchRecommendation(recentDiaries, suppInput);

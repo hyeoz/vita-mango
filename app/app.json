@@ -29,10 +29,20 @@
       [
         "expo-build-properties",
         {
-          "ios": { "useFrameworks": "static" }
+          "ios": {
+            "useFrameworks": "static"
+          }
         }
       ],
-      "@react-native-google-signin/google-signin"
+      "@react-native-google-signin/google-signin",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
+          "userTrackingUsageDescription": "관심사에 맞는 광고를 보여주기 위해 사용돼요. 언제든 설정에서 끌 수 있어요."
+        }
+      ]
     ]
   }
 }

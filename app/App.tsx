@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import mobileAds from "react-native-google-mobile-ads";
 import {
   SafeAreaProvider,
   SafeAreaView,
@@ -12,6 +13,7 @@ import { colors } from "./src/theme/colors";
 import { AppProvider, useApp } from "./src/state/AppContext";
 import { AuthProvider, useAuth } from "./src/state/AuthContext";
 import BottomNav from "./src/components/BottomNav";
+import AdBanner from "./src/ads/AdBanner";
 import HomeScreen from "./src/screens/HomeScreen";
 import RecordScreen from "./src/screens/RecordScreen";
 import AiScreen from "./src/screens/AiScreen";
@@ -28,8 +30,10 @@ function Loading() {
 }
 
 function Screens() {
-  const { screen } = useApp();
+  const { screen, subscribed } = useApp();
   const showNav = screen !== "onboarding";
+  // Subscribers get an ad-free experience.
+  const showAds = showNav && !subscribed;
   return (
     <>
       <View style={styles.flex}>
@@ -39,6 +43,7 @@ function Screens() {
         {screen === "my" && <MyScreen />}
         {screen === "onboarding" && <OnboardingScreen />}
       </View>
+      {showAds && <AdBanner />}
       {showNav && <BottomNav />}
     </>
   );
@@ -71,6 +76,13 @@ export default function App() {
     Jua_400Regular,
     GowunDodum_400Regular,
   });
+
+  // Initialize the AdMob SDK once on startup.
+  useEffect(() => {
+    mobileAds()
+      .initialize()
+      .catch((e) => console.warn("[ads] init failed", e));
+  }, []);
 
   return (
     <SafeAreaProvider>
