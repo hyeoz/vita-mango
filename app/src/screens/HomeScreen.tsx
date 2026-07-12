@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/fonts";
 import { card, hardShadow } from "../theme/ui";
@@ -26,21 +27,43 @@ export default function HomeScreen() {
     diaries,
     supps,
     toggleSupp,
+    unlockedExprs,
   } = useApp();
 
   const recent = diaries.slice(0, 3);
+  const insets = useSafeAreaInsets();
+
+  // Date + greeting follow the device's local clock.
+  const now = new Date();
+  const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
+  const dateLabel = `${now.getMonth() + 1}월 ${now.getDate()}일 (${
+    WEEKDAYS[now.getDay()]
+  }) · 오늘`;
+  const hour = now.getHours();
+  const greeting =
+    hour < 6
+      ? "고요한 새벽이에요. 무리하지 말아요 🌙"
+      : hour < 11
+      ? "해가 떴어요. 천천히 시작해요 🌤️"
+      : hour < 14
+      ? "점심시간이에요. 잘 챙겨 먹어요 🍚"
+      : hour < 18
+      ? "나른한 오후예요. 조금만 힘내요 ☕"
+      : hour < 22
+      ? "저녁이에요. 오늘도 수고했어요 🌆"
+      : "밤이 깊었어요. 곧 푹 쉬어요 🌙";
 
   return (
     <LinearGradient colors={["#fff0f6", colors.cream]} locations={[0, 0.6]} style={styles.fill}>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* header */}
         <View style={styles.headerRow}>
           <View>
-            <Text style={styles.date}>6월 29일 · 오늘</Text>
-            <Text style={styles.sub}>해가 떴어요. 천천히 시작해요 🌤️</Text>
+            <Text style={styles.date}>{dateLabel}</Text>
+            <Text style={styles.sub}>{greeting}</Text>
           </View>
           <View style={styles.counter}>
             <Text style={{ fontSize: 15 }}>💊</Text>
@@ -55,14 +78,16 @@ export default function HomeScreen() {
           <FloatingPill color="yellow" size={40} rotate={10} delay={800} style={{ position: "absolute", bottom: 64, left: 14 }} />
           <FloatingPill color="purple" size={44} rotate={-8} delay={200} style={{ position: "absolute", bottom: 78, right: 18 }} />
           <View style={styles.jellyWrap}>
-            <Jelly mood={jellyMood} width={172} />
+            <Jelly mood={jellyMood} width={172} expressions={unlockedExprs} />
           </View>
           <View style={styles.heroShadow} />
         </View>
 
         {/* speech bubble */}
         <View style={styles.speech}>
-          <View style={styles.speechTip} />
+          <View style={styles.speechTipWrap} pointerEvents="none">
+            <View style={styles.speechTip} />
+          </View>
           <Text style={styles.speechText}>{speech}</Text>
         </View>
 
@@ -185,11 +210,16 @@ const styles = StyleSheet.create({
     marginTop: 2,
     ...hardShadow(),
   },
-  speechTip: {
+  // Full-width row that flex-centres the tip — no %/transform maths, so it's
+  // pixel-perfect centred regardless of device width.
+  speechTipWrap: {
     position: "absolute",
     top: -9,
-    left: "50%",
-    marginLeft: -8,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+  },
+  speechTip: {
     width: 15,
     height: 15,
     backgroundColor: colors.white,

@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/fonts";
 import { hardShadow } from "../theme/ui";
@@ -15,10 +16,14 @@ import { useApp, moodFor } from "../state/AppContext";
 
 export default function RecordScreen() {
   const { diary, setDiary, submitDiary, diaries } = useApp();
+  const insets = useSafeAreaInsets();
 
   return (
     <LinearGradient colors={["#eafaf6", "#fbfdfb"]} locations={[0, 0.6]} style={styles.fill}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 18 }]}
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.title}>한 줄 일기 📔</Text>
         <Text style={styles.sub}>매일의 컨디션이 젤리의 추천을 똑똑하게 만들어요</Text>
 

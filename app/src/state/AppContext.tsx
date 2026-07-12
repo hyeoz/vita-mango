@@ -7,8 +7,18 @@ import React, {
   useState,
 } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
-import { colors } from "../theme/colors";
+import { colors, suppColor } from "../theme/colors";
 import { loadUserData, saveUserData, seedUserData } from "../firebase/db";
+import {
+  dayKey,
+  computeStreak,
+  xpFrom,
+  levelProgress,
+  unlockedKeys,
+  nextLocked,
+  LevelProgress,
+  Collectible,
+} from "./gamification";
 
 export type Supplement = {
   name: string;
@@ -56,17 +66,29 @@ type AppState = {
   takenCount: number;
 
   addedRecs: string[];
-  addRec: (name: string) => void;
+  addRec: (rec: { name: string; time: string; color: string }) => void;
 
   onbSelected: string[];
   toggleOnb: (name: string) => void;
-  completeOnboarding: () => void;
+  reRegister: () => void;
+  completeOnboarding: (
+    timings?: Record<string, { time: string; color?: string }>
+  ) => void;
 
   jellyMood: JellyMood;
   speech: string;
   progress: string;
 
   subscribed: boolean;
+  createdAt: number | null;
+
+  // gamification (all derived from real events)
+  level: number;
+  xp: number;
+  levelInfo: LevelProgress;
+  streak: number;
+  unlockedExprs: JellyMood[];
+  nextUnlock: Collectible | null;
 };
 
 const Ctx = createContext<AppState | null>(null);
@@ -89,6 +111,11 @@ export function AppProvider({
   const [supps, setSupps] = useState<Supplement[]>(DEFAULT_SUPPS);
   // Server-controlled; read-only on the client. Drives whether ads show.
   const [subscribed, setSubscribed] = useState(false);
+  // Account creation time (ms). Drives "함께한 지 N일째" on the my page.
+  const [createdAt, setCreatedAt] = useState<number | null>(null);
+  // Gamification: dates fully dosed, and the last day we reset daily `taken`.
+  const [doseLog, setDoseLog] = useState<string[]>([]);
+  const [lastActiveDate, setLastActiveDate] = useState<string>("");
 
   // ── hydrate from Firestore for this user ──
   useEffect(() => {
@@ -99,12 +126,22 @@ export function AppProvider({
         const data = await loadUserData(uid);
         if (cancelled) return;
         if (data) {
-          setSupps(data.supplements.length ? data.supplements : DEFAULT_SUPPS);
+          const today = dayKey();
+          const base = data.supplements.length ? data.supplements : DEFAULT_SUPPS;
+          // New day since last open → clear the daily "taken" checkmarks.
+          const fresh =
+            data.lastActiveDate !== today
+              ? base.map((s) => ({ ...s, taken: false }))
+              : base;
+          setSupps(fresh);
           setDiaries(data.diaries);
           setOnbSelected(data.onbSelected);
           setAddedRecs(data.addedRecs);
           setOnboarded(data.onboarded);
           setSubscribed(data.subscribed);
+          setCreatedAt(data.createdAt);
+          setDoseLog(data.doseLog);
+          setLastActiveDate(today);
           setScreen(data.onboarded ? "home" : "onboarding");
         } else {
           // new account → seed defaults and start onboarding
@@ -114,9 +151,13 @@ export function AppProvider({
             onbSelected: DEFAULT_ONB,
             addedRecs: [],
             onboarded: false,
+            doseLog: [],
+            lastActiveDate: dayKey(),
           };
           await seedUserData(uid, seed);
           if (cancelled) return;
+          setCreatedAt(Date.now());
+          setLastActiveDate(dayKey());
           setScreen("onboarding");
         }
       } catch (e) {
@@ -140,14 +181,56 @@ export function AppProvider({
       return; // skip the write triggered by hydration itself
     }
     const t = setTimeout(() => {
-      saveUserData(uid, { supplements: supps, diaries, onbSelected, addedRecs, onboarded }).catch(
-        (e) => console.warn("[app] save failed", e)
-      );
+      saveUserData(uid, {
+        supplements: supps,
+        diaries,
+        onbSelected,
+        addedRecs,
+        onboarded,
+        doseLog,
+        lastActiveDate,
+      }).catch((e) => console.warn("[app] save failed", e));
     }, 400);
     return () => clearTimeout(t);
-  }, [hydrated, uid, supps, diaries, onbSelected, addedRecs, onboarded]);
+  }, [
+    hydrated,
+    uid,
+    supps,
+    diaries,
+    onbSelected,
+    addedRecs,
+    onboarded,
+    doseLog,
+    lastActiveDate,
+  ]);
 
   const takenCount = useMemo(() => supps.filter((s) => s.taken).length, [supps]);
+
+  // When every supplement is checked off today, log today's date once — this is
+  // what feeds the streak and dosing XP.
+  useEffect(() => {
+    if (!hydrated) return;
+    if (supps.length > 0 && takenCount === supps.length) {
+      const today = dayKey();
+      setDoseLog((prev) => (prev.includes(today) ? prev : [...prev, today]));
+    }
+  }, [hydrated, takenCount, supps.length]);
+
+  // Derived gamification state (pure functions of real events).
+  const xp = useMemo(
+    () => xpFrom(doseLog.length, diaries.length),
+    [doseLog.length, diaries.length]
+  );
+  const levelInfo = useMemo(() => levelProgress(xp), [xp]);
+  const streak = useMemo(() => computeStreak(doseLog), [doseLog]);
+  const unlockedExprs = useMemo(
+    () => unlockedKeys(levelInfo.level),
+    [levelInfo.level]
+  );
+  const nextUnlock = useMemo(
+    () => nextLocked(levelInfo.level),
+    [levelInfo.level]
+  );
 
   const submitDiary = () => {
     // Clamp length as a safety net even if the input's maxLength is bypassed.
@@ -163,15 +246,66 @@ export function AppProvider({
       prev.map((s, idx) => (idx === i ? { ...s, taken: !s.taken } : s))
     );
 
-  const addRec = (name: string) =>
-    setAddedRecs((prev) => (prev.includes(name) ? prev : [...prev, name]));
+  // Adds a recommended supplement to the actual list (with the AI's suggested
+  // time + colour) and marks it added. Idempotent — ignores duplicates by name.
+  const addRec = (rec: { name: string; time: string; color: string }) => {
+    setAddedRecs((prev) =>
+      prev.includes(rec.name) ? prev : [...prev, rec.name]
+    );
+    setSupps((prev) =>
+      prev.some((s) => s.name === rec.name)
+        ? prev
+        : [
+            ...prev,
+            { name: rec.name, time: rec.time, color: rec.color, taken: false },
+          ]
+    );
+  };
 
   const toggleOnb = (name: string) =>
     setOnbSelected((prev) =>
       prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
     );
 
-  const completeOnboarding = () => {
+  // Re-open onboarding to edit the list, starting with every currently-taken
+  // supplement pre-selected (so re-registration reflects the real state).
+  const reRegister = () => {
+    setOnbSelected(supps.map((s) => s.name));
+    setScreen("onboarding");
+  };
+
+  // Fallback pill colours for user-typed supplements (not in suppColor).
+  const FALLBACK_COLORS = [
+    colors.pink,
+    colors.cyan,
+    colors.mango,
+    colors.purple,
+    colors.yellow,
+  ];
+
+  const completeOnboarding = (
+    timings?: Record<string, { time: string; color?: string }>
+  ) => {
+    // Turn the onboarding picks into the user's actual supplement list. Intake
+    // time + colour come from the AI timing pass when available, else fall back
+    // to sensible defaults. Only replace when something was chosen so we never
+    // wipe the list down to empty.
+    if (onbSelected.length) {
+      setSupps(
+        onbSelected.map((name, i) => {
+          const t = timings?.[name];
+          return {
+            name,
+            time: t?.time ?? "아침 식후 · 1정",
+            color:
+              t?.color ??
+              suppColor[name] ??
+              FALLBACK_COLORS[i % FALLBACK_COLORS.length],
+            taken: false,
+          };
+        })
+      );
+    }
     setOnboarded(true);
     setScreen("home");
   };
@@ -206,11 +340,19 @@ export function AppProvider({
     addRec,
     onbSelected,
     toggleOnb,
+    reRegister,
     completeOnboarding,
     jellyMood,
     speech,
     progress: `${takenCount}/${supps.length}`,
     subscribed,
+    createdAt,
+    level: levelInfo.level,
+    xp,
+    levelInfo,
+    streak,
+    unlockedExprs,
+    nextUnlock,
   };
 
   if (!hydrated) {

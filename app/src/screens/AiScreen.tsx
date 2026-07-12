@@ -8,13 +8,18 @@ import {
   View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/fonts";
 import { hardShadow } from "../theme/ui";
 import Jelly from "../components/Jelly";
 import { FloatingPill, PillSwatch } from "../components/Pill";
 import { useApp } from "../state/AppContext";
-import { fetchRecommendation, RecommendResult } from "../api/recommend";
+import {
+  fetchRecommendation,
+  RecommendResult,
+  Recommendation,
+} from "../api/recommend";
 import { suppColor } from "../theme/colors";
 import { useInterstitial } from "../ads/useInterstitial";
 
@@ -36,6 +41,7 @@ function inputKey(diaries: string[], supps: { name: string; time: string }[]) {
 export default function AiScreen() {
   const { diaries, supps, addedRecs, addRec, subscribed } = useApp();
   const interstitial = useInterstitial();
+  const insets = useSafeAreaInsets();
 
   const recentDiaries = diaries.slice(0, MAX_DIARIES);
   const suppInput = supps.map((s) => ({ name: s.name, time: s.time }));
@@ -96,9 +102,27 @@ export default function AiScreen() {
     return () => clearTimeout(t);
   }, [cooldownLeft]);
 
+  // Add a recommendation to the real supplement list, using the AI's suggested
+  // time + colour. Adding changes `supps` (and thus the input key), so we
+  // pre-seed the cache for the post-add inputs — otherwise the effect below
+  // would fire an automatic (paid) re-analysis just from tapping "add".
+  const onAdd = (r: Recommendation) => {
+    const colorKey = r.color || suppColor[r.name] || "purple";
+    if (cachedResult) {
+      cachedKey = inputKey(recentDiaries, [
+        ...suppInput,
+        { name: r.name, time: r.time },
+      ]);
+    }
+    addRec({ name: r.name, time: r.time, color: colorKey });
+  };
+
   return (
     <LinearGradient colors={["#f1ecff", "#fbf7ff"]} locations={[0, 0.6]} style={styles.fill}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.badgeRow}>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>🔮 젤리의 AI 분석</Text>
@@ -198,7 +222,7 @@ export default function AiScreen() {
                       </View>
                     )}
                     <Pressable
-                      onPress={() => addRec(r.name)}
+                      onPress={() => onAdd(r)}
                       style={[
                         styles.addBtn,
                         { backgroundColor: added ? colors.cyan : colors.purple },
@@ -224,6 +248,11 @@ export default function AiScreen() {
             </Pressable>
           </>
         )}
+
+        <Text style={styles.disclaimer}>
+          🤖 AI가 생성한 추천이에요. 의학적 조언이 아니고 정확하지 않을 수 있어요.
+          참고용으로만 봐주고, 복용 전 전문가와 상담하는 걸 권해요.
+        </Text>
       </ScrollView>
     </LinearGradient>
   );
@@ -330,4 +359,13 @@ const styles = StyleSheet.create({
   },
   refreshText: { fontFamily: fonts.display, fontSize: 14, color: colors.ink },
   disabled: { opacity: 0.5 },
+  disclaimer: {
+    fontFamily: fonts.body,
+    fontSize: 11.5,
+    color: colors.muted4,
+    lineHeight: 17,
+    textAlign: "center",
+    marginTop: 20,
+    paddingHorizontal: 8,
+  },
 });

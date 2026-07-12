@@ -2,10 +2,7 @@ import React, { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import mobileAds from "react-native-google-mobile-ads";
-import {
-  SafeAreaProvider,
-  SafeAreaView,
-} from "react-native-safe-area-context";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts, Jua_400Regular } from "@expo-google-fonts/jua";
 import { GowunDodum_400Regular } from "@expo-google-fonts/gowun-dodum";
 
@@ -60,13 +57,15 @@ function Gate() {
     );
   }
 
+  // Full-bleed: each screen paints its own gradient edge-to-edge and applies
+  // safe-area insets to its own content, so no flat band shows in the insets.
   return (
-    <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
+    <View style={styles.safe}>
       <AppProvider uid={user.uid}>
         <Screens />
       </AppProvider>
       <StatusBar style="dark" />
-    </SafeAreaView>
+    </View>
   );
 }
 

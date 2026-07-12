@@ -17,10 +17,18 @@ export type UserData = {
   onbSelected: string[];
   addedRecs: string[];
   onboarded: boolean;
+  // Gamification: dates (YYYY-MM-DD) the user fully dosed, and the last day the
+  // app reset the daily `taken` flags. Drive level / streak on the my page.
+  doseLog: string[];
+  lastActiveDate: string;
 };
 
-// What loadUserData returns: the writable state plus the read-only subscription.
-export type LoadedUserData = UserData & { subscribed: boolean };
+// What loadUserData returns: the writable state plus the read-only subscription
+// and the account creation time (ms since epoch, null if not set yet).
+export type LoadedUserData = UserData & {
+  subscribed: boolean;
+  createdAt: number | null;
+};
 
 export function userDoc(
   uid: string
@@ -55,7 +63,11 @@ export async function loadUserData(
     onbSelected: d.onbSelected ?? [],
     addedRecs: d.addedRecs ?? [],
     onboarded: !!d.onboarded,
+    doseLog: Array.isArray(d.doseLog) ? d.doseLog : [],
+    lastActiveDate: typeof d.lastActiveDate === "string" ? d.lastActiveDate : "",
     subscribed: isSubscribed(d),
+    createdAt:
+      typeof d.createdAt?.toMillis === "function" ? d.createdAt.toMillis() : null,
   };
 }
 

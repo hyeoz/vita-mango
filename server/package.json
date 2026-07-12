@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Backend proxy for 비타망고 (vita-mango) — calls the Claude API for AI supplement recommendations.",
+  "description": "Backend proxy for 비타망고 (vita-mango) — calls the Gemini API for AI supplement recommendations and intake timing.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.69.0",
+    "@google/genai": "^2.11.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.2"

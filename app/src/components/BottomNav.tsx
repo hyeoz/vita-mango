@@ -1,5 +1,6 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/fonts";
 import { useApp, Screen } from "../state/AppContext";
@@ -8,13 +9,14 @@ const TABS: { key: Screen; icon: string; label: string }[] = [
   { key: "home", icon: "🏠", label: "홈" },
   { key: "record", icon: "📔", label: "기록" },
   { key: "ai", icon: "🔮", label: "AI추천" },
-  { key: "my", icon: "🥭", label: "젤리" },
+  { key: "my", icon: "🥭", label: "마이" },
 ];
 
 export default function BottomNav() {
   const { screen, setScreen } = useApp();
+  const insets = useSafeAreaInsets();
   return (
-    <View style={styles.bar}>
+    <View style={[styles.bar, { paddingBottom: insets.bottom, height: 86 + insets.bottom }]}>
       {TABS.map((t) => {
         const active = screen === t.key;
         return (

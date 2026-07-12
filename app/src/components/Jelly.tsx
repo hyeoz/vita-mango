@@ -21,20 +21,31 @@ type Props = {
   mood: JellyMood;
   width: number; // rendered width; height derives from the 172:160 aspect
   interactive?: boolean; // tap to squish + cycle expression (default true)
+  animated?: boolean; // idle bob + blink loops (default true; off for grids)
+  expressions?: JellyMood[]; // faces the tap-cycle walks (default: all)
 };
 
 // The mango-slime mascot. Five expressions, a squish-on-tap animation, and a
 // heart burst — a faithful port of project/Jelly.dc.html.
-export default function Jelly({ mood, width, interactive = true }: Props) {
+export default function Jelly({
+  mood,
+  width,
+  interactive = true,
+  animated = true,
+  expressions,
+}: Props) {
   const scale = width / BASE_W;
   const height = BASE_H * scale;
 
+  // Tap cycles through the unlocked set when provided, else every face.
+  const cycle = expressions && expressions.length ? expressions : EXPRS;
   const [exprIndex, setExprIndex] = useState<number | null>(null);
-  const expr = exprIndex == null ? mood : EXPRS[exprIndex];
+  const expr = exprIndex == null ? mood : cycle[exprIndex % cycle.length];
 
   // ── bob (idle float) ──
   const bob = useRef(new Animated.Value(0)).current;
   useEffect(() => {
+    if (!animated) return;
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(bob, {
@@ -53,11 +64,12 @@ export default function Jelly({ mood, width, interactive = true }: Props) {
     );
     loop.start();
     return () => loop.stop();
-  }, [bob]);
+  }, [bob, animated]);
 
   // ── blink (happy / wink open eye) ──
   const blink = useRef(new Animated.Value(1)).current;
   useEffect(() => {
+    if (!animated) return;
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(blink, { toValue: 1, duration: 4750, useNativeDriver: true }),
@@ -67,7 +79,7 @@ export default function Jelly({ mood, width, interactive = true }: Props) {
     );
     loop.start();
     return () => loop.stop();
-  }, [blink]);
+  }, [blink, animated]);
 
   // ── squish (tap) ──
   const sx = useRef(new Animated.Value(1)).current;
@@ -110,8 +122,8 @@ export default function Jelly({ mood, width, interactive = true }: Props) {
     }).start(() => setBursting(false));
 
     setExprIndex((cur) => {
-      const base = cur == null ? EXPRS.indexOf(mood) : cur;
-      return (base + 1) % EXPRS.length;
+      const base = cur == null ? Math.max(0, cycle.indexOf(mood)) : cur;
+      return (base + 1) % cycle.length;
     });
   };
 
