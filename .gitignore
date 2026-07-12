@@ -23,6 +23,11 @@ server/.env
 app/google-services.json
 app/GoogleService-Info.plist
 
+# firebase functions / deploy
+functions/node_modules/
+functions/.env
+.firebase/
+
 # logs
 *.log
 npm-debug.*

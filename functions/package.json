@@ -1,0 +1,20 @@
+{
+  "name": "functions",
+  "description": "비타망고 AI backend (Gemini proxy) — Firebase Cloud Functions",
+  "type": "module",
+  "main": "index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "@google/genai": "^2.11.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "firebase-functions": "^6.1.0"
+  }
+}
