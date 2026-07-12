@@ -7,15 +7,16 @@
 //   2. append it to COLLECTIBLES below with the level it unlocks at
 import type { JellyMood } from "./AppContext";
 
-// XP awarded per real event.
-export const DOSE_XP = 12; // one day where every supplement was taken
-export const DIARY_XP = 4; // one diary entry
+// XP is earned only for days where every supplement was taken.
+export const DOSE_XP = 10; // one fully-dosed day
+export const XP_PER_LEVEL = 100; // each level spans 100 XP
 
-// Cumulative XP required to *reach* each level (index 0 = Lv.1).
-export const LEVEL_XP = [0, 20, 50, 100, 170, 260, 380, 520, 700, 900];
+// Cumulative XP required to *reach* each level (index 0 = Lv.1). 9 levels, one
+// per 100 XP → Lv.9 caps at 800.
+export const LEVEL_XP = Array.from({ length: 9 }, (_, i) => i * XP_PER_LEVEL);
 
-export function xpFrom(doseDays: number, diaryCount: number): number {
-  return doseDays * DOSE_XP + diaryCount * DIARY_XP;
+export function xpFrom(doseDays: number): number {
+  return doseDays * DOSE_XP;
 }
 
 export function levelFromXp(xp: number): number {
@@ -62,14 +63,18 @@ export type Collectible = {
 };
 
 // The order here is the 도감 order. The first entry should unlock at Lv.1 so a
-// brand-new user always has at least one face.
+// brand-new user always has at least one face. Lv.6–9 are placeholder faces —
+// swap their renderExpr cases in Jelly.tsx for the real Claude Design art.
 export const COLLECTIBLES: Collectible[] = [
   { key: "happy", label: "방긋", minLevel: 1 },
   { key: "wink", label: "윙크", minLevel: 2 },
   { key: "excited", label: "신남", minLevel: 3 },
   { key: "love", label: "하트뿅", minLevel: 4 },
   { key: "sleepy", label: "노곤", minLevel: 5 },
-  // 새 표정은 여기에 추가 (minLevel 6+)
+  { key: "wow", label: "놀람", minLevel: 6 },
+  { key: "cool", label: "쿨", minLevel: 7 },
+  { key: "proud", label: "뿌듯", minLevel: 8 },
+  { key: "party", label: "파티", minLevel: 9 },
 ];
 
 export function unlockedKeys(level: number): JellyMood[] {

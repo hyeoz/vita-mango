@@ -29,7 +29,17 @@ export type Supplement = {
 
 export type Screen = "onboarding" | "home" | "record" | "ai" | "my";
 
-export type JellyMood = "happy" | "sleepy" | "excited" | "love" | "wink";
+export type JellyMood =
+  | "happy"
+  | "sleepy"
+  | "excited"
+  | "love"
+  | "wink"
+  // Lv.6–9 unlockables (placeholder art until the Claude Design faces land).
+  | "wow"
+  | "cool"
+  | "proud"
+  | "party";
 
 // ── defaults for a brand-new account ──
 const DEFAULT_SUPPS: Supplement[] = [
@@ -217,10 +227,7 @@ export function AppProvider({
   }, [hydrated, takenCount, supps.length]);
 
   // Derived gamification state (pure functions of real events).
-  const xp = useMemo(
-    () => xpFrom(doseLog.length, diaries.length),
-    [doseLog.length, diaries.length]
-  );
+  const xp = useMemo(() => xpFrom(doseLog.length), [doseLog.length]);
   const levelInfo = useMemo(() => levelProgress(xp), [xp]);
   const streak = useMemo(() => computeStreak(doseLog), [doseLog]);
   const unlockedExprs = useMemo(

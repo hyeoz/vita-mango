@@ -75,7 +75,7 @@ export default function MyScreen() {
           {catalog.map((c) => (
             <View key={c.name} style={styles.gridItem}>
               <PillSwatch color={c.color} width={42} height={21} style={{ alignSelf: "center" }} />
-              <Text style={styles.gridName}>{c.name}</Text>
+              <Text style={styles.gridName} numberOfLines={1}>{c.name}</Text>
             </View>
           ))}
           <View style={[styles.gridItem, styles.gridLocked]}>
@@ -103,7 +103,7 @@ export default function MyScreen() {
                         animated={false}
                       />
                     </View>
-                    <Text style={styles.gridName}>{c.label}</Text>
+                    <Text style={styles.gridName} numberOfLines={1}>{c.label}</Text>
                   </>
                 ) : (
                   <>
@@ -180,14 +180,19 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 2,
   },
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  grid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   gridItem: {
-    width: "31.5%",
+    // 3 across: 3×31% + 2×8px gap fits within the content width on every phone
+    // size (31.5% overflowed and wrapped to 2 columns).
+    width: "31%",
+    minHeight: 88,
     backgroundColor: colors.white,
     borderWidth: 2.5,
     borderColor: colors.ink,
     borderRadius: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 6,
+    alignItems: "center",
+    justifyContent: "center",
     ...hardShadow(3, 3, 0.08),
   },
   gridName: {
@@ -201,7 +206,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#faf7ff",
     borderColor: "#c9bce8",
     borderStyle: "dashed",
-    alignItems: "center",
   },
   lockedPill: {
     width: 42,

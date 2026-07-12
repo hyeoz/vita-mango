@@ -284,6 +284,61 @@ function renderExpr(expr: JellyMood, blink: Animated.Value) {
           />
         </>
       );
+
+    // ── Lv.6–9 placeholders — replace with the Claude Design faces ──
+    case "wow":
+      return (
+        <>
+          <View style={[styles.roundEye, { top: 66, left: 42 }]} />
+          <View style={[styles.roundEye, { top: 66, right: 42 }]} />
+          <View
+            style={{
+              position: "absolute",
+              top: 98,
+              left: 78,
+              width: 18,
+              height: 21,
+              borderRadius: 10,
+              borderWidth: 3,
+              borderColor: colors.ink,
+              backgroundColor: colors.mangoDeep,
+            }}
+          />
+        </>
+      );
+    case "cool":
+      return (
+        <>
+          <View style={[styles.arcEye, { top: 78, left: 43 }]} />
+          <View style={[styles.arcEye, { top: 78, right: 43 }]} />
+          <View
+            style={[
+              styles.smile,
+              { width: 32, height: 12, top: 102, left: 70, transform: [{ rotate: "-6deg" }] },
+            ]}
+          />
+        </>
+      );
+    case "proud":
+      return (
+        <>
+          <View style={[styles.arcEye, { top: 74, left: 44 }]} />
+          <View style={[styles.arcEye, { top: 74, right: 44 }]} />
+          <View style={[styles.smile, { width: 26, height: 14, top: 100, left: 73 }]} />
+          <Text style={[styles.star, { top: 90, right: 24 }]}>✦</Text>
+        </>
+      );
+    case "party":
+      return (
+        <>
+          <Text style={[styles.star, { top: 56, left: 38 }]}>✦</Text>
+          <Text style={[styles.star, { top: 56, right: 38 }]}>✦</Text>
+          <View style={styles.openMouth}>
+            <View style={styles.tongue} />
+          </View>
+          <Text style={[styles.zzz, { top: 44, right: 12 }]}>🎉</Text>
+        </>
+      );
   }
 }
 
