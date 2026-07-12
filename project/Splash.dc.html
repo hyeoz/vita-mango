@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; }
+  *{box-sizing:border-box}
+
+  @keyframes sp-bob { 0%,100%{transform:translateY(0) rotate(-1.5deg)} 50%{transform:translateY(-12px) rotate(1.5deg)} }
+  @keyframes sp-shadow { 0%,100%{transform:translateX(-50%) scaleX(1);opacity:.2} 50%{transform:translateX(-50%) scaleX(.82);opacity:.12} }
+  @keyframes sp-blink { 0%,42%,48%,100%{transform:scaleY(1)} 45%{transform:scaleY(.1)} }
+
+  /* squish reaction each time a pill is absorbed */
+  @keyframes sp-squish {
+    0%,54%{transform:scale(1,1)}
+    60%{transform:scale(1.14,.84)}
+    68%{transform:scale(.9,1.12)}
+    76%{transform:scale(1.04,.97)}
+    82%,100%{transform:scale(1,1)}
+  }
+
+  /* four pills flying in from the corners, staggered, looping */
+  @keyframes pill-tl {
+    0%{transform:translate(-150px,-120px) rotate(-30deg) scale(1);opacity:0}
+    8%{opacity:1}
+    42%{transform:translate(0,0) rotate(0deg) scale(1);opacity:1}
+    52%{transform:translate(0,0) rotate(0deg) scale(.2);opacity:0}
+    100%{transform:translate(0,0) rotate(0deg) scale(.2);opacity:0}
+  }
+  @keyframes pill-tr {
+    0%,18%{transform:translate(150px,-130px) rotate(30deg) scale(1);opacity:0}
+    26%{opacity:1}
+    58%{transform:translate(0,0) rotate(0deg) scale(1);opacity:1}
+    68%{transform:translate(0,0) scale(.2);opacity:0}
+    100%{transform:translate(0,0) scale(.2);opacity:0}
+  }
+  @keyframes pill-bl {
+    0%,36%{transform:translate(-140px,120px) rotate(24deg) scale(1);opacity:0}
+    44%{opacity:1}
+    74%{transform:translate(0,0) rotate(0deg) scale(1);opacity:1}
+    84%{transform:translate(0,0) scale(.2);opacity:0}
+    100%{transform:translate(0,0) scale(.2);opacity:0}
+  }
+  @keyframes pill-br {
+    0%,54%{transform:translate(150px,120px) rotate(-24deg) scale(1);opacity:0}
+    62%{opacity:1}
+    92%{transform:translate(0,0) rotate(0deg) scale(1);opacity:1}
+    98%{transform:translate(0,0) scale(.2);opacity:0}
+    100%{transform:translate(0,0) scale(.2);opacity:0}
+  }
+
+  /* sparkle burst at the moment of each absorb */
+  @keyframes sp-spark { 0%,50%{opacity:0;transform:scale(.3)} 56%{opacity:1;transform:scale(1.1)} 70%{opacity:0;transform:scale(1.3)} 100%{opacity:0} }
+
+  @keyframes sp-rise { 0%{opacity:0;transform:translateY(14px)} 100%{opacity:1;transform:translateY(0)} }
+  @keyframes sp-dot { 0%,100%{transform:translateY(0);opacity:.4} 50%{transform:translateY(-7px);opacity:1} }
+  @keyframes sp-ring { 0%{transform:scale(.7);opacity:.5} 100%{transform:scale(1.5);opacity:0} }
+</style>
+</helmet>
+
+<div style="position:relative;width:390px;height:844px;overflow:hidden;font-family:'Gowun Dodum',sans-serif;background:radial-gradient(120% 90% at 50% 22%, #fff2d6 0%, #ffe4f0 46%, #ece3ff 100%)">
+
+  <!-- soft floating background blobs -->
+  <div style="position:absolute;top:90px;left:-40px;width:170px;height:170px;border-radius:50%;background:rgba(255,182,60,.16);filter:blur(6px)"></div>
+  <div style="position:absolute;bottom:120px;right:-50px;width:190px;height:190px;border-radius:50%;background:rgba(124,92,255,.14);filter:blur(6px)"></div>
+  <div style="position:absolute;top:40px;right:30px;width:70px;height:70px;border-radius:50%;background:rgba(59,201,219,.16);filter:blur(3px)"></div>
+
+  <!-- stage -->
+  <div style="position:absolute;top:238px;left:50%;transform:translateX(-50%);width:230px;height:230px">
+
+    <!-- expanding rings -->
+    <div style="position:absolute;top:50%;left:50%;width:170px;height:170px;margin:-85px 0 0 -85px;border:2.5px solid rgba(124,92,255,.4);border-radius:50%;animation:sp-ring 2.6s ease-out infinite"></div>
+    <div style="position:absolute;top:50%;left:50%;width:170px;height:170px;margin:-85px 0 0 -85px;border:2.5px solid rgba(255,126,182,.4);border-radius:50%;animation:sp-ring 2.6s ease-out infinite 1.3s"></div>
+
+    <!-- flying pills (converge to center) -->
+    <div style="position:absolute;top:50%;left:50%;width:52px;height:26px;margin:-13px 0 0 -26px;border-radius:14px;background:linear-gradient(90deg,#ff7eb6 50%,#7c5cff 50%);border:3px solid #2b2335;box-shadow:2px 3px 0 rgba(43,35,53,.16);animation:pill-tl 3.4s cubic-bezier(.6,0,.3,1) infinite"></div>
+    <div style="position:absolute;top:50%;left:50%;width:52px;height:26px;margin:-13px 0 0 -26px;border-radius:14px;background:#3bc9db;border:3px solid #2b2335;box-shadow:2px 3px 0 rgba(43,35,53,.16);animation:pill-tr 3.4s cubic-bezier(.6,0,.3,1) infinite"></div>
+    <div style="position:absolute;top:50%;left:50%;width:52px;height:26px;margin:-13px 0 0 -26px;border-radius:14px;background:#ffd23f;border:3px solid #2b2335;box-shadow:2px 3px 0 rgba(43,35,53,.16);animation:pill-bl 3.4s cubic-bezier(.6,0,.3,1) infinite"></div>
+    <div style="position:absolute;top:50%;left:50%;width:52px;height:26px;margin:-13px 0 0 -26px;border-radius:14px;background:#7c5cff;border:3px solid #2b2335;box-shadow:2px 3px 0 rgba(43,35,53,.16);animation:pill-br 3.4s cubic-bezier(.6,0,.3,1) infinite"></div>
+
+    <!-- shadow -->
+    <div style="position:absolute;bottom:6px;left:50%;width:128px;height:20px;background:rgba(43,35,53,.2);border-radius:50%;filter:blur(3px);animation:sp-shadow 2.8s ease-in-out infinite"></div>
+
+    <!-- jelly (absorbs) -->
+    <div style="position:absolute;top:24px;left:50%;transform:translateX(-50%);width:176px;height:164px">
+     <div style="position:absolute;inset:0;animation:sp-bob 2.8s ease-in-out infinite">
+      <div style="position:absolute;inset:0;transform-origin:bottom center;animation:sp-squish 3.4s ease-in-out infinite">
+        <div style="position:absolute;inset:0;background:linear-gradient(168deg,#ffe07a 0%,#ffb43d 60%,#ff9e2c 100%);border:3.5px solid #2b2335;border-radius:46% 46% 42% 42%/56% 56% 44% 44%;box-shadow:inset -12px -16px 0 rgba(214,120,20,.18), 7px 9px 0 rgba(43,35,53,.12)"></div>
+        <div style="position:absolute;top:26px;left:32px;width:50px;height:32px;background:rgba(255,255,255,.6);border-radius:50%;filter:blur(.4px)"></div>
+        <!-- happy face -->
+        <div style="position:absolute;top:72px;left:46px;width:16px;height:24px;background:#2b2335;border-radius:50%;transform-origin:center;animation:sp-blink 3.4s infinite"></div>
+        <div style="position:absolute;top:72px;right:46px;width:16px;height:24px;background:#2b2335;border-radius:50%;transform-origin:center;animation:sp-blink 3.4s infinite"></div>
+        <div style="position:absolute;top:77px;left:50px;width:7px;height:7px;background:#fff;border-radius:50%"></div>
+        <div style="position:absolute;top:77px;right:55px;width:7px;height:7px;background:#fff;border-radius:50%"></div>
+        <div style="position:absolute;top:104px;left:50%;transform:translateX(-50%);width:32px;height:17px;border:3px solid #2b2335;border-top:none;border-radius:0 0 18px 18px"></div>
+        <div style="position:absolute;top:100px;left:32px;width:19px;height:14px;background:#ff7a7a;opacity:.5;border-radius:50%"></div>
+        <div style="position:absolute;top:100px;right:32px;width:19px;height:14px;background:#ff7a7a;opacity:.5;border-radius:50%"></div>
+      </div>
+      <!-- absorb sparkle -->
+      <div style="position:absolute;top:60px;left:50%;transform:translateX(-50%);font-size:22px;animation:sp-spark 3.4s ease-out infinite">✨</div>
+     </div>
+    </div>
+  </div>
+
+  <!-- wordmark -->
+  <div style="position:absolute;top:96px;left:0;right:0;text-align:center;animation:sp-rise .8s ease-out both">
+  </div>
+
+  <!-- loading -->
+  <div style="position:absolute;bottom:120px;left:0;right:0;text-align:center;animation:sp-rise 1s ease-out both">
+    <div style="display:inline-flex;gap:8px;margin-bottom:14px">
+      <span style="width:11px;height:11px;border-radius:50%;background:#ff7eb6;border:2px solid #2b2335;animation:sp-dot 1.2s ease-in-out infinite"></span>
+      <span style="width:11px;height:11px;border-radius:50%;background:#ffb43d;border:2px solid #2b2335;animation:sp-dot 1.2s ease-in-out infinite .18s"></span>
+      <span style="width:11px;height:11px;border-radius:50%;background:#3bc9db;border:2px solid #2b2335;animation:sp-dot 1.2s ease-in-out infinite .36s"></span>
+      <span style="width:11px;height:11px;border-radius:50%;background:#7c5cff;border:2px solid #2b2335;animation:sp-dot 1.2s ease-in-out infinite .54s"></span>
+    </div>
+    <div style="font-size:13px;color:#9b8fae">영양제를 불러오는 중…</div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844}}"></script>
+</body>
+</html>
