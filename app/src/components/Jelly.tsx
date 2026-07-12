@@ -285,58 +285,156 @@ function renderExpr(expr: JellyMood, blink: Animated.Value) {
         </>
       );
 
-    // ── Lv.6–9 placeholders — replace with the Claude Design faces ──
-    case "wow":
+    // ── Lv.6–9 faces — ported from the Claude Design Jelly.dc.html handoff ──
+    case "surprised":
       return (
         <>
-          <View style={[styles.roundEye, { top: 66, left: 42 }]} />
-          <View style={[styles.roundEye, { top: 66, right: 42 }]} />
+          {/* big round white eyes */}
+          <View style={[styles.wideEye, { top: 66, left: 42 }]} />
+          <View style={[styles.wideEye, { top: 66, right: 42 }]} />
+          <View style={[styles.widePupil, { top: 74, left: 47 }]} />
+          <View style={[styles.widePupil, { top: 74, right: 47 }]} />
+          {/* open "o" mouth */}
           <View
             style={{
               position: "absolute",
-              top: 98,
+              top: 100,
               left: 78,
-              width: 18,
-              height: 21,
-              borderRadius: 10,
-              borderWidth: 3,
-              borderColor: colors.ink,
-              backgroundColor: colors.mangoDeep,
+              width: 16,
+              height: 18,
+              borderRadius: 9,
+              backgroundColor: colors.ink,
             }}
           />
+          <Text style={[styles.deco, { top: 40, left: 16 }]}>❗</Text>
         </>
       );
-    case "cool":
+    case "curious":
       return (
         <>
-          <View style={[styles.arcEye, { top: 78, left: 43 }]} />
-          <View style={[styles.arcEye, { top: 78, right: 43 }]} />
+          {/* left open eye + catchlight */}
           <View
-            style={[
-              styles.smile,
-              { width: 32, height: 12, top: 102, left: 70, transform: [{ rotate: "-6deg" }] },
-            ]}
+            style={{
+              position: "absolute",
+              top: 70,
+              left: 44,
+              width: 13,
+              height: 18,
+              borderRadius: 9,
+              backgroundColor: colors.ink,
+            }}
           />
+          <View style={[styles.tinyDot, { top: 74, left: 47 }]} />
+          {/* right half-closed arc eye */}
+          <View
+            style={{
+              position: "absolute",
+              top: 73,
+              right: 43,
+              width: 20,
+              height: 10,
+              borderWidth: 3,
+              borderColor: colors.ink,
+              borderBottomWidth: 0,
+              borderTopLeftRadius: 14,
+              borderTopRightRadius: 14,
+            }}
+          />
+          {/* small "o" mouth */}
+          <View
+            style={{
+              position: "absolute",
+              top: 101,
+              left: 79,
+              width: 14,
+              height: 14,
+              borderRadius: 7,
+              borderWidth: 3,
+              borderColor: colors.ink,
+            }}
+          />
+          <Text
+            style={{
+              position: "absolute",
+              top: 40,
+              right: 12,
+              fontFamily: fonts.display,
+              fontSize: 20,
+              color: colors.purple,
+            }}
+          >
+            ?
+          </Text>
         </>
       );
     case "proud":
       return (
         <>
-          <View style={[styles.arcEye, { top: 74, left: 44 }]} />
-          <View style={[styles.arcEye, { top: 74, right: 44 }]} />
-          <View style={[styles.smile, { width: 26, height: 14, top: 100, left: 73 }]} />
-          <Text style={[styles.star, { top: 90, right: 24 }]}>✦</Text>
+          {/* tilted eyebrow eyes */}
+          <View
+            style={[styles.browEye, { top: 74, left: 43, transform: [{ rotate: "6deg" }] }]}
+          />
+          <View
+            style={[styles.browEye, { top: 74, right: 43, transform: [{ rotate: "-6deg" }] }]}
+          />
+          {/* confident smile */}
+          <View
+            style={{
+              position: "absolute",
+              top: 99,
+              left: 73,
+              width: 26,
+              height: 13,
+              borderWidth: 3,
+              borderColor: colors.ink,
+              borderTopWidth: 0,
+              borderBottomLeftRadius: 15,
+              borderBottomRightRadius: 15,
+            }}
+          />
+          <Text style={[styles.deco, { top: 44, right: 12 }]}>✨</Text>
         </>
       );
-    case "party":
+    case "sad":
       return (
         <>
-          <Text style={[styles.star, { top: 56, left: 38 }]}>✦</Text>
-          <Text style={[styles.star, { top: 56, right: 38 }]}>✦</Text>
-          <View style={styles.openMouth}>
-            <View style={styles.tongue} />
-          </View>
-          <Text style={[styles.zzz, { top: 44, right: 12 }]}>🎉</Text>
+          {/* teary eyes + catchlights */}
+          <View style={[styles.sadEye, { top: 72, left: 44 }]} />
+          <View style={[styles.sadEye, { top: 72, right: 44 }]} />
+          <View style={[styles.tinyDot, { top: 77, left: 48 }]} />
+          <View style={[styles.tinyDot, { top: 77, right: 48 }]} />
+          {/* teardrop */}
+          <View
+            style={{
+              position: "absolute",
+              top: 92,
+              right: 44,
+              width: 8,
+              height: 13,
+              backgroundColor: "#8fd3f4",
+              borderWidth: 1.5,
+              borderColor: "#6bb8e0",
+              borderTopLeftRadius: 6,
+              borderTopRightRadius: 6,
+              borderBottomLeftRadius: 4,
+              borderBottomRightRadius: 4,
+            }}
+          />
+          {/* downturned (frown) mouth */}
+          <View
+            style={{
+              position: "absolute",
+              top: 110,
+              left: 74,
+              width: 24,
+              height: 12,
+              borderWidth: 3,
+              borderColor: colors.ink,
+              borderBottomWidth: 0,
+              borderTopLeftRadius: 14,
+              borderTopRightRadius: 14,
+            }}
+          />
         </>
       );
   }
@@ -429,6 +527,51 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 8,
   },
   zzz: { position: "absolute", fontSize: 15, color: colors.purple, fontFamily: fonts.display },
+  deco: { position: "absolute", fontSize: 15 },
+  // surprised: big round white eyes with dark pupils
+  wideEye: {
+    position: "absolute",
+    width: 19,
+    height: 26,
+    backgroundColor: colors.white,
+    borderWidth: 3,
+    borderColor: colors.ink,
+    borderRadius: 13,
+  },
+  widePupil: {
+    position: "absolute",
+    width: 9,
+    height: 12,
+    backgroundColor: colors.ink,
+    borderRadius: 6,
+  },
+  // small white catchlight (curious / sad)
+  tinyDot: {
+    position: "absolute",
+    width: 6,
+    height: 6,
+    backgroundColor: colors.white,
+    borderRadius: 3,
+  },
+  // proud: tilted eyebrow-shaped upper-arc eye
+  browEye: {
+    position: "absolute",
+    width: 20,
+    height: 12,
+    borderWidth: 3,
+    borderColor: colors.ink,
+    borderBottomWidth: 0,
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 14,
+  },
+  // sad: filled oval eye
+  sadEye: {
+    position: "absolute",
+    width: 15,
+    height: 20,
+    backgroundColor: colors.ink,
+    borderRadius: 10,
+  },
   star: { position: "absolute", fontSize: 26, lineHeight: 26, color: colors.ink },
   heart: { position: "absolute", fontSize: 20, lineHeight: 20, color: "#ff5d8f" },
   burstEmoji: { position: "absolute", fontSize: 16 },

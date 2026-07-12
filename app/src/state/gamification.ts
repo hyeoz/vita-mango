@@ -71,10 +71,10 @@ export const COLLECTIBLES: Collectible[] = [
   { key: "excited", label: "신남", minLevel: 3 },
   { key: "love", label: "하트뿅", minLevel: 4 },
   { key: "sleepy", label: "노곤", minLevel: 5 },
-  { key: "wow", label: "놀람", minLevel: 6 },
-  { key: "cool", label: "쿨", minLevel: 7 },
+  { key: "surprised", label: "놀람", minLevel: 6 },
+  { key: "curious", label: "궁금", minLevel: 7 },
   { key: "proud", label: "뿌듯", minLevel: 8 },
-  { key: "party", label: "파티", minLevel: 9 },
+  { key: "sad", label: "시무룩", minLevel: 9 },
 ];
 
 export function unlockedKeys(level: number): JellyMood[] {

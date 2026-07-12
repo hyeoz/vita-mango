@@ -35,11 +35,11 @@ export type JellyMood =
   | "excited"
   | "love"
   | "wink"
-  // Lv.6–9 unlockables (placeholder art until the Claude Design faces land).
-  | "wow"
-  | "cool"
+  // Lv.6–9 unlockables — ported from the Claude Design Jelly.dc.html handoff.
+  | "surprised"
+  | "curious"
   | "proud"
-  | "party";
+  | "sad";
 
 // ── defaults for a brand-new account ──
 const DEFAULT_SUPPS: Supplement[] = [
