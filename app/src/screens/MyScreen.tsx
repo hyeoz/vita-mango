@@ -20,6 +20,7 @@ export default function MyScreen() {
     streak,
     levelInfo,
     nextUnlock,
+    unlockedExprs,
     reRegister,
   } = useApp();
   const { user, signOut } = useAuth();
@@ -51,7 +52,7 @@ export default function MyScreen() {
       >
         <View style={styles.hero}>
           <View style={styles.jellyWrap}>
-            <Jelly mood="love" width={142} />
+            <Jelly mood="love" width={142} expressions={unlockedExprs} />
           </View>
         </View>
         <Text style={styles.name}>젤리 · Lv.{level}</Text>

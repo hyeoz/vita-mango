@@ -39,7 +39,8 @@ function inputKey(diaries: string[], supps: { name: string; time: string }[]) {
 }
 
 export default function AiScreen() {
-  const { diaries, supps, addedRecs, addRec, subscribed } = useApp();
+  const { diaries, supps, addedRecs, addRec, subscribed, unlockedExprs } =
+    useApp();
   const interstitial = useInterstitial();
   const insets = useSafeAreaInsets();
 
@@ -134,7 +135,7 @@ export default function AiScreen() {
           <FloatingPill color="yellow" size={34} rotate={0} delay={0} style={{ position: "absolute", top: 18, left: 46 }} />
           <FloatingPill color="cyan" size={34} rotate={0} delay={400} style={{ position: "absolute", top: 24, right: 50 }} />
           <View style={styles.jellyWrap}>
-            <Jelly mood="excited" width={124} />
+            <Jelly mood="excited" width={124} expressions={unlockedExprs} />
           </View>
         </View>
 
