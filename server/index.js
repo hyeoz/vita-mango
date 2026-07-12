@@ -59,6 +59,10 @@ async function generateJSON({ system, prompt, schema, maxTokens = 2048 }) {
       responseSchema: schema,
       maxOutputTokens: maxTokens,
       temperature: 0.7,
+      // Gemini 2.5 models enable "thinking" by default, which eats into
+      // maxOutputTokens and can truncate the JSON ("Unterminated string").
+      // These are simple schema-constrained outputs, so disable it.
+      thinkingConfig: { thinkingBudget: 0 },
     },
   });
 
@@ -156,7 +160,7 @@ const TIMING_SCHEMA = {
           time: {
             type: Type.STRING,
             description:
-              "복용 시점 · 용량. '시점 · 1정' 형식. 예: '자기 전 · 1정', '아침 식후 · 1정', '공복 · 1정'",
+              "복용 시점 · 용량. '시점 · N정' 형식. N은 일반적 1회 권장 정수(보통 1~2정, 확실치 않으면 1정). 예: '자기 전 · 1정', '아침 식후 · 2정', '공복 · 1정'",
           },
           color: { type: Type.STRING, enum: COLOR_KEYS, description: "알약 색상 키" },
         },
@@ -173,7 +177,8 @@ const TIMING_SYSTEM = `너는 "젤리"라는 영양제 도우미야. 주어진 �
 
 규칙:
 - 흡수·효과·부작용을 고려한 일반적 복용 시점을 정해. 예: 마그네슘·유산균은 자기 전, 지용성 비타민(A·D·E·K)·오메가-3는 식후, 철분은 공복(또는 비타민C와 함께), 비타민 C·B는 아침 식후.
-- time은 반드시 "시점 · 1정" 형식. (예: "자기 전 · 1정", "아침 식후 · 1정", "공복 · 1정")
+- 용량(정 수)도 그 영양제의 일반적인 1회 권장량으로 정해. 보통 1~2정이며, 확실하지 않으면 1정으로 해.
+- time은 반드시 "시점 · N정" 형식. (예: "자기 전 · 1정", "아침 식후 · 2정", "공복 · 1정")
 - color는 그 영양제에 어울리는 색상 키를 골라.
 - 의학적 단정은 피하고 일반적인 가이드로만.
 - name에는 입력받은 이름을 그대로 넣어. 모든 텍스트는 한국어로.

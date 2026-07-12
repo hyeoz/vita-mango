@@ -9,6 +9,7 @@ import React, {
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { colors, suppColor } from "../theme/colors";
 import { loadUserData, saveUserData, seedUserData } from "../firebase/db";
+import { useInterstitial } from "../ads/useInterstitial";
 import {
   dayKey,
   computeStreak,
@@ -73,6 +74,8 @@ type AppState = {
 
   supps: Supplement[];
   toggleSupp: (i: number) => void;
+  removeSupp: (i: number) => void;
+  updateSuppTime: (i: number, time: string) => void;
   takenCount: number;
 
   addedRecs: string[];
@@ -126,6 +129,11 @@ export function AppProvider({
   // Gamification: dates fully dosed, and the last day we reset daily `taken`.
   const [doseLog, setDoseLog] = useState<string[]>([]);
   const [lastActiveDate, setLastActiveDate] = useState<string>("");
+
+  // Interstitial shown on level-up. prevLevelRef seeds after hydration so we
+  // never fire an ad just for loading into an existing level.
+  const { show: showLevelUpAd } = useInterstitial();
+  const prevLevelRef = useRef<number | null>(null);
 
   // ── hydrate from Firestore for this user ──
   useEffect(() => {
@@ -239,6 +247,21 @@ export function AppProvider({
     [levelInfo.level]
   );
 
+  // Level-up → interstitial ad (a new face just unlocked). Subscribers skip
+  // ads; the first post-hydration run only records the baseline level.
+  useEffect(() => {
+    if (!hydrated) return;
+    const lvl = levelInfo.level;
+    if (prevLevelRef.current === null) {
+      prevLevelRef.current = lvl;
+      return;
+    }
+    if (lvl > prevLevelRef.current && !subscribed) {
+      showLevelUpAd();
+    }
+    prevLevelRef.current = lvl;
+  }, [hydrated, levelInfo.level, subscribed, showLevelUpAd]);
+
   const submitDiary = () => {
     // Clamp length as a safety net even if the input's maxLength is bypassed.
     const t = diary.trim().slice(0, 200);
@@ -252,6 +275,13 @@ export function AppProvider({
     setSupps((prev) =>
       prev.map((s, idx) => (idx === i ? { ...s, taken: !s.taken } : s))
     );
+
+  const removeSupp = (i: number) =>
+    setSupps((prev) => prev.filter((_, idx) => idx !== i));
+
+  // Manual override of the AI-suggested intake time / dosage string.
+  const updateSuppTime = (i: number, time: string) =>
+    setSupps((prev) => prev.map((s, idx) => (idx === i ? { ...s, time } : s)));
 
   // Adds a recommended supplement to the actual list (with the AI's suggested
   // time + colour) and marks it added. Idempotent — ignores duplicates by name.
@@ -342,6 +372,8 @@ export function AppProvider({
     justLogged,
     supps,
     toggleSupp,
+    removeSupp,
+    updateSuppTime,
     takenCount,
     addedRecs,
     addRec,

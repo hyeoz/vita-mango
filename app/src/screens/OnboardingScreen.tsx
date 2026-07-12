@@ -98,14 +98,14 @@ export default function OnboardingScreen() {
 
   const onFinish = async () => {
     if (finishing) return;
-    // Batch-fill AI timing for any selected supplement not timed yet (catalog
-    // picks + customs still in flight). Never block completion on failure.
-    const missing = onbSelected.filter((n) => !timings[n]);
+    // Run the AI timing pass for EVERY selected supplement so each gets its own
+    // recommended time + dosage (not just the ones not previewed yet). Never
+    // block completion on failure — completeOnboarding falls back to defaults.
     let merged = timings;
-    if (missing.length) {
+    if (onbSelected.length) {
       setFinishing(true);
       try {
-        const map = await fetchTimings(missing);
+        const map = await fetchTimings(onbSelected);
         merged = { ...timings, ...map };
         setTimings(merged);
       } catch (e) {

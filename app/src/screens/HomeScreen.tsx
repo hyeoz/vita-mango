@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -14,6 +15,7 @@ import { fonts } from "../theme/fonts";
 import { card, hardShadow } from "../theme/ui";
 import Jelly from "../components/Jelly";
 import { FloatingPill, PillSwatch } from "../components/Pill";
+import SuppEditModal from "../components/SuppEditModal";
 import { useApp } from "../state/AppContext";
 
 export default function HomeScreen() {
@@ -27,11 +29,30 @@ export default function HomeScreen() {
     diaries,
     supps,
     toggleSupp,
+    removeSupp,
+    updateSuppTime,
     unlockedExprs,
   } = useApp();
 
   const recent = diaries.slice(0, 3);
   const insets = useSafeAreaInsets();
+
+  // Which supplement's edit sheet is open (null = closed).
+  const [editing, setEditing] = React.useState<number | null>(null);
+
+  const confirmRemove = (i: number, name: string) =>
+    Alert.alert(`${name} 삭제`, "이 영양제를 목록에서 지울까요?", [
+      { text: "취소", style: "cancel" },
+      { text: "삭제", style: "destructive", onPress: () => removeSupp(i) },
+    ]);
+
+  // Long-press a supplement → edit its time/dose or delete it.
+  const openSuppMenu = (i: number, name: string) =>
+    Alert.alert(name, undefined, [
+      { text: "시간·용량 편집", onPress: () => setEditing(i) },
+      { text: "삭제", style: "destructive", onPress: () => confirmRemove(i, name) },
+      { text: "취소", style: "cancel" },
+    ]);
 
   // Date + greeting follow the device's local clock.
   const now = new Date();
@@ -44,19 +65,26 @@ export default function HomeScreen() {
     hour < 6
       ? "고요한 새벽이에요. 무리하지 말아요 🌙"
       : hour < 11
-      ? "해가 떴어요. 천천히 시작해요 🌤️"
-      : hour < 14
-      ? "점심시간이에요. 잘 챙겨 먹어요 🍚"
-      : hour < 18
-      ? "나른한 오후예요. 조금만 힘내요 ☕"
-      : hour < 22
-      ? "저녁이에요. 오늘도 수고했어요 🌆"
-      : "밤이 깊었어요. 곧 푹 쉬어요 🌙";
+        ? "해가 떴어요. 천천히 시작해요 🌤️"
+        : hour < 14
+          ? "점심시간이에요. 잘 챙겨 먹어요 🍚"
+          : hour < 18
+            ? "나른한 오후예요. 조금만 힘내요 ☕"
+            : hour < 22
+              ? "저녁이에요. 오늘도 수고했어요 🌆"
+              : "밤이 깊었어요. 곧 푹 쉬어요 🌙";
 
   return (
-    <LinearGradient colors={["#fff0f6", colors.cream]} locations={[0, 0.6]} style={styles.fill}>
+    <LinearGradient
+      colors={["#fff0f6", colors.cream]}
+      locations={[0, 0.6]}
+      style={styles.fill}
+    >
       <ScrollView
-        contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: insets.top + 16 },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         {/* header */}
@@ -73,10 +101,34 @@ export default function HomeScreen() {
 
         {/* hero */}
         <View style={styles.hero}>
-          <FloatingPill color="mixed" size={46} rotate={-14} delay={0} style={{ position: "absolute", top: 42, left: 26 }} />
-          <FloatingPill color="cyan" size={42} rotate={16} delay={400} style={{ position: "absolute", top: 30, right: 30 }} />
-          <FloatingPill color="yellow" size={40} rotate={10} delay={800} style={{ position: "absolute", bottom: 64, left: 14 }} />
-          <FloatingPill color="purple" size={44} rotate={-8} delay={200} style={{ position: "absolute", bottom: 78, right: 18 }} />
+          <FloatingPill
+            color="mixed"
+            size={46}
+            rotate={-14}
+            delay={0}
+            style={{ position: "absolute", top: 42, left: 26 }}
+          />
+          <FloatingPill
+            color="cyan"
+            size={42}
+            rotate={16}
+            delay={400}
+            style={{ position: "absolute", top: 30, right: 30 }}
+          />
+          <FloatingPill
+            color="yellow"
+            size={40}
+            rotate={10}
+            delay={800}
+            style={{ position: "absolute", bottom: 64, left: 14 }}
+          />
+          <FloatingPill
+            color="purple"
+            size={44}
+            rotate={-8}
+            delay={200}
+            style={{ position: "absolute", bottom: 78, right: 18 }}
+          />
           <View style={styles.jellyWrap}>
             <Jelly mood={jellyMood} width={172} expressions={unlockedExprs} />
           </View>
@@ -113,7 +165,7 @@ export default function HomeScreen() {
               style={styles.input}
             />
             <Pressable style={styles.sendBtn} onPress={submitDiary}>
-              <Text style={styles.sendIcon}>↑</Text>
+              <Text style={styles.sendIcon}>→</Text>
             </Pressable>
           </View>
           {diaries.length > 0 && (
@@ -130,14 +182,18 @@ export default function HomeScreen() {
         {/* today schedule */}
         <View style={styles.schedHead}>
           <Text style={styles.schedTitle}>오늘의 복용</Text>
-          <Text style={styles.schedHint}>탭하면 완료 ✓</Text>
+          <Text style={styles.schedHint}>탭 완료 ✓ · 길게 눌러 편집·삭제</Text>
         </View>
         <View style={{ gap: 10 }}>
           {supps.map((item, i) => (
             <Pressable
               key={item.name}
               onPress={() => toggleSupp(i)}
-              style={[styles.suppRow, { backgroundColor: item.taken ? "#f4fff4" : colors.white }]}
+              onLongPress={() => openSuppMenu(i, item.name)}
+              style={[
+                styles.suppRow,
+                { backgroundColor: item.taken ? "#f4fff4" : colors.white },
+              ]}
             >
               <PillSwatch color={item.color} width={48} height={24} />
               <View style={{ flex: 1 }}>
@@ -150,7 +206,12 @@ export default function HomeScreen() {
                   { backgroundColor: item.taken ? colors.cyan : colors.white },
                 ]}
               >
-                <Text style={{ color: item.taken ? colors.white : "#cfc6da", fontSize: 15 }}>
+                <Text
+                  style={{
+                    color: item.taken ? colors.white : "#cfc6da",
+                    fontSize: 15,
+                  }}
+                >
                   {item.taken ? "✓" : "○"}
                 </Text>
               </View>
@@ -158,6 +219,17 @@ export default function HomeScreen() {
           ))}
         </View>
       </ScrollView>
+
+      <SuppEditModal
+        visible={editing !== null}
+        name={editing !== null ? supps[editing]?.name ?? "" : ""}
+        time={editing !== null ? supps[editing]?.time ?? "" : ""}
+        onClose={() => setEditing(null)}
+        onSave={(time) => {
+          if (editing !== null) updateSuppTime(editing, time);
+          setEditing(null);
+        }}
+      />
     </LinearGradient>
   );
 }
@@ -172,7 +244,12 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   date: { fontFamily: fonts.display, fontSize: 21, color: colors.ink },
-  sub: { fontFamily: fonts.body, fontSize: 13, color: colors.muted, marginTop: 2 },
+  sub: {
+    fontFamily: fonts.body,
+    fontSize: 13,
+    color: colors.muted,
+    marginTop: 2,
+  },
   counter: {
     flexDirection: "row",
     alignItems: "center",
@@ -242,7 +319,12 @@ const styles = StyleSheet.create({
     marginTop: 18,
     ...hardShadow(),
   },
-  diaryHead: { flexDirection: "row", alignItems: "center", gap: 7, marginBottom: 10 },
+  diaryHead: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    marginBottom: 10,
+  },
   diaryTitle: { fontFamily: fonts.display, fontSize: 16, color: colors.ink },
   diaryRow: { flexDirection: "row", gap: 8 },
   input: {
@@ -300,7 +382,12 @@ const styles = StyleSheet.create({
     ...hardShadow(3, 4),
   },
   suppName: { fontFamily: fonts.display, fontSize: 16, color: colors.ink },
-  suppTime: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted2, marginTop: 1 },
+  suppTime: {
+    fontFamily: fonts.body,
+    fontSize: 12.5,
+    color: colors.muted2,
+    marginTop: 1,
+  },
   check: {
     width: 30,
     height: 30,
