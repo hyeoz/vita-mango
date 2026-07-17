@@ -37,7 +37,9 @@ export default function LoginScreen() {
           <FloatingPill color="yellow" size={38} rotate={10} delay={800} style={{ position: "absolute", bottom: 8, left: 28 }} />
           <FloatingPill color="purple" size={42} rotate={-8} delay={200} style={{ position: "absolute", bottom: 16, right: 30 }} />
           <View style={styles.jellyWrap}>
-            <Jelly mood="happy" width={150} />
+            {/* Pre-login: no account/level yet, so preview just the first three
+                collectible faces (방긋·윙크·신남). */}
+            <Jelly mood="happy" width={150} expressions={["happy", "wink", "excited"]} />
           </View>
         </View>
 

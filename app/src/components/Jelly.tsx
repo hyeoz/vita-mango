@@ -37,10 +37,16 @@ export default function Jelly({
   const scale = width / BASE_W;
   const height = BASE_H * scale;
 
-  // Tap cycles through the unlocked set when provided, else every face.
-  const cycle = expressions && expressions.length ? expressions : EXPRS;
+  // When `expressions` is passed it's the unlocked set: the tap-cycle walks it,
+  // and a resting `mood` that isn't in it (e.g. jellyMood derives "sleepy"/"love"
+  // from state but the user is only Lv.1) falls back to an unlocked face so we
+  // never show an expression they haven't collected. Without the prop (the 도감
+  // grid, login mascot) the exact `mood` is shown as-is.
+  const gate = expressions && expressions.length ? expressions : null;
+  const cycle = gate ?? EXPRS;
   const [exprIndex, setExprIndex] = useState<number | null>(null);
-  const expr = exprIndex == null ? mood : cycle[exprIndex % cycle.length];
+  const restingMood = gate && !gate.includes(mood) ? gate[0] : mood;
+  const expr = exprIndex == null ? restingMood : cycle[exprIndex % cycle.length];
 
   // ── bob (idle float) ──
   const bob = useRef(new Animated.Value(0)).current;

@@ -33,7 +33,8 @@ const CATALOG = [
 const CUSTOM_PALETTE = [colors.pink, colors.cyan, colors.mango, colors.purple];
 
 export default function OnboardingScreen() {
-  const { supps, onbSelected, toggleOnb, completeOnboarding } = useApp();
+  const { supps, onbSelected, toggleOnb, completeOnboarding, unlockedExprs } =
+    useApp();
 
   // Names the user typed in this session. Kept in local state so a custom card
   // stays visible (and re-selectable) even after being toggled off.
@@ -134,7 +135,7 @@ export default function OnboardingScreen() {
       >
         <View style={styles.hero}>
           <View style={styles.jellyWrap}>
-            <Jelly mood="happy" width={120} />
+            <Jelly mood="happy" width={120} expressions={unlockedExprs} />
           </View>
         </View>
 
