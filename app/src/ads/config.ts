@@ -13,13 +13,13 @@ import { TestIds } from "react-native-google-mobile-ads";
 
 const REAL = {
   banner: Platform.select({
-    android: "ca-app-pub-6998718430585981/4956890732", // TODO: Android 배너 광고단위 ID
-    ios: "ca-app-pub-6998718430585981/6854214771", //     TODO: iOS 배너 광고단위 ID
+    android: "ca-app-pub-6998718430585981/4956890732", // Android 배너
+    ios: "ca-app-pub-6998718430585981/6854214771", //     iOS 배너
     default: "",
   })!,
   interstitial: Platform.select({
-    android: "ca-app-pub-6998718430585981/5441060751", // TODO: Android 전면 광고단위 ID
-    ios: "ca-app-pub-6998718430585981/1570098503", //     TODO: iOS 전면 광고단위 ID
+    android: "ca-app-pub-6998718430585981/5441060751", // Android 전면
+    ios: "ca-app-pub-6998718430585981/1570098503", //     iOS 전면
     default: "",
   })!,
 };

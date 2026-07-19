@@ -43,14 +43,11 @@ export type JellyMood =
   | "sad";
 
 // ── defaults for a brand-new account ──
-const DEFAULT_SUPPS: Supplement[] = [
-  { name: "오메가-3", time: "아침 식후 · 1정", color: "mixed", taken: true },
-  { name: "비타민 C", time: "아침 식후 · 1정", color: "#ffb43d", taken: true },
-  { name: "비타민 D", time: "아침 식후 · 1정", color: "#ffd23f", taken: true },
-  { name: "마그네슘", time: "자기 전 · 1정", color: "#7c5cff", taken: false },
-  { name: "유산균", time: "자기 전 · 1정", color: "#3bc9db", taken: false },
-];
-const DEFAULT_DIARIES = ["어젯밤 잠을 설쳤어", "점심 먹고 졸렸어"];
+// A new account starts empty — no diaries and no supplements. Both are filled
+// by the user (onboarding for supplements, the diary input for entries), so we
+// never show fabricated content as if it were the user's own data.
+// DEFAULT_ONB just pre-selects a couple of common picks in the onboarding
+// chooser (a suggestion the user reviews), not persisted content.
 const DEFAULT_ONB = ["비타민 C", "오메가-3"];
 
 // Condition keywords → emoji, mirroring the prototype's moodFor().
@@ -116,12 +113,12 @@ export function AppProvider({
   const [hydrated, setHydrated] = useState(false);
   const [screen, setScreen] = useState<Screen>("onboarding");
   const [diary, setDiary] = useState("");
-  const [diaries, setDiaries] = useState<string[]>(DEFAULT_DIARIES);
+  const [diaries, setDiaries] = useState<string[]>([]);
   const [justLogged, setJustLogged] = useState(false);
   const [addedRecs, setAddedRecs] = useState<string[]>([]);
   const [onbSelected, setOnbSelected] = useState<string[]>(DEFAULT_ONB);
   const [onboarded, setOnboarded] = useState(false);
-  const [supps, setSupps] = useState<Supplement[]>(DEFAULT_SUPPS);
+  const [supps, setSupps] = useState<Supplement[]>([]);
   // Server-controlled; read-only on the client. Drives whether ads show.
   const [subscribed, setSubscribed] = useState(false);
   // Account creation time (ms). Drives "함께한 지 N일째" on the my page.
@@ -145,7 +142,7 @@ export function AppProvider({
         if (cancelled) return;
         if (data) {
           const today = dayKey();
-          const base = data.supplements.length ? data.supplements : DEFAULT_SUPPS;
+          const base = data.supplements;
           // New day since last open → clear the daily "taken" checkmarks.
           const fresh =
             data.lastActiveDate !== today
@@ -162,10 +159,10 @@ export function AppProvider({
           setLastActiveDate(today);
           setScreen(data.onboarded ? "home" : "onboarding");
         } else {
-          // new account → seed defaults and start onboarding
+          // new account → seed an empty profile and start onboarding
           const seed = {
-            supplements: DEFAULT_SUPPS,
-            diaries: DEFAULT_DIARIES,
+            supplements: [],
+            diaries: [],
             onbSelected: DEFAULT_ONB,
             addedRecs: [],
             onboarded: false,

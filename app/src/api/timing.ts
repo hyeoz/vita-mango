@@ -1,4 +1,4 @@
-import { API_URL } from "./config";
+import { postJSON } from "./http";
 
 export type Timing = { time: string; color: string };
 
@@ -13,18 +13,7 @@ export async function fetchTimings(
 ): Promise<Record<string, Timing>> {
   if (!names.length) return {};
 
-  const res = await fetch(`${API_URL}/api/timing`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ names }),
-  });
-
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`timing failed (${res.status}) ${body}`);
-  }
-
-  const data = (await res.json()) as { items?: TimingItem[] };
+  const data = await postJSON<{ items?: TimingItem[] }>("/api/timing", { names });
   const map: Record<string, Timing> = {};
   for (const it of data.items ?? []) {
     if (it?.name) map[it.name] = { time: it.time, color: it.color };

@@ -1,22 +1,37 @@
 {
   "cli": {
     "version": ">= 12.0.0",
-    "appVersionSource": "remote"
+    "appVersionSource": "local"
   },
   "build": {
     "development": {
       "developmentClient": true,
       "distribution": "internal",
       "ios": { "simulator": false },
-      "channel": "development"
+      "channel": "development",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://vita-mango.web.app",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "800291445751-4jfcu96uuek9612ki151bo2kbghdpojf.apps.googleusercontent.com",
+        "APPLE_TEAM_ID": "236GF8Y83H"
+      }
     },
     "preview": {
       "distribution": "internal",
-      "channel": "preview"
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://vita-mango.web.app",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "800291445751-4jfcu96uuek9612ki151bo2kbghdpojf.apps.googleusercontent.com",
+        "APPLE_TEAM_ID": "236GF8Y83H"
+      }
     },
     "production": {
       "channel": "production",
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://vita-mango.web.app",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "800291445751-4jfcu96uuek9612ki151bo2kbghdpojf.apps.googleusercontent.com",
+        "APPLE_TEAM_ID": "236GF8Y83H"
+      }
     }
   },
   "submit": {

@@ -13,12 +13,14 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.vitamango.dev",
+      "bundleIdentifier": "com.vitamango.app",
+      "buildNumber": "1",
       "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "edgeToEdgeEnabled": true,
       "package": "com.vitamango.app",
+      "versionCode": 1,
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
@@ -44,13 +46,14 @@
       [
         "react-native-google-mobile-ads",
         {
-          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
-          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
+          "androidAppId": "ca-app-pub-6998718430585981~3811330026",
+          "iosAppId": "ca-app-pub-6998718430585981~2498248356",
           "userTrackingUsageDescription": "관심사에 맞는 광고를 보여주기 위해 사용돼요. 언제든 설정에서 끌 수 있어요."
         }
       ],
       "./plugins/withFirebaseStaticFrameworkFix",
-      "./plugins/withDevelopmentTeam"
+      "./plugins/withDevelopmentTeam",
+      "@react-native-firebase/app-check"
     ]
   }
 }

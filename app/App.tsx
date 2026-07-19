@@ -7,6 +7,7 @@ import { useFonts, Jua_400Regular } from "@expo-google-fonts/jua";
 import { GowunDodum_400Regular } from "@expo-google-fonts/gowun-dodum";
 
 import { colors } from "./src/theme/colors";
+import { initAppCheck } from "./src/firebase/appCheck";
 import { AppProvider, useApp } from "./src/state/AppContext";
 import { AuthProvider, useAuth } from "./src/state/AuthContext";
 import BottomNav from "./src/components/BottomNav";
@@ -75,8 +76,10 @@ export default function App() {
     GowunDodum_400Regular,
   });
 
-  // Initialize the AdMob SDK once on startup.
+  // Initialize App Check (attests requests to the backend) and the AdMob SDK
+  // once on startup.
   useEffect(() => {
+    initAppCheck();
     mobileAds()
       .initialize()
       .catch((e) => console.warn("[ads] init failed", e));

@@ -1,4 +1,4 @@
-import { API_URL } from "./config";
+import { postJSON } from "./http";
 
 export type Signal = { emoji: string; label: string };
 
@@ -26,16 +26,5 @@ export async function fetchRecommendation(
   diaries: string[],
   supplements: SuppInput[]
 ): Promise<RecommendResult> {
-  const res = await fetch(`${API_URL}/api/recommend`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ diaries, supplements }),
-  });
-
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`recommend failed (${res.status}) ${body}`);
-  }
-
-  return (await res.json()) as RecommendResult;
+  return postJSON<RecommendResult>("/api/recommend", { diaries, supplements });
 }

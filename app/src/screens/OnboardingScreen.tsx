@@ -98,7 +98,7 @@ export default function OnboardingScreen() {
   };
 
   const onFinish = async () => {
-    if (finishing) return;
+    if (finishing || onbSelected.length === 0) return;
     // Run the AI timing pass for EVERY selected supplement so each gets its own
     // recommended time + dosage (not just the ones not previewed yet). Never
     // block completion on failure — completeOnboarding falls back to defaults.
@@ -220,9 +220,12 @@ export default function OnboardingScreen() {
         </Text>
 
         <Pressable
-          style={[styles.finish, finishing && styles.finishBusy]}
+          style={[
+            styles.finish,
+            (finishing || onbSelected.length === 0) && styles.finishBusy,
+          ]}
           onPress={onFinish}
-          disabled={finishing}
+          disabled={finishing || onbSelected.length === 0}
         >
           {finishing ? (
             <View style={styles.finishRow}>
@@ -230,7 +233,11 @@ export default function OnboardingScreen() {
               <Text style={styles.finishText}>젤리가 시간 정하는 중…</Text>
             </View>
           ) : (
-            <Text style={styles.finishText}>다 골랐어!  ({onbSelected.length}개)</Text>
+            <Text style={styles.finishText}>
+              {onbSelected.length === 0
+                ? "영양제를 골라줘"
+                : `다 골랐어!  (${onbSelected.length}개)`}
+            </Text>
           )}
         </Pressable>
         <Text style={styles.footer}>언제든 마이페이지에서 추가할 수 있어요</Text>
