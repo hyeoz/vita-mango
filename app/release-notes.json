@@ -1,0 +1,11 @@
+{
+  "_comment": "Reusable release notes used by fastlane (see fastlane/Fastfile). For a given app.json version, the matching key is used; otherwise `default`. `default` is the generic 'always usable' note. Locale keys: ko (App Store ko + Play ko-KR), en-US.",
+  "default": {
+    "ko": "안정성을 개선하고 자잘한 버그를 고쳤어요. 더 쾌적해진 비타망고를 즐겨보세요! 🥭",
+    "en-US": "Stability improvements and bug fixes. Enjoy a smoother 비타망고!"
+  },
+  "1.0.0": {
+    "ko": "비타망고 첫 출시! 젤리와 함께 영양제를 기록하고, AI 추천과 딱 맞는 복용 시간까지 챙겨보세요 🍮",
+    "en-US": "비타망고 is here — track your supplements with Jelly, get AI recommendations, and never miss the right dose."
+  }
+}

@@ -28,6 +28,16 @@ functions/node_modules/
 functions/.env
 .firebase/
 
+# fastlane / local release
+app/build/
+app/vendor/bundle/
+app/secrets/
+app/fastlane/report.xml
+app/fastlane/Preview.html
+app/fastlane/test_output/
+app/fastlane/metadata/
+*.p8
+
 # logs
 *.log
 npm-debug.*

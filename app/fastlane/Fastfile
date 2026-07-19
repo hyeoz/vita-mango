@@ -1,0 +1,113 @@
+# 비타망고 — local build + store upload with reusable release notes.
+#
+# No EAS cloud build (free): each lane runs `expo prebuild` to generate the
+# native project, builds it locally, then uploads the binary + release notes.
+# Release notes come from ../release-notes.json (per-version, else `default`).
+#
+# Auth: App Store Connect API key (.p8) for iOS, a Play service-account JSON for
+# Android — both via env vars (see fastlane/README.md). Nothing secret is
+# committed.
+
+require "json"
+require "fileutils"
+
+APP_JSON   = File.expand_path("../app.json", __dir__)
+NOTES_JSON = File.expand_path("../release-notes.json", __dir__)
+APP_DIR    = File.expand_path("..", __dir__)
+
+def app_json
+  JSON.parse(File.read(APP_JSON))
+end
+
+def app_version
+  app_json["expo"]["version"]
+end
+
+# Release note for a locale, for the current app.json version (falls back to the
+# generic `default` block).
+def notes_for(locale)
+  data  = JSON.parse(File.read(NOTES_JSON))
+  entry = data[app_version] || data["default"]
+  entry[locale] || data["default"][locale]
+end
+
+# Bump the native build number (iOS) and versionCode (Android) in app.json.
+# app.json is the version source of truth (eas.json appVersionSource=local), and
+# `expo prebuild --clean` regenerates the native projects from it each run — so
+# the bump must live here, not in the generated ios/android files.
+def bump_build!
+  data    = app_json
+  ios     = (data["expo"]["ios"] ||= {})
+  android = (data["expo"]["android"] ||= {})
+  ios["buildNumber"]     = ((ios["buildNumber"] || "0").to_i + 1).to_s
+  android["versionCode"] = (android["versionCode"] || 0).to_i + 1
+  File.write(APP_JSON, JSON.pretty_generate(data) + "\n")
+  UI.success("Bumped → iOS build #{ios['buildNumber']}, Android versionCode #{android['versionCode']} (v#{app_version})")
+end
+
+def asc_api_key
+  app_store_connect_api_key(
+    key_id: ENV.fetch("ASC_KEY_ID"),
+    issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+    key_filepath: ENV.fetch("ASC_KEY_PATH")
+  )
+end
+
+def prebuild(platform)
+  # --clean regenerates native project from app.json (applies the bumped build
+  # number, bundle id, plugin config); installs Pods for iOS.
+  sh("cd #{APP_DIR.shellescape} && npx expo prebuild -p #{platform} --clean")
+end
+
+platform :ios do
+  desc "Local build → upload to TestFlight with release notes"
+  lane :beta do
+    bump_build!
+    prebuild("ios")
+    workspace = Dir[File.join(APP_DIR, "ios", "*.xcworkspace")].first
+    UI.user_error!("No .xcworkspace found — did prebuild run?") unless workspace
+    build_app(
+      workspace: workspace,
+      scheme: File.basename(workspace, ".xcworkspace"),
+      export_method: "app-store",
+      output_directory: File.join(APP_DIR, "build")
+    )
+    upload_to_testflight(
+      api_key: asc_api_key,
+      changelog: notes_for("ko"),
+      skip_waiting_for_build_processing: true
+    )
+    UI.success("Uploaded to TestFlight. Promote to the App Store in App Store Connect when ready.")
+  end
+end
+
+platform :android do
+  desc "Local build → upload to Play internal track with release notes"
+  lane :beta do
+    bump_build!
+    prebuild("android")
+
+    # Write changelogs where supply reads them (metadata/android/<locale>/changelogs/<versionCode>.txt).
+    version_code = app_json["expo"]["android"]["versionCode"]
+    { "ko-KR" => notes_for("ko"), "en-US" => notes_for("en-US") }.each do |loc, text|
+      dir = File.expand_path("metadata/android/#{loc}/changelogs", __dir__)
+      FileUtils.mkdir_p(dir)
+      File.write(File.join(dir, "#{version_code}.txt"), text)
+    end
+
+    gradle(
+      project_dir: File.join(APP_DIR, "android"),
+      task: "bundle",
+      build_type: "Release"
+    )
+    upload_to_play_store(
+      track: "internal",
+      aab: File.join(APP_DIR, "android/app/build/outputs/bundle/release/app-release.aab"),
+      json_key: ENV.fetch("PLAY_JSON_KEY_PATH"),
+      skip_upload_apk: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+    UI.success("Uploaded to Play internal track. Promote to production in the Play Console when ready.")
+  end
+end
