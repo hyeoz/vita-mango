@@ -57,8 +57,33 @@ firebase emulators:start --only functions
 Give the emulator the key for the session:
 `GEMINI_API_KEY=... firebase emulators:start --only functions`
 
+## App Check (protects the paid endpoints)
+
+The app attaches a Firebase App Check token (`X-Firebase-AppCheck` header); the
+function verifies it. Enforcement is **off until you flip it on**, so deploying
+this code never breaks live traffic (App Check's monitor→enforce rollout).
+
+Rollout order:
+
+1. **Firebase Console → App Check** → register the apps:
+   - iOS: **App Attest** (requires the App Attest capability on the build)
+   - Android: **Play Integrity**
+   - For local/dev builds: run the app once, copy the **debug token** it logs,
+     and add it under App Check → Manage debug tokens.
+2. Ship an app build that initializes App Check (already wired in
+   `app/src/firebase/appCheck.ts`) and let it reach users.
+3. Turn on hard rejection — set the env var and redeploy:
+   ```bash
+   echo "APP_CHECK_ENFORCE=true" >> functions/.env
+   firebase deploy --only functions
+   ```
+   Until then the function verifies-and-logs but still serves requests without a
+   valid token.
+
 ## Config
 
 - Model: `GEMINI_MODEL` env var (default `gemini-flash-latest`).
+- `APP_CHECK_ENFORCE` env var (default off) — set `true` to reject requests
+  without a valid App Check token.
 - Region: `asia-northeast3` (see `index.js`). Change there + in the Hosting rewrite
   region if you move it.
