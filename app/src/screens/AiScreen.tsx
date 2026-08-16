@@ -22,6 +22,7 @@ import {
 } from "../api/recommend";
 import { suppColor } from "../theme/colors";
 import { useInterstitial } from "../ads/useInterstitial";
+import { useAds } from "../ads/AdsContext";
 
 // Cost guards: only the most recent diaries are analysed, and manual
 // re-analysis is rate-limited. Cache + cooldown live at module scope so they
@@ -41,7 +42,8 @@ function inputKey(diaries: string[], supps: { name: string; time: string }[]) {
 export default function AiScreen() {
   const { diaries, supps, addedRecs, addRec, subscribed, unlockedExprs } =
     useApp();
-  const interstitial = useInterstitial();
+  const { ready: adsReady } = useAds();
+  const interstitial = useInterstitial(adsReady);
   const insets = useSafeAreaInsets();
 
   const recentDiaries = diaries.slice(0, MAX_DIARIES);

@@ -9,7 +9,7 @@ import { adUnitIds } from "./config";
 // break (e.g. after the user triggers a re-analysis). The ad preloads on mount
 // and re-preloads itself after each show, so `show()` is instant when ready.
 // If no ad is loaded yet, `show()` is a no-op and never blocks the UX.
-export function useInterstitial() {
+export function useInterstitial(enabled = true) {
   const adRef = useRef<InterstitialAd | null>(null);
   // Mirror readiness in a ref so `show` stays stable and always reads the
   // current value, even when captured in a memoized callback elsewhere.
@@ -22,7 +22,15 @@ export function useInterstitial() {
   };
 
   useEffect(() => {
-    const ad = InterstitialAd.createForAdRequest(adUnitIds.interstitial);
+    if (!enabled) {
+      setReadyBoth(false);
+      adRef.current = null;
+      return;
+    }
+
+    const ad = InterstitialAd.createForAdRequest(adUnitIds.interstitial, {
+      requestNonPersonalizedAdsOnly: true,
+    });
     adRef.current = ad;
 
     const onLoaded = ad.addAdEventListener(AdEventType.LOADED, () =>
@@ -39,11 +47,13 @@ export function useInterstitial() {
     ad.load();
 
     return () => {
+      setReadyBoth(false);
+      adRef.current = null;
       onLoaded();
       onClosed();
       onError();
     };
-  }, []);
+  }, [enabled]);
 
   const show = useCallback(() => {
     if (readyRef.current && adRef.current) {

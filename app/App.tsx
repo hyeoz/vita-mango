@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import mobileAds from "react-native-google-mobile-ads";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts, Jua_400Regular } from "@expo-google-fonts/jua";
 import { GowunDodum_400Regular } from "@expo-google-fonts/gowun-dodum";
@@ -12,6 +11,7 @@ import { AppProvider, useApp } from "./src/state/AppContext";
 import { AuthProvider, useAuth } from "./src/state/AuthContext";
 import BottomNav from "./src/components/BottomNav";
 import AdBanner from "./src/ads/AdBanner";
+import { AdsProvider, useAds } from "./src/ads/AdsContext";
 import HomeScreen from "./src/screens/HomeScreen";
 import RecordScreen from "./src/screens/RecordScreen";
 import AiScreen from "./src/screens/AiScreen";
@@ -22,9 +22,10 @@ import SplashScreen from "./src/screens/SplashScreen";
 
 function Screens() {
   const { screen, subscribed } = useApp();
+  const { ready: adsReady } = useAds();
   const showNav = screen !== "onboarding";
   // Subscribers get an ad-free experience.
-  const showAds = showNav && !subscribed;
+  const showAds = adsReady && showNav && !subscribed;
   return (
     <>
       <View style={styles.flex}>
@@ -76,21 +77,20 @@ export default function App() {
     GowunDodum_400Regular,
   });
 
-  // Initialize App Check (attests requests to the backend) and the AdMob SDK
-  // once on startup.
+  // Initialize App Check once on startup. AdMob initialization is owned by
+  // AdsProvider and starts only after UMP says ads may be requested.
   useEffect(() => {
     initAppCheck();
-    mobileAds()
-      .initialize()
-      .catch((e) => console.warn("[ads] init failed", e));
   }, []);
 
   return (
     <SafeAreaProvider>
       {loaded ? (
-        <AuthProvider>
-          <Gate />
-        </AuthProvider>
+        <AdsProvider>
+          <AuthProvider>
+            <Gate />
+          </AuthProvider>
+        </AdsProvider>
       ) : (
         <SplashScreen />
       )}
