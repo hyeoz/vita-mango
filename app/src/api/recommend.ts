@@ -19,7 +19,7 @@ export type RecommendResult = {
 
 export type SuppInput = { name: string; time: string };
 
-// Calls the backend, which calls Claude (claude-opus-4-8) and returns a
+// Calls the backend, which calls Gemini and returns a
 // structured recommendation. Throws on network / server error so the screen can
 // show a retry state.
 export async function fetchRecommendation(

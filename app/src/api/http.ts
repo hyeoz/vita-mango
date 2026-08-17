@@ -1,5 +1,6 @@
 import { API_URL } from "./config";
 import { getAppCheckToken } from "../firebase/appCheck";
+import auth from "@react-native-firebase/auth";
 
 // Hard cap on how long an AI request may run before we give up. Without this a
 // flaky/offline connection leaves the AI screen and onboarding spinner hanging
@@ -18,11 +19,14 @@ export async function postJSON<T>(
   // Attest this is a genuine app build so the backend can reject direct/scripted
   // calls. Null if App Check isn't ready — the backend decides whether to allow.
   const appCheckToken = await getAppCheckToken();
+  const idToken = await auth().currentUser?.getIdToken();
+  if (!idToken) throw new Error("로그인이 필요한 기능이에요.");
   try {
     const res = await fetch(`${API_URL}${path}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
         ...(appCheckToken ? { "X-Firebase-AppCheck": appCheckToken } : {}),
       },
       body: JSON.stringify(body),

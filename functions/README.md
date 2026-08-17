@@ -59,9 +59,10 @@ Give the emulator the key for the session:
 
 ## App Check (protects the paid endpoints)
 
-The app attaches a Firebase App Check token (`X-Firebase-AppCheck` header); the
-function verifies it. Enforcement is **off until you flip it on**, so deploying
-this code never breaks live traffic (App Check's monitor→enforce rollout).
+The app attaches both a Firebase ID token (`Authorization: Bearer ...`) and a
+Firebase App Check token (`X-Firebase-AppCheck` header). The function verifies
+both. Hard rejection is **off until you flip it on**, so deployment does not
+break traffic from an older release during the monitor→enforce rollout.
 
 Rollout order:
 
@@ -72,9 +73,10 @@ Rollout order:
      and add it under App Check → Manage debug tokens.
 2. Ship an app build that initializes App Check (already wired in
    `app/src/firebase/appCheck.ts`) and let it reach users.
-3. Turn on hard rejection — set the env var and redeploy:
+3. Ship the build that sends both tokens, confirm valid-token traffic, then turn
+   on hard rejection and redeploy:
    ```bash
-   echo "APP_CHECK_ENFORCE=true" >> functions/.env
+   printf 'APP_CHECK_ENFORCE=true\nAUTH_ENFORCE=true\n' >> functions/.env
    firebase deploy --only functions
    ```
    Until then the function verifies-and-logs but still serves requests without a
@@ -85,5 +87,7 @@ Rollout order:
 - Model: `GEMINI_MODEL` env var (default `gemini-flash-latest`).
 - `APP_CHECK_ENFORCE` env var (default off) — set `true` to reject requests
   without a valid App Check token.
+- `AUTH_ENFORCE` env var (default off) — set `true` after the token-enabled app
+  build is live to reject requests without a valid Firebase ID token.
 - Region: `asia-northeast3` (see `index.js`). Change there + in the Hosting rewrite
   region if you move it.

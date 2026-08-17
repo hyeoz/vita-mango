@@ -240,9 +240,7 @@ ${suppText}
     res.json(data);
   } catch (err) {
     console.error("[recommend] failed:", err);
-    res
-      .status(500)
-      .json({ error: "recommend_failed", detail: String(err?.message ?? err) });
+    res.status(500).json({ error: "recommend_failed" });
   }
 });
 
@@ -273,9 +271,7 @@ ${listText}
     res.json(data);
   } catch (err) {
     console.error("[timing] failed:", err);
-    res
-      .status(500)
-      .json({ error: "timing_failed", detail: String(err?.message ?? err) });
+    res.status(500).json({ error: "timing_failed" });
   }
 });
 

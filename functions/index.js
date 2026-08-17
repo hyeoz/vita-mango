@@ -5,6 +5,7 @@ import cors from "cors";
 import { GoogleGenAI, Type } from "@google/genai";
 import { initializeApp } from "firebase-admin/app";
 import { getAppCheck } from "firebase-admin/app-check";
+import { getAuth } from "firebase-admin/auth";
 
 // Admin SDK — used to verify Firebase App Check tokens sent by the app.
 initializeApp();
@@ -209,6 +210,7 @@ const TIMING_SYSTEM = `너는 "젤리"라는 영양제 도우미야. 주어진 �
 // Check-enabled app build is live), so deploying this never breaks existing
 // traffic. When off we still verify-and-log to confirm real tokens arrive.
 const ENFORCE_APP_CHECK = process.env.APP_CHECK_ENFORCE === "true";
+const ENFORCE_AUTH = process.env.AUTH_ENFORCE === "true";
 
 async function appCheckGuard(req, res, next) {
   const token = req.header("X-Firebase-AppCheck");
@@ -228,6 +230,60 @@ async function appCheckGuard(req, res, next) {
   }
 }
 
+// Paid AI endpoints verify a Firebase session in addition to App Check. Keep
+// enforcement rollout-safe until the Authorization-enabled app build is live.
+async function authGuard(req, res, next) {
+  const value = req.header("Authorization") || "";
+  const match = value.match(/^Bearer\s+(.+)$/i);
+  if (!match) {
+    if (ENFORCE_AUTH)
+      return res.status(401).json({ error: "auth_required" });
+    return next();
+  }
+
+  try {
+    req.firebaseUser = await getAuth().verifyIdToken(match[1]);
+    return next();
+  } catch (err) {
+    console.warn("[auth] verify failed:", err?.message ?? err);
+    if (ENFORCE_AUTH)
+      return res.status(401).json({ error: "auth_invalid" });
+    return next();
+  }
+}
+
+// Per-instance backstop against accidental retry loops and simple abuse. App
+// Check + Firebase Auth are the primary gates; maxInstances remains the global
+// spend cap. A distributed quota store can replace this if traffic grows.
+const RATE_WINDOW_MS = 60_000;
+const RATE_MAX_REQUESTS = 12;
+const rateBuckets = new Map();
+
+function rateLimitGuard(req, res, next) {
+  const key = req.firebaseUser?.uid || req.ip || "unauthenticated";
+  const now = Date.now();
+  if (rateBuckets.size > 1_000) {
+    for (const [bucketKey, bucket] of rateBuckets) {
+      if (now - bucket.startedAt >= RATE_WINDOW_MS) rateBuckets.delete(bucketKey);
+    }
+  }
+  const current = rateBuckets.get(key);
+  if (!current || now - current.startedAt >= RATE_WINDOW_MS) {
+    rateBuckets.set(key, { startedAt: now, count: 1 });
+    return next();
+  }
+  if (current.count >= RATE_MAX_REQUESTS) {
+    const retryAfter = Math.max(
+      1,
+      Math.ceil((RATE_WINDOW_MS - (now - current.startedAt)) / 1000)
+    );
+    res.set("Retry-After", String(retryAfter));
+    return res.status(429).json({ error: "rate_limited" });
+  }
+  current.count += 1;
+  return next();
+}
+
 const app = express();
 // Restrict browser origins to our own Hosting domains (native apps send no
 // Origin header and are unaffected).
@@ -237,7 +293,7 @@ app.use(
   })
 );
 app.use(express.json({ limit: "256kb" }));
-app.use("/api", appCheckGuard);
+app.use("/api", appCheckGuard, authGuard, rateLimitGuard);
 
 app.get("/health", (_req, res) => res.json({ ok: true, model: MODEL }));
 
@@ -287,9 +343,7 @@ ${suppText}
     res.json(data);
   } catch (err) {
     console.error("[recommend] failed:", err);
-    res
-      .status(500)
-      .json({ error: "recommend_failed", detail: String(err?.message ?? err) });
+    res.status(500).json({ error: "recommend_failed" });
   }
 });
 
@@ -320,9 +374,7 @@ ${listText}
     res.json(data);
   } catch (err) {
     console.error("[timing] failed:", err);
-    res
-      .status(500)
-      .json({ error: "timing_failed", detail: String(err?.message ?? err) });
+    res.status(500).json({ error: "timing_failed" });
   }
 });
 
