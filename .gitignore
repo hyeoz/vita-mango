@@ -30,12 +30,14 @@ functions/.env
 
 # fastlane / local release
 app/build/
+app/bin/asc
 app/vendor/bundle/
+app/.bundle/
 app/secrets/
 app/fastlane/report.xml
 app/fastlane/Preview.html
 app/fastlane/test_output/
-app/fastlane/metadata/
+app/fastlane/metadata/android/
 *.p8
 
 # logs
@@ -44,3 +46,6 @@ npm-debug.*
 
 # os
 .DS_Store
+
+# claude code local settings
+.claude/settings.local.json

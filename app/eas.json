@@ -12,7 +12,7 @@
       "env": {
         "EXPO_PUBLIC_API_URL": "https://vita-mango.web.app",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "800291445751-4jfcu96uuek9612ki151bo2kbghdpojf.apps.googleusercontent.com",
-        "APPLE_TEAM_ID": "236GF8Y83H"
+        "APPLE_TEAM_ID": "25KGF8Y83H"
       }
     },
     "preview": {
@@ -21,7 +21,7 @@
       "env": {
         "EXPO_PUBLIC_API_URL": "https://vita-mango.web.app",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "800291445751-4jfcu96uuek9612ki151bo2kbghdpojf.apps.googleusercontent.com",
-        "APPLE_TEAM_ID": "236GF8Y83H"
+        "APPLE_TEAM_ID": "25KGF8Y83H"
       }
     },
     "production": {
@@ -30,7 +30,7 @@
       "env": {
         "EXPO_PUBLIC_API_URL": "https://vita-mango.web.app",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "800291445751-4jfcu96uuek9612ki151bo2kbghdpojf.apps.googleusercontent.com",
-        "APPLE_TEAM_ID": "236GF8Y83H"
+        "APPLE_TEAM_ID": "25KGF8Y83H"
       }
     }
   },

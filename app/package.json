@@ -7,7 +7,13 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "ios:device": "bash scripts/run-device.sh",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "asc": "bash scripts/asc.sh",
+    "asc:install": "bash scripts/install-asc.sh",
+    "asc:publish": "bash scripts/publish-ios-asc.sh",
+    "build:ios-keychainless": "bash scripts/build-ios-keychainless.sh",
+    "build:ios-prod": "bash scripts/release-ios.sh",
+    "build:android-prod": "bash scripts/release-android.sh"
   },
   "dependencies": {
     "@expo-google-fonts/gowun-dodum": "^0.2.3",
@@ -34,6 +40,9 @@
     "@babel/core": "^7.25.2",
     "@types/react": "~19.1.10",
     "typescript": "~5.9.2"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "private": true
 }

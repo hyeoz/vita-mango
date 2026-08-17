@@ -1,7 +1,7 @@
 # App identity for fastlane. Auth uses an App Store Connect API key (set via env
 # in Fastfile), so no Apple ID / password is stored here.
 app_identifier("com.vitamango.app") # iOS bundle id
-team_id("236GF8Y83H")               # Apple Developer Team ID
+team_id("25KGF8Y83H")               # Apple Developer Team ID
 
 # Android package for supply (upload_to_play_store)
 for_platform :android do

@@ -1,0 +1,13 @@
+{
+  "name": "vita-mango",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "asc": "yarn --cwd app asc",
+    "asc:install": "yarn --cwd app asc:install",
+    "asc:publish": "yarn --cwd app asc:publish",
+    "build:ios-keychainless": "yarn --cwd app build:ios-keychainless",
+    "build:ios-prod": "yarn --cwd app build:ios-prod",
+    "build:android-prod": "yarn --cwd app build:android-prod"
+  }
+}
