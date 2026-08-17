@@ -1,5 +1,13 @@
 import React from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "../theme/colors";
@@ -10,6 +18,7 @@ import { PillSwatch } from "../components/Pill";
 import { useApp } from "../state/AppContext";
 import { useAuth } from "../state/AuthContext";
 import { COLLECTIBLES } from "../state/gamification";
+import { useAds } from "../ads/AdsContext";
 
 export default function MyScreen() {
   const {
@@ -23,12 +32,32 @@ export default function MyScreen() {
     unlockedExprs,
     reRegister,
   } = useApp();
-  const { user, signOut } = useAuth();
+  const { user, signOut, deleteAccount } = useAuth();
+  const { privacyOptionsRequired, showPrivacyOptions } = useAds();
   const nickname = user?.displayName?.split(" ")[0] || "젤리";
 
   // collection = unique supplement names (their 도감 swatches)
   const catalog = supps.map((s) => ({ name: s.name, color: s.color }));
   const insets = useSafeAreaInsets();
+
+  const confirmAccountDeletion = () => {
+    Alert.alert(
+      "계정과 데이터를 삭제할까요?",
+      "영양제, 복용 기록, 일기와 젤리 성장 기록이 모두 영구 삭제돼요. 삭제한 내용은 복구할 수 없어요.",
+      [
+        { text: "취소", style: "cancel" },
+        {
+          text: "영구 삭제",
+          style: "destructive",
+          onPress: () => {
+            deleteAccount().catch((e: Error) => {
+              Alert.alert("삭제하지 못했어요", e.message);
+            });
+          },
+        },
+      ]
+    );
+  };
 
   // Real stats — all derived from actual activity.
   const achievement = supps.length
@@ -147,6 +176,35 @@ export default function MyScreen() {
 
         <Pressable style={styles.logout} onPress={signOut}>
           <Text style={styles.logoutText}>로그아웃</Text>
+        </Pressable>
+
+        <Pressable
+          style={styles.privacy}
+          onPress={() => Linking.openURL("https://vita-mango.web.app/privacy.html")}
+          accessibilityRole="link"
+        >
+          <Text style={styles.privacyText}>개인정보처리방침</Text>
+        </Pressable>
+
+        {privacyOptionsRequired ? (
+          <Pressable
+            style={styles.privacy}
+            onPress={() => {
+              showPrivacyOptions().catch(() => {
+                Alert.alert(
+                  "광고 설정을 열지 못했어요",
+                  "잠시 후 다시 시도해 주세요."
+                );
+              });
+            }}
+            accessibilityRole="button"
+          >
+            <Text style={styles.privacyText}>광고 개인정보 설정</Text>
+          </Pressable>
+        ) : null}
+
+        <Pressable style={styles.deleteAccount} onPress={confirmAccountDeletion}>
+          <Text style={styles.deleteAccountText}>계정 및 모든 데이터 삭제</Text>
         </Pressable>
       </ScrollView>
     </LinearGradient>
@@ -268,4 +326,13 @@ const styles = StyleSheet.create({
   resetText: { fontFamily: fonts.display, fontSize: 14, color: colors.ink },
   logout: { marginTop: 14, alignItems: "center", paddingVertical: 6 },
   logoutText: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
+  privacy: { alignItems: "center", paddingVertical: 7 },
+  privacyText: {
+    fontFamily: fonts.body,
+    fontSize: 12,
+    color: colors.muted3,
+    textDecorationLine: "underline",
+  },
+  deleteAccount: { alignItems: "center", paddingVertical: 8 },
+  deleteAccountText: { fontFamily: fonts.body, fontSize: 12, color: "#b24355" },
 });

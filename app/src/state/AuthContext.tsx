@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { signInWithGoogle, signOutEverywhere } from "../firebase/auth";
+import {
+  deleteAccountEverywhere,
+  signInAnonymously,
+  signInWithGoogle,
+  signOutEverywhere,
+} from "../firebase/auth";
 
 type AuthState = {
   user: FirebaseAuthTypes.User | null;
@@ -8,7 +13,9 @@ type AuthState = {
   signingIn: boolean;
   error: string | null;
   signIn: () => Promise<void>;
+  continueAsGuest: () => Promise<void>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 };
 
 const Ctx = createContext<AuthState | null>(null);
@@ -40,6 +47,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const continueAsGuest = async () => {
+    setError(null);
+    setSigningIn(true);
+    try {
+      await signInAnonymously();
+    } catch (e: any) {
+      console.warn("[auth] anonymous sign-in failed", e);
+      setError(e?.message ?? "시작하지 못했어요.");
+    } finally {
+      setSigningIn(false);
+    }
+  };
+
   const signOut = async () => {
     try {
       await signOutEverywhere();
@@ -48,8 +68,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const deleteAccount = async () => {
+    setError(null);
+    try {
+      await deleteAccountEverywhere();
+    } catch (e: any) {
+      console.warn("[auth] account deletion failed", e);
+      const message =
+        e?.message ?? "계정을 삭제하지 못했어요. 잠시 후 다시 시도해 주세요.";
+      setError(message);
+      throw new Error(message);
+    }
+  };
+
   return (
-    <Ctx.Provider value={{ user, initializing, signingIn, error, signIn, signOut }}>
+    <Ctx.Provider
+      value={{
+        user,
+        initializing,
+        signingIn,
+        error,
+        signIn,
+        continueAsGuest,
+        signOut,
+        deleteAccount,
+      }}
+    >
       {children}
     </Ctx.Provider>
   );

@@ -1,6 +1,7 @@
 import React from "react";
 import {
   ActivityIndicator,
+  Linking,
   Pressable,
   StyleSheet,
   Text,
@@ -16,7 +17,7 @@ import { FloatingPill } from "../components/Pill";
 import { useAuth } from "../state/AuthContext";
 
 export default function LoginScreen() {
-  const { signIn, signingIn, error } = useAuth();
+  const { signIn, continueAsGuest, signingIn, error } = useAuth();
   const insets = useSafeAreaInsets();
 
   return (
@@ -67,11 +68,23 @@ export default function LoginScreen() {
           )}
         </Pressable>
 
+        <Pressable
+          style={[styles.guestBtn, signingIn && { opacity: 0.7 }]}
+          onPress={continueAsGuest}
+          disabled={signingIn}
+        >
+          <Text style={styles.guestText}>로그인 없이 시작하기</Text>
+        </Pressable>
+
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <Text style={styles.footer}>
-          로그인하면 기록이 안전하게 저장되고{"\n"}어느 기기에서나 이어볼 수 있어요
-        </Text>
+        <Text style={styles.footer}>Google 로그인 시 어느 기기에서나 기록을 이어볼 수 있어요</Text>
+        <Pressable
+          onPress={() => Linking.openURL("https://vita-mango.web.app/privacy.html")}
+          accessibilityRole="link"
+        >
+          <Text style={styles.privacyLink}>개인정보처리방침</Text>
+        </Pressable>
       </View>
     </LinearGradient>
   );
@@ -119,6 +132,18 @@ const styles = StyleSheet.create({
   },
   gLogoText: { color: colors.white, fontFamily: fonts.display, fontSize: 15 },
   googleText: { fontFamily: fonts.display, fontSize: 17, color: colors.ink },
+  guestBtn: {
+    width: "100%",
+    height: 48,
+    marginTop: 12,
+    borderWidth: 2,
+    borderColor: colors.ink,
+    borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.58)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  guestText: { fontFamily: fonts.display, fontSize: 15, color: colors.ink },
   error: {
     fontFamily: fonts.body,
     fontSize: 13,
@@ -133,5 +158,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 18,
     marginTop: 18,
+  },
+  privacyLink: {
+    fontFamily: fonts.body,
+    fontSize: 12,
+    color: colors.muted3,
+    textDecorationLine: "underline",
+    marginTop: 8,
   },
 });
