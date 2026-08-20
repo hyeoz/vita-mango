@@ -175,13 +175,30 @@ export const ANSWER_WEIGHT: Record<Answer, number> = {
   no: 0,
 };
 
+/**
+ * Where a question sits in the adaptive flow.
+ *  screen  — always asked; one broad probe per area
+ *  deep    — asked only when its gate domain screened positive; these
+ *            discriminate *between* supplements rather than re-confirming
+ *  safety  — asked only when a supplement still in contention cares
+ */
+export type Stage = "screen" | "deep" | "safety";
+
 export type Question = {
   id: string;
   text: string;
   /** Short section label shown above the question. */
   section: string;
+  stage: Stage;
   /** Domains this question expresses a need for, with weights. */
   domains: Partial<Record<Domain, number>>;
+  /**
+   * Deep questions only. Ask this follow-up when the gate domain has already
+   * accumulated at least `min` need from the screener. Asking someone who
+   * sleeps fine three more sleep questions is how a survey earns its
+   * reputation for being too long.
+   */
+  gate?: { domain: Domain; min: number };
   /** Safety questions set a flag instead of scoring domains. */
   safetyFlag?: SafetyFlag;
   /** Inverted questions score when the user answers "아니다". */

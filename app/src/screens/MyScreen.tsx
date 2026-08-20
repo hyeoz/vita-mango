@@ -15,6 +15,7 @@ import { fonts } from "../theme/fonts";
 import { hardShadow } from "../theme/ui";
 import Jelly from "../components/Jelly";
 import { PillSwatch } from "../components/Pill";
+import Bouncy from "../components/Bouncy";
 import { useApp } from "../state/AppContext";
 import { COLLECTIBLES } from "../state/gamification";
 import { useAds } from "../ads/AdsContext";
@@ -191,14 +192,16 @@ export default function MyScreen() {
         <View style={styles.notifyCard}>
           <View style={styles.notifyHead}>
             <Text style={styles.notifyTitle}>🔔 복용 알림</Text>
-            <Pressable
+            <Bouncy
+              scaleTo={0.92}
+              haptic="medium"
               style={[styles.switch, notifyEnabled && styles.switchOn]}
               onPress={() => onToggleNotify(!notifyEnabled)}
               accessibilityRole="switch"
               accessibilityState={{ checked: notifyEnabled }}
             >
               <View style={[styles.knob, notifyEnabled && styles.knobOn]} />
-            </Pressable>
+            </Bouncy>
           </View>
           <Text style={styles.notifyHint}>
             기기 안에서만 울리는 알림이에요. 영양제마다 시간을 따로 정할 수 있어요.
@@ -209,26 +212,30 @@ export default function MyScreen() {
           ) : (
             supps.map((s, i) => (
               <View key={`${s.name}-${i}`} style={styles.notifyRow}>
-                <Pressable
+                <Bouncy
+                  scaleTo={0.9}
+                  haptic="selection"
                   style={[styles.rowCheck, s.notify && styles.rowCheckOn]}
                   onPress={() => updateSupp(i, { notify: !s.notify })}
                   accessibilityRole="checkbox"
                   accessibilityState={{ checked: s.notify }}
                 >
                   {s.notify ? <Text style={styles.rowCheckMark}>✓</Text> : null}
-                </Pressable>
+                </Bouncy>
                 <Text style={styles.rowName} numberOfLines={1}>
                   {s.name}
                 </Text>
                 <View style={styles.stepper}>
-                  <Pressable
+                  <Bouncy
+                    scaleTo={0.88}
+                    haptic="selection"
                     style={styles.stepBtn}
                     onPress={() => nudgeTime(i, -30)}
                     disabled={!notifyEnabled || !s.notify}
                     hitSlop={6}
                   >
                     <Text style={styles.stepText}>−</Text>
-                  </Pressable>
+                  </Bouncy>
                   <Text
                     style={[
                       styles.timeText,
@@ -237,23 +244,25 @@ export default function MyScreen() {
                   >
                     {String(s.hour).padStart(2, "0")}:{String(s.minute).padStart(2, "0")}
                   </Text>
-                  <Pressable
+                  <Bouncy
+                    scaleTo={0.88}
+                    haptic="selection"
                     style={styles.stepBtn}
                     onPress={() => nudgeTime(i, 30)}
                     disabled={!notifyEnabled || !s.notify}
                     hitSlop={6}
                   >
                     <Text style={styles.stepText}>＋</Text>
-                  </Pressable>
+                  </Bouncy>
                 </View>
               </View>
             ))
           )}
         </View>
 
-        <Pressable style={styles.reset} onPress={startSurvey}>
+        <Bouncy style={styles.reset} haptic="medium" onPress={startSurvey}>
           <Text style={styles.resetText}>🔮 영양제 추천 다시 받기</Text>
-        </Pressable>
+        </Bouncy>
 
         <Pressable
           style={styles.privacy}

@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
   Animated,
+  Easing,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -13,41 +14,52 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import { colors } from "../theme/colors";
+import { colors, pillColor } from "../theme/colors";
 import { fonts } from "../theme/fonts";
 import { hardShadow } from "../theme/ui";
 import Jelly from "../components/Jelly";
+import Bouncy from "../components/Bouncy";
+import RadarChart from "../components/RadarChart";
 import { PillSwatch } from "../components/Pill";
-import { QUESTIONS } from "../data/survey";
 import { DOMAIN_LABELS, EVIDENCE_LABELS, type Answer } from "../data/types";
-import { recommend, type Answers, type Recommendation, type SurveyResult } from "../logic/recommend";
+import { AXIS_SHORT, type Axis } from "../data/axes";
+import { nextQuestion, progressOf } from "../logic/adaptive";
+import {
+  projectAxes,
+  recommend,
+  type Answers,
+  type Recommendation,
+  type SurveyResult,
+} from "../logic/recommend";
+import { joinWithParticle } from "../logic/korean";
 import { useApp } from "../state/AppContext";
-import { pillColor } from "../theme/colors";
 
 type Step = "intro" | "quiz" | "freetext" | "loading" | "result";
 
 const CHOICES: { key: Answer; label: string; emoji: string; tint: string }[] = [
   { key: "yes", label: "그렇다", emoji: "⭕️", tint: colors.cyan },
-  { key: "unsure", label: "모르겠다", emoji: "🤔", tint: colors.yellow },
+  { key: "unsure", label: "모르겠다", emoji: "🤔", tint: colors.mangoLight },
   { key: "no", label: "아니다", emoji: "❌", tint: colors.pink },
 ];
 
 // The wait is theatre — the engine finishes in under a millisecond. It buys the
 // result a beat of anticipation and keeps the reveal from feeling like a form
-// submit. Kept short enough that repeat runs don't become a chore.
+// submit.
 const LOADING_MS = 3000;
 const LOADING_LINES = [
   "답변 꼼꼼히 읽는 중…",
   "컨디션 신호 맞춰보는 중…",
-  "너한테 맞는 조합 고르는 중…",
+  "겹치지 않게 조합 고르는 중…",
 ];
+
+// How long the picked answer stays lit before the next question slides in.
+const CONFIRM_MS = 190;
 
 export default function SurveyScreen() {
   const { supps, survey, completeSurvey, unlockedExprs, setScreen } = useApp();
   const insets = useSafeAreaInsets();
 
   const [step, setStep] = useState<Step>("intro");
-  const [index, setIndex] = useState(0);
   // Seeded from the last run so retaking is a review, not a blank slate.
   const [answers, setAnswers] = useState<Answers>(() => survey?.answers ?? {});
   const [freeText, setFreeText] = useState(() => survey?.freeText ?? "");
@@ -55,29 +67,95 @@ export default function SurveyScreen() {
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [line, setLine] = useState(0);
 
-  const progress = useRef(new Animated.Value(0)).current;
-  const question = QUESTIONS[index];
-  const answeredCount = Object.keys(answers).length;
+  // The adaptive flow has no index to walk back through, so the questions
+  // actually asked are remembered here.
+  const [history, setHistory] = useState<string[]>([]);
+  const [current, setCurrent] = useState(() => nextQuestion(survey?.answers ?? {}));
+  const [flash, setFlash] = useState<Answer | null>(null);
 
-  useEffect(() => {
-    Animated.timing(progress, {
-      toValue: (index + 1) / QUESTIONS.length,
-      duration: 220,
-      useNativeDriver: false,
-    }).start();
-  }, [index, progress]);
+  const progressAnim = useRef(new Animated.Value(0)).current;
+  const slide = useRef(new Animated.Value(0)).current;
+  const busy = useRef(false);
+
+  const progress = useMemo(() => progressOf(answers), [answers]);
+
+  const animateProgress = useCallback(
+    (ratio: number) => {
+      Animated.timing(progressAnim, {
+        toValue: ratio,
+        duration: 260,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: false,
+      }).start();
+    },
+    [progressAnim]
+  );
+
+  /** Slides the current card out, swaps it, slides the next one in. */
+  const transition = useCallback(
+    (swap: () => void) => {
+      Animated.timing(slide, {
+        toValue: -1,
+        duration: 150,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true,
+      }).start(() => {
+        swap();
+        slide.setValue(1);
+        Animated.timing(slide, {
+          toValue: 0,
+          duration: 200,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }).start();
+      });
+    },
+    [slide]
+  );
 
   const answer = useCallback(
     (choice: Answer) => {
-      Haptics.selectionAsync().catch(() => {});
-      setAnswers((prev) => ({ ...prev, [question.id]: choice }));
-      if (index + 1 < QUESTIONS.length) setIndex((i) => i + 1);
-      else setStep("freetext");
+      if (!current || busy.current) return;
+      busy.current = true;
+      setFlash(choice);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+
+      const next = { ...answers, [current.id]: choice };
+      const upcoming = nextQuestion(next);
+      animateProgress(progressOf(next).ratio);
+
+      // Hold the lit answer for a beat so the tap visibly registers before the
+      // question changes underneath the finger.
+      setTimeout(() => {
+        setAnswers(next);
+        setHistory((h) => [...h, current.id]);
+        if (!upcoming) {
+          setFlash(null);
+          busy.current = false;
+          setStep("freetext");
+          return;
+        }
+        transition(() => {
+          setCurrent(upcoming);
+          setFlash(null);
+          busy.current = false;
+        });
+      }, CONFIRM_MS);
     },
-    [index, question]
+    [answers, current, animateProgress, transition]
   );
 
-  // Run the engine, then hold the reveal for the theatrical beat above.
+  const goBack = useCallback(() => {
+    if (!history.length || busy.current) return;
+    const prevId = history[history.length - 1];
+    const next = { ...answers };
+    delete next[prevId];
+    setHistory((h) => h.slice(0, -1));
+    setAnswers(next);
+    animateProgress(progressOf(next).ratio);
+    transition(() => setCurrent(nextQuestion(next)));
+  }, [history, answers, animateProgress, transition]);
+
   const runAnalysis = useCallback(() => {
     setStep("loading");
     setLine(0);
@@ -89,18 +167,13 @@ export default function SurveyScreen() {
       () => setLine((l) => Math.min(l + 1, LOADING_LINES.length - 1)),
       LOADING_MS / LOADING_LINES.length
     );
-    const timer = setTimeout(() => {
+    setTimeout(() => {
       clearInterval(ticker);
       setResult(computed);
-      // Everything is pre-selected: the common case is "yes, add these".
       setPicked(new Set(computed.recommendations.map((r) => r.supplement.id)));
       setStep("result");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     }, LOADING_MS);
-    return () => {
-      clearInterval(ticker);
-      clearTimeout(timer);
-    };
   }, [answers, freeText, supps]);
 
   const finish = useCallback(() => {
@@ -108,39 +181,49 @@ export default function SurveyScreen() {
     completeSurvey(answers, freeText, picks);
   }, [result, picked, answers, freeText, completeSurvey]);
 
+  // The projection follows what's actually ticked, so untick a card and watch
+  // the dashed polygon shrink. That is the whole point of showing it.
+  const livingProjection = useMemo(() => {
+    if (!result) return undefined;
+    const chosen = result.recommendations
+      .filter((r) => picked.has(r.supplement.id))
+      .map((r) => r.supplement);
+    return projectAxes(result.needs, chosen);
+  }, [result, picked]);
+
   // ── intro ──
   if (step === "intro") {
     return (
       <Shell insets={insets}>
-        <View style={styles.introWrap}>
-          <Jelly mood="excited" width={128} expressions={unlockedExprs} />
+        <ScrollView contentContainerStyle={styles.introWrap} showsVerticalScrollIndicator={false}>
+          <Jelly mood="excited" width={122} expressions={unlockedExprs} />
           <Text style={styles.introTitle}>나에게 맞는 영양제 찾기</Text>
           <Text style={styles.introBody}>
-            {QUESTIONS.length}개 질문에 <Text style={styles.bold}>그렇다 · 모르겠다 · 아니다</Text>로
-            답하면, 컨디션 신호를 읽어서 딱 맞는 조합을 골라줄게.{"\n\n"}
-            2~3분이면 끝나! 모르겠으면 <Text style={styles.bold}>모르겠다</Text>를 눌러도 괜찮아.
+            <Text style={styles.bold}>그렇다 · 모르겠다 · 아니다</Text>로만 답하면 돼.{"\n"}
+            해당 없는 영역은 건너뛰니까 보통 <Text style={styles.bold}>30문항 안팎</Text>이야.
           </Text>
           <View style={styles.introFacts}>
+            <Fact emoji="🎯" text="답한 내용에 따라 물어보는 질문이 달라져요" />
             <Fact emoji="🔬" text="임상 근거 등급이 높은 성분을 우선 추천해요" />
-            <Fact emoji="🔒" text="답변은 기기 안에만 저장되고 서버로 전송되지 않아요" />
-            <Fact emoji="🩺" text="임신·복약 중이라면 결과에서 자동으로 제외해요" />
+            <Fact emoji="🧩" text="효능이 겹치는 성분은 하나만 골라줘요" />
+            <Fact emoji="🔒" text="답변은 기기 안에만 저장되고 전송되지 않아요" />
           </View>
-          <Pressable style={styles.cta} onPress={() => setStep("quiz")}>
+          <Bouncy style={styles.cta} haptic="medium" onPress={() => setStep("quiz")}>
             <Text style={styles.ctaText}>시작하기</Text>
-          </Pressable>
+          </Bouncy>
           {survey && (
             <Pressable onPress={() => setScreen("home")} hitSlop={10}>
               <Text style={styles.skipLink}>나중에 할래</Text>
             </Pressable>
           )}
-        </View>
+        </ScrollView>
       </Shell>
     );
   }
 
   // ── quiz ──
-  if (step === "quiz") {
-    const current = answers[question.id];
+  if (step === "quiz" && current) {
+    const chosen = flash ?? answers[current.id];
     return (
       <Shell insets={insets}>
         <View style={styles.quizHeader}>
@@ -149,35 +232,58 @@ export default function SurveyScreen() {
               style={[
                 styles.progressFill,
                 {
-                  width: progress.interpolate({
+                  width: progressAnim.interpolate({
                     inputRange: [0, 1],
-                    outputRange: ["0%", "100%"],
+                    outputRange: ["2%", "100%"],
                   }),
                 },
               ]}
             />
           </View>
           <Text style={styles.progressText}>
-            {index + 1} / {QUESTIONS.length}
+            {progress.answered + 1}
+            <Text style={styles.progressTotal}>
+              {progress.exact ? ` / ${progress.estimatedTotal}` : ` / 약 ${progress.estimatedTotal}`}
+            </Text>
           </Text>
         </View>
 
-        <View style={styles.quizBody}>
-          <Text style={styles.sectionTag}>{question.section}</Text>
-          <Text style={styles.questionText}>{question.text}</Text>
-          {question.safetyFlag && (
+        <Animated.View
+          style={[
+            styles.quizBody,
+            {
+              opacity: slide.interpolate({
+                inputRange: [-1, 0, 1],
+                outputRange: [0, 1, 0],
+              }),
+              transform: [
+                {
+                  translateX: slide.interpolate({
+                    inputRange: [-1, 0, 1],
+                    outputRange: [-40, 0, 40],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          <Text style={styles.sectionTag}>{current.section}</Text>
+          <Text style={styles.questionText}>{current.text}</Text>
+          {current.safetyFlag && (
             <Text style={styles.safetyHint}>
               안전을 위해 확인하는 질문이에요. 해당하면 관련 성분을 빼고 추천할게.
             </Text>
           )}
-        </View>
+        </Animated.View>
 
         <View style={styles.choices}>
           {CHOICES.map((c) => {
-            const active = current === c.key;
+            const active = chosen === c.key;
             return (
-              <Pressable
+              <Bouncy
                 key={c.key}
+                scaleTo={0.97}
+                haptic="none"
                 style={[
                   styles.choice,
                   { backgroundColor: active ? c.tint : colors.white },
@@ -187,18 +293,14 @@ export default function SurveyScreen() {
               >
                 <Text style={styles.choiceEmoji}>{c.emoji}</Text>
                 <Text style={styles.choiceLabel}>{c.label}</Text>
-              </Pressable>
+              </Bouncy>
             );
           })}
         </View>
 
         <View style={styles.quizNav}>
-          <Pressable
-            onPress={() => setIndex((i) => Math.max(0, i - 1))}
-            disabled={index === 0}
-            hitSlop={10}
-          >
-            <Text style={[styles.navLink, index === 0 && styles.navLinkOff]}>← 이전</Text>
+          <Pressable onPress={goBack} disabled={!history.length} hitSlop={10}>
+            <Text style={[styles.navLink, !history.length && styles.navLinkOff]}>← 이전</Text>
           </Pressable>
           <Pressable onPress={() => setStep("freetext")} hitSlop={10}>
             <Text style={styles.navLink}>여기까지만 답할래 →</Text>
@@ -217,7 +319,7 @@ export default function SurveyScreen() {
           behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
           <ScrollView contentContainerStyle={styles.freeWrap} keyboardShouldPersistTaps="handled">
-            <Jelly mood="curious" width={96} expressions={unlockedExprs} />
+            <Jelly mood="curious" width={92} expressions={unlockedExprs} />
             <Text style={styles.introTitle}>더 하고 싶은 얘기 있어?</Text>
             <Text style={styles.introBody}>
               요즘 컨디션이나 신경 쓰이는 점을 편하게 적어줘.{"\n"}안 써도 결과는 나와!
@@ -234,11 +336,11 @@ export default function SurveyScreen() {
             />
             <Text style={styles.counter}>{freeText.length} / 300</Text>
             <Text style={styles.answeredNote}>
-              {answeredCount}개 문항에 답했어 · 답하지 않은 문항은 계산에서 빠져
+              {progress.answered}개 문항에 답했어 · 답하지 않은 문항은 계산에서 빠져
             </Text>
-            <Pressable style={styles.cta} onPress={runAnalysis}>
+            <Bouncy style={styles.cta} haptic="medium" onPress={runAnalysis}>
               <Text style={styles.ctaText}>결과 보기</Text>
-            </Pressable>
+            </Bouncy>
             <Pressable onPress={() => setStep("quiz")} hitSlop={10}>
               <Text style={styles.skipLink}>← 질문으로 돌아가기</Text>
             </Pressable>
@@ -252,15 +354,12 @@ export default function SurveyScreen() {
   if (step === "loading") {
     return (
       <Shell insets={insets}>
-        <View style={styles.introWrap}>
-          <Jelly mood="curious" width={132} interactive={false} expressions={unlockedExprs} />
+        <View style={styles.loadingWrap}>
+          <Jelly mood="curious" width={128} interactive={false} expressions={unlockedExprs} />
           <Text style={styles.loadingText}>{LOADING_LINES[line]}</Text>
           <View style={styles.dots}>
             {LOADING_LINES.map((_, i) => (
-              <View
-                key={i}
-                style={[styles.dot, i <= line && { backgroundColor: colors.purple }]}
-              />
+              <View key={i} style={[styles.dot, i <= line && { backgroundColor: colors.purple }]} />
             ))}
           </View>
         </View>
@@ -279,7 +378,28 @@ export default function SurveyScreen() {
         </View>
         <Text style={styles.blurb}>{r.profileBlurb}</Text>
 
-        {!!r.topDomains.length && (
+        <View style={styles.radarCard}>
+          <Text style={styles.radarTitle}>내 컨디션 능력치</Text>
+          <View style={styles.radarWrap}>
+            <RadarChart scores={r.axisScores} projected={livingProjection} size={272} />
+          </View>
+          <View style={styles.legend}>
+            <View style={styles.legendRow}>
+              <View style={styles.swatchNow} />
+              <Text style={styles.legendText}>지금</Text>
+            </View>
+            <View style={styles.legendRow}>
+              <View style={styles.swatchNext} />
+              <Text style={styles.legendText}>선택한 영양제를 챙겼을 때</Text>
+            </View>
+          </View>
+          <Text style={styles.radarNote}>
+            점수가 높을수록 그 영역에 부족한 신호가 적다는 뜻이에요. 아래에서 항목을 빼면
+            점선도 같이 줄어들어요.
+          </Text>
+        </View>
+
+        {!!(r.topDomains.length || r.freeTextSignals.length) && (
           <View style={styles.chips}>
             {r.topDomains.map((d) => (
               <View key={d} style={styles.chip}>
@@ -301,6 +421,10 @@ export default function SurveyScreen() {
         ) : (
           <>
             <Text style={styles.sectionHead}>추천 조합 {r.recommendations.length}가지</Text>
+            <Text style={styles.sectionSub}>
+              효능이 겹치지 않게 골랐어요. 퍼센트는 <Text style={styles.bold}>이 조합에 얼마나
+              보탬이 되는지</Text>예요.
+            </Text>
             {r.recommendations.map((rec) => (
               <RecCard
                 key={rec.supplement.id}
@@ -309,9 +433,8 @@ export default function SurveyScreen() {
                 onToggle={() =>
                   setPicked((prev) => {
                     const next = new Set(prev);
-                    next.has(rec.supplement.id)
-                      ? next.delete(rec.supplement.id)
-                      : next.add(rec.supplement.id);
+                    if (next.has(rec.supplement.id)) next.delete(rec.supplement.id);
+                    else next.add(rec.supplement.id);
                     return next;
                   })
                 }
@@ -337,13 +460,22 @@ export default function SurveyScreen() {
           상의하세요.
         </Text>
 
-        <Pressable style={styles.cta} onPress={finish}>
+        <Bouncy style={styles.cta} haptic="medium" onPress={finish}>
           <Text style={styles.ctaText}>
             {picked.size > 0 ? `${picked.size}개 담고 시작하기` : "그냥 시작하기"}
           </Text>
-        </Pressable>
-        <Pressable onPress={() => { setStep("intro"); setIndex(0); }} hitSlop={10}>
-          <Text style={styles.skipLink}>다시 답해볼래</Text>
+        </Bouncy>
+        <Pressable
+          onPress={() => {
+            setAnswers({});
+            setHistory([]);
+            setCurrent(nextQuestion({}));
+            progressAnim.setValue(0);
+            setStep("intro");
+          }}
+          hitSlop={10}
+        >
+          <Text style={styles.skipLink}>처음부터 다시 답할래</Text>
         </Pressable>
       </ScrollView>
     </Shell>
@@ -385,8 +517,14 @@ function RecCard({
   onToggle: () => void;
 }) {
   const s = rec.supplement;
+  const lifts = Object.entries(rec.axisLift) as [Axis, number][];
   return (
-    <Pressable style={[styles.card, checked && styles.cardOn]} onPress={onToggle}>
+    <Bouncy
+      scaleTo={0.985}
+      haptic="selection"
+      style={[styles.card, checked && styles.cardOn]}
+      onPress={onToggle}
+    >
       <View style={styles.cardTop}>
         <PillSwatch color={pillColor[s.color] ?? colors.purple} width={44} height={22} />
         <View style={styles.cardTitleWrap}>
@@ -403,6 +541,23 @@ function RecCard({
 
       <Text style={styles.cardBenefit}>{s.benefit}</Text>
 
+      {!!lifts.length && (
+        <View style={styles.lifts}>
+          {lifts
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)
+            .map(([axis, delta]) => (
+              <View key={axis} style={styles.liftRow}>
+                <Text style={styles.liftLabel}>{AXIS_SHORT[axis]}</Text>
+                <View style={styles.liftTrack}>
+                  <View style={[styles.liftFill, { width: `${Math.min(100, delta * 3)}%` }]} />
+                </View>
+                <Text style={styles.liftValue}>+{delta}</Text>
+              </View>
+            ))}
+        </View>
+      )}
+
       <View style={styles.metaRow}>
         <Text style={styles.metaTag}>🔬 {EVIDENCE_LABELS[s.evidence]}</Text>
         <Text style={styles.metaTag}>💊 {s.dose}</Text>
@@ -414,6 +569,12 @@ function RecCard({
         </Text>
       )}
 
+      {!!rec.overlapsWith.length && (
+        <Text style={styles.overlap}>
+          🧩 {joinWithParticle(rec.overlapsWith)} 효능이 겹쳐요. 단독으로는 {rec.soloMatch}%였어요.
+        </Text>
+      )}
+
       {!!s.upperLimit && <Text style={styles.cardLimit}>상한 {s.upperLimit}</Text>}
 
       {s.cautions.slice(0, 2).map((c) => (
@@ -422,14 +583,21 @@ function RecCard({
       {rec.warnings.map((w) => (
         <Text key={w} style={styles.warning}>⚠️ {w}</Text>
       ))}
-    </Pressable>
+    </Bouncy>
   );
 }
 
 const styles = StyleSheet.create({
   fill: { flex: 1 },
 
-  introWrap: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 26, gap: 14 },
+  introWrap: {
+    flexGrow: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 26,
+    paddingVertical: 20,
+    gap: 13,
+  },
   introTitle: { fontFamily: fonts.display, fontSize: 22, color: colors.ink, textAlign: "center" },
   introBody: {
     fontFamily: fonts.body,
@@ -439,7 +607,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   bold: { fontFamily: fonts.display, color: colors.ink },
-  introFacts: { alignSelf: "stretch", gap: 8, marginTop: 4 },
+  introFacts: { alignSelf: "stretch", gap: 9, marginTop: 2 },
   factRow: { flexDirection: "row", gap: 8, alignItems: "flex-start" },
   factEmoji: { fontSize: 14 },
   factText: { flex: 1, fontFamily: fonts.body, fontSize: 12.5, lineHeight: 19, color: colors.muted2 },
@@ -454,7 +622,13 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   progressFill: { height: "100%", backgroundColor: colors.mango },
-  progressText: { fontFamily: fonts.display, fontSize: 12, color: colors.muted2, textAlign: "right" },
+  progressText: {
+    fontFamily: fonts.display,
+    fontSize: 13,
+    color: colors.ink,
+    textAlign: "right",
+  },
+  progressTotal: { color: colors.muted4, fontSize: 12 },
 
   quizBody: { flex: 1, justifyContent: "center", paddingHorizontal: 26, gap: 12 },
   sectionTag: {
@@ -485,7 +659,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     ...hardShadow(3, 4, 0.12),
   },
-  choiceActive: { ...hardShadow(2, 2, 0.2) },
+  choiceActive: { ...hardShadow(1, 1, 0.22) },
   choiceEmoji: { fontSize: 17 },
   choiceLabel: { fontFamily: fonts.display, fontSize: 17, color: colors.ink },
 
@@ -516,7 +690,8 @@ const styles = StyleSheet.create({
   counter: { alignSelf: "flex-end", fontFamily: fonts.body, fontSize: 11, color: colors.muted4 },
   answeredNote: { fontFamily: fonts.body, fontSize: 12, color: colors.muted2, textAlign: "center" },
 
-  loadingText: { fontFamily: fonts.display, fontSize: 17, color: colors.ink, marginTop: 8 },
+  loadingWrap: { flex: 1, alignItems: "center", justifyContent: "center", gap: 14 },
+  loadingText: { fontFamily: fonts.display, fontSize: 17, color: colors.ink },
   dots: { flexDirection: "row", gap: 7 },
   dot: {
     width: 9,
@@ -550,7 +725,51 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingHorizontal: 8,
   },
-  chips: { flexDirection: "row", flexWrap: "wrap", gap: 6, justifyContent: "center", marginTop: 2 },
+
+  radarCard: {
+    backgroundColor: colors.white,
+    borderWidth: 2.5,
+    borderColor: colors.ink,
+    borderRadius: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    marginTop: 8,
+    alignItems: "center",
+    gap: 8,
+    ...hardShadow(4, 5, 0.12),
+  },
+  radarTitle: { fontFamily: fonts.display, fontSize: 15, color: colors.ink },
+  radarWrap: { alignItems: "center", justifyContent: "center" },
+  legend: { flexDirection: "row", gap: 14, flexWrap: "wrap", justifyContent: "center" },
+  legendRow: { flexDirection: "row", alignItems: "center", gap: 5 },
+  swatchNow: {
+    width: 14,
+    height: 10,
+    borderRadius: 3,
+    backgroundColor: "rgba(124,92,255,0.35)",
+    borderWidth: 2,
+    borderColor: colors.purpleDeep,
+  },
+  swatchNext: {
+    width: 14,
+    height: 10,
+    borderRadius: 3,
+    backgroundColor: "rgba(255,180,61,0.2)",
+    borderWidth: 2,
+    borderStyle: "dashed",
+    borderColor: colors.mangoDeep,
+  },
+  legendText: { fontFamily: fonts.body, fontSize: 11.5, color: colors.muted2 },
+  radarNote: {
+    fontFamily: fonts.body,
+    fontSize: 11,
+    lineHeight: 17,
+    color: colors.muted4,
+    textAlign: "center",
+    paddingHorizontal: 6,
+  },
+
+  chips: { flexDirection: "row", flexWrap: "wrap", gap: 6, justifyContent: "center", marginTop: 6 },
   chip: {
     backgroundColor: colors.white,
     borderWidth: 2,
@@ -563,6 +782,13 @@ const styles = StyleSheet.create({
   chipText: { fontFamily: fonts.display, fontSize: 11.5, color: colors.ink },
 
   sectionHead: { fontFamily: fonts.display, fontSize: 15, color: colors.ink, marginTop: 14 },
+  sectionSub: {
+    fontFamily: fonts.body,
+    fontSize: 11.5,
+    lineHeight: 18,
+    color: colors.muted3,
+    marginTop: -4,
+  },
   emptyNote: {
     fontFamily: fonts.body,
     fontSize: 14,
@@ -578,6 +804,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 14,
     gap: 6,
+    marginTop: 8,
     ...hardShadow(3, 4, 0.1),
   },
   cardOn: { backgroundColor: "#fffdf5" },
@@ -600,7 +827,23 @@ const styles = StyleSheet.create({
   checkOn: { backgroundColor: colors.cyan },
   checkMark: { fontFamily: fonts.display, fontSize: 14, color: colors.ink },
   cardBenefit: { fontFamily: fonts.body, fontSize: 13, lineHeight: 20, color: colors.muted3 },
-  metaRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+
+  lifts: { gap: 5, marginTop: 2 },
+  liftRow: { flexDirection: "row", alignItems: "center", gap: 7 },
+  liftLabel: { fontFamily: fonts.display, fontSize: 11, color: colors.muted2, width: 44 },
+  liftTrack: {
+    flex: 1,
+    height: 8,
+    borderRadius: 5,
+    backgroundColor: "#eef1f4",
+    borderWidth: 1.5,
+    borderColor: colors.ink,
+    overflow: "hidden",
+  },
+  liftFill: { height: "100%", backgroundColor: colors.mango },
+  liftValue: { fontFamily: fonts.display, fontSize: 11.5, color: colors.mangoDeep, width: 26 },
+
+  metaRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 2 },
   metaTag: {
     fontFamily: fonts.body,
     fontSize: 11.5,
@@ -612,6 +855,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   cardReason: { fontFamily: fonts.body, fontSize: 12, color: colors.purpleDeep },
+  overlap: { fontFamily: fonts.body, fontSize: 11.5, lineHeight: 18, color: colors.muted2 },
   cardLimit: { fontFamily: fonts.body, fontSize: 11.5, color: colors.muted4 },
   caution: { fontFamily: fonts.body, fontSize: 11.5, lineHeight: 18, color: colors.muted2 },
   warning: { fontFamily: fonts.body, fontSize: 12, lineHeight: 18, color: colors.pinkText },

@@ -10,6 +10,7 @@ import {
 } from "../data/types";
 import { QUESTIONS } from "../data/survey";
 import { SUPPLEMENTS, findSupplement } from "../data/supplements";
+import { AXES, AXIS_DOMAINS, DOMAIN_AXIS, type Axis } from "../data/axes";
 import { scanFreeText } from "./freeText";
 
 // ── The recommendation engine ────────────────────────────────────────────────
@@ -30,12 +31,22 @@ export type Answers = Record<string, Answer>;
 
 export type Recommendation = {
   supplement: Supplement;
-  /** Relative match, 0–99, for display. */
+  /**
+   * 0–99. How much this adds *on top of the picks above it* — not raw personal
+   * fit. Two magnesium-shaped supplements both matching you at 80 would be a
+   * useless list, so the second one's number reflects what it still adds.
+   */
   match: number;
-  /** Ranking value — fit × evidence weight. */
+  /** Raw personal fit before overlap is discounted, for the overlap note. */
+  soloMatch: number;
+  /** Ranking value. Always agrees with `match`. */
   score: number;
   /** Domains that drove this pick, strongest first. */
   reasons: Domain[];
+  /** Already-picked names covering the same ground, if that cut the score. */
+  overlapsWith: string[];
+  /** Per-axis stat gain, 0–100 scale, for the "능력치" rows. */
+  axisLift: Partial<Record<Axis, number>>;
   /** Safety notes triggered by the user's own answers. */
   warnings: string[];
   intake: string;
@@ -49,6 +60,10 @@ export type SurveyResult = {
   /** Strongest domains, for the signal chips. */
   topDomains: Domain[];
   needs: Record<Domain, number>;
+  /** Current capability per macro axis, 0–100 (higher is better). */
+  axisScores: Record<Axis, number>;
+  /** Same axes after the recommended set, so the radar can show the lift. */
+  projectedAxisScores: Record<Axis, number>;
   flags: SafetyFlag[];
   recommendations: Recommendation[];
   /** Names excluded purely for safety, so the UI can say why. */
@@ -158,7 +173,15 @@ export function recommend(
   }
 
   const excluded: { name: string; reason: string }[] = [];
-  const scored: Recommendation[] = [];
+
+  // ── candidate pool ─────────────────────────────────────────────────────────
+  type Candidate = {
+    supplement: Supplement;
+    capacity: number;
+    soloFit: number;
+    soloValue: number;
+  };
+  const pool: Candidate[] = [];
 
   for (const s of SUPPLEMENTS) {
     if (taken.has(s.id)) continue;
@@ -177,43 +200,108 @@ export function recommend(
       continue;
     }
 
-    let fit = 0;
+    let soloFit = 0;
     let capacity = 0;
-    const hits: { domain: Domain; strength: number }[] = [];
     for (const [d, cover] of Object.entries(s.domains)) {
-      const domain = d as Domain;
       const c = cover as number;
       capacity += c;
-      const contribution = needs[domain] * c;
-      fit += contribution;
-      if (needs[domain] >= 0.2 && c >= 0.4) hits.push({ domain, strength: contribution });
+      soloFit += needs[d as Domain] * c;
     }
-    if (fit <= 0 || !hits.length) continue;
-
-    const evidence = EVIDENCE_WEIGHT[s.evidence];
-    // "Of everything this supplement is good at, how much do the answers
-    // actually call for" — plus a small bonus for covering several needs at
-    // once, so a broad fit isn't beaten by a one-trick match. Relative
-    // guidance for ordering, not a clinical claim.
-    const focus = fit / capacity;
-    const breadth = 1 + 0.15 * Math.min(1, hits.length / 3);
-    const match = Math.max(1, Math.min(99, Math.round(focus * evidence * breadth * 100)));
-    // Rank by the number we display. Ordering that disagrees with the score on
-    // screen reads as a bug, so there is exactly one value driving both; `fit`
-    // only breaks ties between equal matches.
-    const score = match + Math.min(0.99, fit / 100);
-
-    scored.push({
+    if (soloFit <= 0 || capacity <= 0) continue;
+    pool.push({
       supplement: s,
-      score,
-      match,
-      reasons: hits.sort((a, b) => b.strength - a.strength).map((h) => h.domain).slice(0, 3),
-      warnings: buildWarnings(s, flags),
-      intake: intakeLabel(s),
+      capacity,
+      soloFit,
+      soloValue: valueOf(soloFit, capacity, s),
     });
   }
 
-  scored.sort((a, b) => b.score - a.score);
+  // ── greedy selection with overlap discounting ──────────────────────────────
+  // Ranking each candidate independently gives a list where the top five are
+  // all the same idea — three sleep aids for someone who answered "잠을 못
+  // 자요". A nutritionist would cover the sleep need once and spend the rest of
+  // the list elsewhere. So each pick saturates the needs it covers before the
+  // next one is scored: whoever is left competes for what is actually still
+  // unmet. `match` is that marginal score, which is also what gets displayed,
+  // so the order on screen always matches the numbers on screen.
+  const SATURATION = 0.7;
+  const remaining: Record<Domain, number> = { ...needs };
+  type Picked = Recommendation & { rawValue: number; soloValue: number };
+  const chosen: Picked[] = [];
+  const used = new Set<string>();
+
+  while (chosen.length < limit) {
+    let best: { cand: Candidate; fit: number; value: number } | null = null;
+
+    for (const cand of pool) {
+      if (used.has(cand.supplement.id)) continue;
+      let fit = 0;
+      for (const [d, cover] of Object.entries(cand.supplement.domains)) {
+        fit += remaining[d as Domain] * (cover as number);
+      }
+      if (fit <= 0) continue;
+      const hits = countHits(cand.supplement, remaining);
+      if (!hits) continue;
+      const value = valueOf(fit, cand.capacity, cand.supplement);
+      if (!best || value > best.value) best = { cand, fit, value };
+    }
+    if (!best) break;
+
+    const { supplement } = best.cand;
+    used.add(supplement.id);
+
+    // Name whoever already covers this ground, so a lower number reads as
+    // "you're covered" rather than "this is a bad match".
+    const overlapsWith = chosen
+      .filter((prev) =>
+        Object.keys(supplement.domains).some(
+          (d) =>
+            (prev.supplement.domains[d as Domain] ?? 0) >= 0.5 &&
+            (supplement.domains[d as Domain] ?? 0) >= 0.5 &&
+            needs[d as Domain] >= 0.2
+        )
+      )
+      .map((prev) => prev.supplement.name);
+
+    chosen.push({
+      supplement,
+      match: 0, // filled in below, once the reference is known
+      soloMatch: 0,
+      score: 0,
+      rawValue: best.value,
+      soloValue: best.cand.soloValue,
+      reasons: hitList(supplement, remaining),
+      overlapsWith,
+      axisLift: axisLiftOf(supplement, remaining),
+      warnings: buildWarnings(supplement, flags),
+      intake: intakeLabel(supplement),
+    });
+
+    for (const [d, cover] of Object.entries(supplement.domains)) {
+      const key = d as Domain;
+      remaining[key] = remaining[key] * (1 - (cover as number) * SATURATION);
+    }
+  }
+
+  // Percentages are relative to the strongest pick, so they are only knowable
+  // once selection is done.
+  const reference = chosen.length ? chosen[0].rawValue : 0;
+  const recommendations: Recommendation[] = chosen.map((c) => {
+    const match = matchFrom(c.rawValue, reference);
+    const soloMatch = matchFrom(c.soloValue, reference);
+    return {
+      supplement: c.supplement,
+      match,
+      soloMatch,
+      score: match,
+      reasons: c.reasons,
+      // Only call it overlap when the discount is big enough to notice.
+      overlapsWith: soloMatch - match >= 8 ? c.overlapsWith : [],
+      axisLift: c.axisLift,
+      warnings: c.warnings,
+      intake: c.intake,
+    };
+  });
 
   const topDomains = ALL_DOMAINS.filter((d) => needs[d] > 0)
     .sort((a, b) => needs[b] - needs[a])
@@ -223,12 +311,126 @@ export function recommend(
     ...buildProfile(topDomains, needs),
     topDomains,
     needs,
+    axisScores: axisScoresFrom(needs),
+    projectedAxisScores: axisScoresFrom(
+      projectNeeds(needs, chosen.map((c) => c.supplement))
+    ),
     flags,
-    recommendations: scored.slice(0, limit),
+    recommendations,
     excluded,
     freeTextSignals: scan.signals,
     answeredCount: Object.keys(answers).length,
   };
+}
+
+/** Domains where the need is real and this supplement genuinely covers it. */
+function countHits(s: Supplement, needs: Record<Domain, number>): number {
+  let n = 0;
+  for (const [d, cover] of Object.entries(s.domains)) {
+    if (needs[d as Domain] >= 0.2 && (cover as number) >= 0.4) n += 1;
+  }
+  return n;
+}
+
+function hitList(s: Supplement, needs: Record<Domain, number>): Domain[] {
+  return (Object.entries(s.domains) as [Domain, number][])
+    .filter(([d, c]) => needs[d] >= 0.2 && c >= 0.4)
+    .sort((a, b) => needs[b[0]] * b[1] - needs[a[0]] * a[1])
+    .map(([d]) => d)
+    .slice(0, 3);
+}
+
+/**
+ * How much this supplement actually does for you, in absolute terms.
+ *
+ * The obvious metric — "what fraction of this pill's abilities do you need" —
+ * structurally punishes broad products: a multivitamin covering three of your
+ * five gaps scores below a selenium tablet covering one gap perfectly, because
+ * the multivitamin also does things you don't need. That is backwards. A
+ * dietitian ranks by benefit delivered.
+ *
+ * So value is mostly absolute coverage (`fit`), nudged by focus so a shotgun
+ * formula doesn't win on breadth alone, and damped by evidence grade.
+ */
+function valueOf(fit: number, capacity: number, s: Supplement): number {
+  const focus = capacity > 0 ? fit / capacity : 0;
+  return fit * EVIDENCE_WEIGHT[s.evidence] * (0.6 + 0.4 * focus);
+}
+
+/**
+ * Display percentage, relative to the strongest pick in this same run. An
+ * absolute scale would read 12% for a perfectly sensible recommendation just
+ * because the user has few complaints; relative keeps the list legible while
+ * preserving the gaps between entries.
+ */
+function matchFrom(value: number, reference: number): number {
+  if (reference <= 0) return 1;
+  return Math.max(5, Math.min(99, Math.round((value / reference) * 96)));
+}
+
+// ── Macro-axis capability ────────────────────────────────────────────────────
+// The radar shows capability (higher is better), not deficit, because "능력치"
+// is how people read a stat chart. Need is mapped onto a 30–100 band rather
+// than 0–100: a run where everything is a problem should still draw a readable
+// hexagon instead of collapsing to a dot.
+const AXIS_FLOOR = 30;
+
+function axisScoresFrom(needs: Record<Domain, number>): Record<Axis, number> {
+  const out = {} as Record<Axis, number>;
+  for (const axis of AXES) {
+    const domains = AXIS_DOMAINS[axis];
+    const avg = domains.length
+      ? domains.reduce((sum, d) => sum + needs[d], 0) / domains.length
+      : 0;
+    out[axis] = Math.round(100 - avg * (100 - AXIS_FLOOR));
+  }
+  return out;
+}
+
+/**
+ * What the axes would look like after taking the recommended set. Supplements
+ * support, they don't cure, so coverage buys back a fraction of the need.
+ */
+const SUPPLEMENT_EFFECT = 0.55;
+
+function projectNeeds(
+  needs: Record<Domain, number>,
+  supps: Supplement[]
+): Record<Domain, number> {
+  const out = { ...needs };
+  for (const s of supps) {
+    for (const [d, cover] of Object.entries(s.domains)) {
+      const key = d as Domain;
+      out[key] = out[key] * (1 - (cover as number) * SUPPLEMENT_EFFECT);
+    }
+  }
+  return out;
+}
+
+/**
+ * Axis scores for an arbitrary subset — lets the result screen redraw the
+ * projection live as the user ticks recommendations on and off.
+ */
+export function projectAxes(
+  needs: Record<Domain, number>,
+  supps: Supplement[]
+): Record<Axis, number> {
+  return axisScoresFrom(projectNeeds(needs, supps));
+}
+
+/** Per-axis points this one supplement would add, for the stat rows on a card. */
+function axisLiftOf(
+  s: Supplement,
+  needs: Record<Domain, number>
+): Partial<Record<Axis, number>> {
+  const before = axisScoresFrom(needs);
+  const after = axisScoresFrom(projectNeeds(needs, [s]));
+  const lift: Partial<Record<Axis, number>> = {};
+  for (const axis of AXES) {
+    const delta = after[axis] - before[axis];
+    if (delta >= 1) lift[axis] = delta;
+  }
+  return lift;
 }
 
 const SAFETY_REASON: Record<SafetyFlag, string> = {

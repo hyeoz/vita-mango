@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, pillColor } from "../theme/colors";
@@ -7,8 +7,12 @@ import { fonts } from "../theme/fonts";
 import { hardShadow } from "../theme/ui";
 import Jelly from "../components/Jelly";
 import { FloatingPill, PillSwatch } from "../components/Pill";
+import Bouncy from "../components/Bouncy";
+import RadarChart from "../components/RadarChart";
+import { joinWithParticle } from "../logic/korean";
 import { useApp, suppFromRecommendation } from "../state/AppContext";
 import { DOMAIN_LABELS, EVIDENCE_LABELS } from "../data/types";
+import { AXIS_SHORT, type Axis } from "../data/axes";
 import type { Recommendation } from "../logic/recommend";
 
 // The recommendation tab. Everything shown here is computed on the device from
@@ -62,9 +66,9 @@ export default function AiScreen() {
             <Text style={styles.emptyBody}>
               50개 질문에 답하면 컨디션 신호를 읽어서 딱 맞는 영양제를 골라줄게. 2~3분이면 끝나!
             </Text>
-            <Pressable style={styles.cta} onPress={startSurvey}>
+            <Bouncy style={styles.cta} haptic="medium" onPress={startSurvey}>
               <Text style={styles.ctaText}>영양제 추천받기</Text>
-            </Pressable>
+            </Bouncy>
           </View>
         ) : (
           <>
@@ -79,6 +83,19 @@ export default function AiScreen() {
             </View>
 
             <Text style={styles.blurb}>{result.profileBlurb}</Text>
+
+            <View style={styles.radarCard}>
+              <Text style={styles.radarTitle}>내 컨디션 능력치</Text>
+              <RadarChart
+                scores={result.axisScores}
+                projected={result.projectedAxisScores}
+                size={262}
+              />
+              <Text style={styles.radarNote}>
+                점선은 아래 추천을 모두 챙겼을 때예요. 점수가 높을수록 그 영역에 부족한
+                신호가 적어요.
+              </Text>
+            </View>
 
             <View style={styles.chips}>
               {result.topDomains.map((d) => (
@@ -116,9 +133,9 @@ export default function AiScreen() {
               하지 않아요. 복용 중인 약이 있다면 의사·약사와 상의하세요.
             </Text>
 
-            <Pressable style={styles.secondary} onPress={startSurvey}>
+            <Bouncy style={styles.secondary} haptic="medium" onPress={startSurvey}>
               <Text style={styles.secondaryText}>다시 추천받기</Text>
-            </Pressable>
+            </Bouncy>
           </>
         )}
       </ScrollView>
@@ -136,6 +153,7 @@ function RecCard({
   onAdd: () => void;
 }) {
   const s = rec.supplement;
+  const lifts = Object.entries(rec.axisLift) as [Axis, number][];
   return (
     <View style={styles.card}>
       <View style={styles.cardTop}>
@@ -149,6 +167,23 @@ function RecCard({
 
       <Text style={styles.cardBenefit}>{s.benefit}</Text>
 
+      {!!lifts.length && (
+        <View style={styles.lifts}>
+          {lifts
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)
+            .map(([axis, delta]) => (
+              <View key={axis} style={styles.liftRow}>
+                <Text style={styles.liftLabel}>{AXIS_SHORT[axis]}</Text>
+                <View style={styles.liftTrack}>
+                  <View style={[styles.liftFill, { width: `${Math.min(100, delta * 3)}%` }]} />
+                </View>
+                <Text style={styles.liftValue}>+{delta}</Text>
+              </View>
+            ))}
+        </View>
+      )}
+
       <View style={styles.metaRow}>
         <Text style={styles.metaTag}>🔬 {EVIDENCE_LABELS[s.evidence]}</Text>
         <Text style={styles.metaTag}>💊 {s.dose}</Text>
@@ -160,6 +195,12 @@ function RecCard({
         </Text>
       )}
 
+      {!!rec.overlapsWith.length && (
+        <Text style={styles.overlap}>
+          🧩 {joinWithParticle(rec.overlapsWith)} 효능이 겹쳐요. 단독으로는 {rec.soloMatch}%였어요.
+        </Text>
+      )}
+
       {s.cautions.slice(0, 1).map((c) => (
         <Text key={c} style={styles.caution}>• {c}</Text>
       ))}
@@ -167,13 +208,14 @@ function RecCard({
         <Text key={w} style={styles.warning}>⚠️ {w}</Text>
       ))}
 
-      <Pressable
+      <Bouncy
+        scaleTo={0.97}
         style={[styles.addBtn, added && styles.addBtnOff]}
         onPress={onAdd}
         disabled={added}
       >
         <Text style={styles.addBtnText}>{added ? "담겼어 ✓" : "내 영양제에 담기"}</Text>
-      </Pressable>
+      </Bouncy>
     </View>
   );
 }
@@ -238,6 +280,42 @@ const styles = StyleSheet.create({
   chipSoft: { backgroundColor: "#efe9ff" },
   chipText: { fontFamily: fonts.display, fontSize: 11.5, color: colors.ink },
 
+  radarCard: {
+    backgroundColor: colors.white,
+    borderWidth: 2.5,
+    borderColor: colors.ink,
+    borderRadius: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    marginTop: 10,
+    alignItems: "center",
+    gap: 8,
+    ...hardShadow(4, 5, 0.12),
+  },
+  radarTitle: { fontFamily: fonts.display, fontSize: 15, color: colors.ink },
+  radarNote: {
+    fontFamily: fonts.body,
+    fontSize: 11,
+    lineHeight: 17,
+    color: colors.muted4,
+    textAlign: "center",
+    paddingHorizontal: 6,
+  },
+  lifts: { gap: 5, marginTop: 2 },
+  liftRow: { flexDirection: "row", alignItems: "center", gap: 7 },
+  liftLabel: { fontFamily: fonts.display, fontSize: 11, color: colors.muted2, width: 44 },
+  liftTrack: {
+    flex: 1,
+    height: 8,
+    borderRadius: 5,
+    backgroundColor: "#eef1f4",
+    borderWidth: 1.5,
+    borderColor: colors.ink,
+    overflow: "hidden",
+  },
+  liftFill: { height: "100%", backgroundColor: colors.mango },
+  liftValue: { fontFamily: fonts.display, fontSize: 11.5, color: colors.mangoDeep, width: 26 },
+  overlap: { fontFamily: fonts.body, fontSize: 11.5, lineHeight: 18, color: colors.muted2 },
   sectionHead: { fontFamily: fonts.display, fontSize: 15, color: colors.ink, marginTop: 14 },
   allSet: {
     fontFamily: fonts.body,

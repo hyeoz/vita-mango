@@ -16,6 +16,7 @@ import { card, hardShadow } from "../theme/ui";
 import Jelly from "../components/Jelly";
 import { FloatingPill, PillSwatch } from "../components/Pill";
 import SuppEditModal from "../components/SuppEditModal";
+import Bouncy from "../components/Bouncy";
 import { useApp } from "../state/AppContext";
 
 export default function HomeScreen() {
@@ -164,9 +165,9 @@ export default function HomeScreen() {
               placeholderTextColor={colors.muted}
               style={styles.input}
             />
-            <Pressable style={styles.sendBtn} onPress={submitDiary}>
+            <Bouncy style={styles.sendBtn} haptic="medium" onPress={submitDiary}>
               <Text style={styles.sendIcon}>→</Text>
-            </Pressable>
+            </Bouncy>
           </View>
           {diaries.length > 0 && (
             <View style={styles.chips}>
@@ -186,7 +187,9 @@ export default function HomeScreen() {
         </View>
         <View style={{ gap: 10 }}>
           {supps.map((item, i) => (
-            <Pressable
+            <Bouncy
+  scaleTo={0.98}
+  haptic="selection"
               key={item.name}
               onPress={() => toggleSupp(i)}
               onLongPress={() => openSuppMenu(i, item.name)}
@@ -215,7 +218,7 @@ export default function HomeScreen() {
                   {item.taken ? "✓" : "○"}
                 </Text>
               </View>
-            </Pressable>
+            </Bouncy>
           ))}
         </View>
       </ScrollView>
