@@ -16,7 +16,6 @@ import { hardShadow } from "../theme/ui";
 import Jelly from "../components/Jelly";
 import { PillSwatch } from "../components/Pill";
 import { useApp } from "../state/AppContext";
-import { useAuth } from "../state/AuthContext";
 import { COLLECTIBLES } from "../state/gamification";
 import { useAds } from "../ads/AdsContext";
 
@@ -30,33 +29,52 @@ export default function MyScreen() {
     levelInfo,
     nextUnlock,
     unlockedExprs,
-    reRegister,
+    startSurvey,
+    updateSupp,
+    notifyEnabled,
+    toggleNotify,
+    resetEverything,
   } = useApp();
-  const { user, signOut, deleteAccount } = useAuth();
   const { privacyOptionsRequired, showPrivacyOptions } = useAds();
-  const nickname = user?.displayName?.split(" ")[0] || "젤리";
+  // No account means no profile name to greet with — the mascot's name it is.
+  const nickname = "젤리";
 
   // collection = unique supplement names (their 도감 swatches)
   const catalog = supps.map((s) => ({ name: s.name, color: s.color }));
   const insets = useSafeAreaInsets();
 
-  const confirmAccountDeletion = () => {
+  const confirmReset = () => {
     Alert.alert(
-      "계정과 데이터를 삭제할까요?",
-      "영양제, 복용 기록, 일기와 젤리 성장 기록이 모두 영구 삭제돼요. 삭제한 내용은 복구할 수 없어요.",
+      "모든 데이터를 삭제할까요?",
+      "영양제, 복용 기록, 일기, 설문 결과와 젤리 성장 기록이 이 기기에서 지워져요. 서버에 사본이 없어서 되돌릴 수 없어요.",
       [
         { text: "취소", style: "cancel" },
-        {
-          text: "영구 삭제",
-          style: "destructive",
-          onPress: () => {
-            deleteAccount().catch((e: Error) => {
-              Alert.alert("삭제하지 못했어요", e.message);
-            });
-          },
-        },
+        { text: "영구 삭제", style: "destructive", onPress: () => { resetEverything(); } },
       ]
     );
+  };
+
+  // Nudge the reminder time in half-hour steps. A stepper keeps this free of a
+  // date-picker dependency and is quick for the one adjustment people actually
+  // make — shifting a reminder to when they really eat.
+  const nudgeTime = (i: number, deltaMin: number) => {
+    const s = supps[i];
+    const total = (s.hour * 60 + s.minute + deltaMin + 1440) % 1440;
+    updateSupp(i, { hour: Math.floor(total / 60), minute: total % 60 });
+  };
+
+  const onToggleNotify = async (on: boolean) => {
+    const granted = await toggleNotify(on);
+    if (on && !granted) {
+      Alert.alert(
+        "알림 권한이 꺼져 있어요",
+        "설정 앱에서 비타망고 알림을 켜주면 복용 시간에 젤리가 알려줄게요.",
+        [
+          { text: "나중에", style: "cancel" },
+          { text: "설정 열기", onPress: () => Linking.openSettings() },
+        ]
+      );
+    }
   };
 
   // Real stats — all derived from actual activity.
@@ -170,12 +188,71 @@ export default function MyScreen() {
           </View>
         </LinearGradient>
 
-        <Pressable style={styles.reset} onPress={reRegister}>
-          <Text style={styles.resetText}>＋ 영양제 다시 등록하기</Text>
-        </Pressable>
+        <View style={styles.notifyCard}>
+          <View style={styles.notifyHead}>
+            <Text style={styles.notifyTitle}>🔔 복용 알림</Text>
+            <Pressable
+              style={[styles.switch, notifyEnabled && styles.switchOn]}
+              onPress={() => onToggleNotify(!notifyEnabled)}
+              accessibilityRole="switch"
+              accessibilityState={{ checked: notifyEnabled }}
+            >
+              <View style={[styles.knob, notifyEnabled && styles.knobOn]} />
+            </Pressable>
+          </View>
+          <Text style={styles.notifyHint}>
+            기기 안에서만 울리는 알림이에요. 영양제마다 시간을 따로 정할 수 있어요.
+          </Text>
 
-        <Pressable style={styles.logout} onPress={signOut}>
-          <Text style={styles.logoutText}>로그아웃</Text>
+          {supps.length === 0 ? (
+            <Text style={styles.notifyEmpty}>등록한 영양제가 아직 없어요.</Text>
+          ) : (
+            supps.map((s, i) => (
+              <View key={`${s.name}-${i}`} style={styles.notifyRow}>
+                <Pressable
+                  style={[styles.rowCheck, s.notify && styles.rowCheckOn]}
+                  onPress={() => updateSupp(i, { notify: !s.notify })}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: s.notify }}
+                >
+                  {s.notify ? <Text style={styles.rowCheckMark}>✓</Text> : null}
+                </Pressable>
+                <Text style={styles.rowName} numberOfLines={1}>
+                  {s.name}
+                </Text>
+                <View style={styles.stepper}>
+                  <Pressable
+                    style={styles.stepBtn}
+                    onPress={() => nudgeTime(i, -30)}
+                    disabled={!notifyEnabled || !s.notify}
+                    hitSlop={6}
+                  >
+                    <Text style={styles.stepText}>−</Text>
+                  </Pressable>
+                  <Text
+                    style={[
+                      styles.timeText,
+                      (!notifyEnabled || !s.notify) && styles.timeOff,
+                    ]}
+                  >
+                    {String(s.hour).padStart(2, "0")}:{String(s.minute).padStart(2, "0")}
+                  </Text>
+                  <Pressable
+                    style={styles.stepBtn}
+                    onPress={() => nudgeTime(i, 30)}
+                    disabled={!notifyEnabled || !s.notify}
+                    hitSlop={6}
+                  >
+                    <Text style={styles.stepText}>＋</Text>
+                  </Pressable>
+                </View>
+              </View>
+            ))
+          )}
+        </View>
+
+        <Pressable style={styles.reset} onPress={startSurvey}>
+          <Text style={styles.resetText}>🔮 영양제 추천 다시 받기</Text>
         </Pressable>
 
         <Pressable
@@ -203,8 +280,13 @@ export default function MyScreen() {
           </Pressable>
         ) : null}
 
-        <Pressable style={styles.deleteAccount} onPress={confirmAccountDeletion}>
-          <Text style={styles.deleteAccountText}>계정 및 모든 데이터 삭제</Text>
+        <Text style={styles.localNote}>
+          모든 기록은 이 기기 안에만 저장돼요. 계정이 없어서 서버로 전송되지 않지만,
+          앱을 삭제하면 함께 지워져요.
+        </Text>
+
+        <Pressable style={styles.deleteAccount} onPress={confirmReset}>
+          <Text style={styles.deleteAccountText}>모든 데이터 삭제</Text>
         </Pressable>
       </ScrollView>
     </LinearGradient>
@@ -335,4 +417,88 @@ const styles = StyleSheet.create({
   },
   deleteAccount: { alignItems: "center", paddingVertical: 8 },
   deleteAccountText: { fontFamily: fonts.body, fontSize: 12, color: "#b24355" },
+  notifyCard: {
+    backgroundColor: colors.white,
+    borderWidth: 2.5,
+    borderColor: colors.ink,
+    borderRadius: 18,
+    padding: 14,
+    marginTop: 18,
+    gap: 8,
+    ...hardShadow(3, 4, 0.1),
+  },
+  notifyHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  notifyTitle: { fontFamily: fonts.display, fontSize: 15, color: colors.ink },
+  notifyHint: { fontFamily: fonts.body, fontSize: 11.5, lineHeight: 18, color: colors.muted2 },
+  notifyEmpty: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted4, paddingVertical: 8 },
+  switch: {
+    width: 50,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 2.5,
+    borderColor: colors.ink,
+    backgroundColor: "#e9eef0",
+    justifyContent: "center",
+    paddingHorizontal: 3,
+  },
+  switchOn: { backgroundColor: colors.cyan },
+  knob: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 2,
+    borderColor: colors.ink,
+    backgroundColor: colors.white,
+    alignSelf: "flex-start",
+  },
+  knobOn: { alignSelf: "flex-end" },
+  notifyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingTop: 8,
+    borderTopWidth: 1.5,
+    borderTopColor: "#eef2f4",
+  },
+  rowCheck: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: colors.ink,
+    backgroundColor: colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rowCheckOn: { backgroundColor: colors.cyan },
+  rowCheckMark: { fontFamily: fonts.display, fontSize: 12, color: colors.ink },
+  rowName: { flex: 1, fontFamily: fonts.body, fontSize: 13, color: colors.ink },
+  stepper: { flexDirection: "row", alignItems: "center", gap: 6 },
+  stepBtn: {
+    width: 26,
+    height: 26,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: colors.ink,
+    backgroundColor: colors.cream,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  stepText: { fontFamily: fonts.display, fontSize: 13, color: colors.ink },
+  timeText: {
+    fontFamily: fonts.display,
+    fontSize: 14,
+    color: colors.ink,
+    minWidth: 46,
+    textAlign: "center",
+  },
+  timeOff: { color: colors.muted4 },
+  localNote: {
+    fontFamily: fonts.body,
+    fontSize: 11,
+    lineHeight: 17,
+    color: colors.muted4,
+    marginTop: 18,
+    textAlign: "center",
+  },
 });

@@ -1,19 +1,6 @@
 {
-  "functions": {
-    "source": "functions",
-    "runtime": "nodejs22"
-  },
   "hosting": {
     "public": "public",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "rewrites": [
-      {
-        "source": "/api/**",
-        "function": { "functionId": "api", "region": "asia-northeast3" }
-      }
-    ]
-  },
-  "firestore": {
-    "rules": "firestore.rules"
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
   }
 }
