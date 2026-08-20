@@ -18,6 +18,12 @@ service cloud.firestore {
       // Firebase Auth account is deleted.
       allow delete: if isOwner(uid);
     }
+    // `timingCache/{name}` is the shared intake-timing cache the api function
+    // fills for supplement names outside the manual table. It is written only
+    // by the Admin SDK (which bypasses these rules) and must stay unwritable
+    // from clients — a client write would poison the answer for every user.
+    // It needs no match block: the default denial below already covers it.
+
     // everything else is denied by default
   }
 
