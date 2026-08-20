@@ -15,7 +15,6 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.vitamango.app",
       "buildNumber": "12",
-      "googleServicesFile": "./GoogleService-Info.plist",
       "config": {
         "usesNonExemptEncryption": false
       }
@@ -24,7 +23,6 @@
       "edgeToEdgeEnabled": true,
       "package": "com.vitamango.app",
       "versionCode": 10,
-      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#fff4ea"
@@ -34,18 +32,14 @@
       "bundler": "metro"
     },
     "plugins": [
-      "@react-native-firebase/app",
-      "@react-native-firebase/auth",
       [
         "expo-build-properties",
         {
           "ios": {
-            "useFrameworks": "static",
-            "buildReactNativeFromSource": true
+            "useFrameworks": "static"
           }
         }
       ],
-      "@react-native-google-signin/google-signin",
       [
         "react-native-google-mobile-ads",
         {
@@ -106,9 +100,13 @@
           ]
         }
       ],
-      "./plugins/withFirebaseStaticFrameworkFix",
       "./plugins/withDevelopmentTeam",
-      "@react-native-firebase/app-check"
+      [
+        "expo-notifications",
+        {
+          "color": "#ffb43d"
+        }
+      ]
     ]
   }
 }

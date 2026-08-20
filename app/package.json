@@ -13,16 +13,13 @@
     "asc:publish": "bash scripts/publish-ios-asc.sh",
     "build:ios-keychainless": "bash scripts/build-ios-keychainless.sh",
     "build:ios-prod": "bash scripts/release-ios.sh",
-    "build:android-prod": "bash scripts/release-android.sh"
+    "build:android-prod": "bash scripts/release-android.sh",
+    "verify:engine": "tsx scripts/verify-engine.ts"
   },
   "dependencies": {
     "@expo-google-fonts/gowun-dodum": "^0.2.3",
     "@expo-google-fonts/jua": "^0.2.3",
-    "@react-native-firebase/app": "^25.1.0",
-    "@react-native-firebase/app-check": "^25.1.0",
-    "@react-native-firebase/auth": "^25.1.0",
-    "@react-native-firebase/firestore": "^25.1.0",
-    "@react-native-google-signin/google-signin": "^16.1.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "babel-preset-expo": "~54.0.10",
     "expo": "^54.0.35",
     "expo-asset": "~12.0.13",
@@ -30,6 +27,7 @@
     "expo-font": "~14.0.12",
     "expo-haptics": "~15.0.7",
     "expo-linear-gradient": "~15.0.8",
+    "expo-notifications": "~0.32.12",
     "expo-status-bar": "~3.0.9",
     "react": "19.1.0",
     "react-native": "0.81.5",
@@ -39,6 +37,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@types/react": "~19.1.10",
+    "tsx": "^4.20.0",
     "typescript": "~5.9.2"
   },
   "engines": {

@@ -30,7 +30,7 @@ export default function HomeScreen() {
     supps,
     toggleSupp,
     removeSupp,
-    updateSuppTime,
+    updateSupp,
     unlockedExprs,
   } = useApp();
 
@@ -226,7 +226,7 @@ export default function HomeScreen() {
         time={editing !== null ? supps[editing]?.time ?? "" : ""}
         onClose={() => setEditing(null)}
         onSave={(time) => {
-          if (editing !== null) updateSuppTime(editing, time);
+          if (editing !== null) updateSupp(editing, { time });
           setEditing(null);
         }}
       />

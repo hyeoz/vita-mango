@@ -1,5 +1,6 @@
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -8,7 +9,17 @@ import React, {
 } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { colors, suppColor } from "../theme/colors";
-import { loadUserData, saveUserData, seedUserData } from "../firebase/db";
+import {
+  clearProfile,
+  loadProfile,
+  saveProfile,
+  type StoredSupplement,
+  type StoredSurvey,
+} from "../storage/local";
+import { syncReminders, requestPermission } from "../notifications/reminders";
+import { recommend, type Answers, type Recommendation, type SurveyResult } from "../logic/recommend";
+import { findSupplement } from "../data/supplements";
+import { TIME_SLOTS } from "../data/types";
 import { useInterstitial } from "../ads/useInterstitial";
 import {
   dayKey,
@@ -21,14 +32,9 @@ import {
   Collectible,
 } from "./gamification";
 
-export type Supplement = {
-  name: string;
-  time: string;
-  color: string; // colour key or hex (see theme/colors.ts suppColor / pillColor)
-  taken: boolean;
-};
+export type Supplement = StoredSupplement;
 
-export type Screen = "onboarding" | "home" | "record" | "ai" | "my";
+export type Screen = "survey" | "home" | "record" | "ai" | "my";
 
 export type JellyMood =
   | "happy"
@@ -36,21 +42,12 @@ export type JellyMood =
   | "excited"
   | "love"
   | "wink"
-  // Lv.6–9 unlockables — ported from the Claude Design Jelly.dc.html handoff.
   | "surprised"
   | "curious"
   | "proud"
   | "sad";
 
-// ── defaults for a brand-new account ──
-// A new account starts empty — no diaries and no supplements. Both are filled
-// by the user (onboarding for supplements, the diary input for entries), so we
-// never show fabricated content as if it were the user's own data.
-// DEFAULT_ONB just pre-selects a couple of common picks in the onboarding
-// chooser (a suggestion the user reviews), not persisted content.
-const DEFAULT_ONB = ["비타민 C", "오메가-3"];
-
-// Condition keywords → emoji, mirroring the prototype's moodFor().
+// Condition keywords → emoji, used for the diary mood stamp.
 export function moodFor(t: string): string {
   if (/피곤|졸|설|피로|아프|힘들|지친|스트레스/.test(t)) return "😮‍💨";
   if (/좋|개운|상쾌|괜찮|행복|활기|든든/.test(t)) return "😊";
@@ -58,6 +55,56 @@ export function moodFor(t: string): string {
 }
 
 const TIRED_RE = /피곤|졸|설|피로|아프|힘들|지친|스트레스/;
+
+const FALLBACK_COLORS = [colors.pink, colors.cyan, colors.mango, colors.purple, colors.yellow];
+
+/**
+ * Turns a recommendation into a list entry, carrying over the master data's
+ * intake time and dose so the reminder and the "권장 섭취량" line need no
+ * lookup later.
+ */
+export function suppFromRecommendation(rec: Recommendation, i = 0): Supplement {
+  const slot = TIME_SLOTS[rec.supplement.slot];
+  return {
+    id: rec.supplement.id,
+    name: rec.supplement.name,
+    time: rec.intake,
+    color: rec.supplement.color,
+    taken: false,
+    hour: slot.hour,
+    minute: slot.minute,
+    notify: true,
+    dose: rec.supplement.dose,
+  };
+}
+
+/** Builds an entry for a name the user typed themselves. */
+export function suppFromName(name: string, i = 0): Supplement {
+  const known = findSupplement(name);
+  if (known) {
+    const slot = TIME_SLOTS[known.slot];
+    return {
+      id: known.id,
+      name: known.name,
+      time: `${slot.label} · ${known.unitsPerTake}${known.unitNoun}`,
+      color: known.color,
+      taken: false,
+      hour: slot.hour,
+      minute: slot.minute,
+      notify: true,
+      dose: known.dose,
+    };
+  }
+  return {
+    name,
+    time: "아침 식후 · 1정",
+    color: suppColor[name] ?? FALLBACK_COLORS[i % FALLBACK_COLORS.length],
+    taken: false,
+    hour: 8,
+    minute: 30,
+    notify: true,
+  };
+}
 
 type AppState = {
   screen: Screen;
@@ -72,18 +119,19 @@ type AppState = {
   supps: Supplement[];
   toggleSupp: (i: number) => void;
   removeSupp: (i: number) => void;
-  updateSuppTime: (i: number, time: string) => void;
+  updateSupp: (i: number, patch: Partial<Supplement>) => void;
+  addByName: (name: string) => void;
   takenCount: number;
 
-  addedRecs: string[];
-  addRec: (rec: { name: string; time: string; color: string }) => void;
+  /** Saved answers, or null if the survey was never completed. */
+  survey: StoredSurvey | null;
+  /** Result recomputed from the saved answers — never persisted, always fresh. */
+  result: SurveyResult | null;
+  completeSurvey: (answers: Answers, freeText: string, picks: Recommendation[]) => void;
+  startSurvey: () => void;
 
-  onbSelected: string[];
-  toggleOnb: (name: string) => void;
-  reRegister: () => void;
-  completeOnboarding: (
-    timings?: Record<string, { time: string; color?: string }>
-  ) => void;
+  notifyEnabled: boolean;
+  toggleNotify: (on: boolean) => Promise<boolean>;
 
   jellyMood: JellyMood;
   speech: string;
@@ -91,8 +139,8 @@ type AppState = {
 
   subscribed: boolean;
   createdAt: number | null;
+  resetEverything: () => Promise<void>;
 
-  // gamification (all derived from real events)
   level: number;
   xp: number;
   levelInfo: LevelProgress;
@@ -103,89 +151,54 @@ type AppState = {
 
 const Ctx = createContext<AppState | null>(null);
 
-export function AppProvider({
-  uid,
-  children,
-}: {
-  uid: string;
-  children: React.ReactNode;
-}) {
+export function AppProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
-  const [screen, setScreen] = useState<Screen>("onboarding");
+  const [screen, setScreen] = useState<Screen>("survey");
   const [diary, setDiary] = useState("");
   const [diaries, setDiaries] = useState<string[]>([]);
   const [justLogged, setJustLogged] = useState(false);
-  const [addedRecs, setAddedRecs] = useState<string[]>([]);
-  const [onbSelected, setOnbSelected] = useState<string[]>(DEFAULT_ONB);
-  const [onboarded, setOnboarded] = useState(false);
   const [supps, setSupps] = useState<Supplement[]>([]);
-  // Server-controlled; read-only on the client. Drives whether ads show.
-  const [subscribed, setSubscribed] = useState(false);
-  // Account creation time (ms). Drives "함께한 지 N일째" on the my page.
+  const [survey, setSurvey] = useState<StoredSurvey | null>(null);
+  const [onboarded, setOnboarded] = useState(false);
   const [createdAt, setCreatedAt] = useState<number | null>(null);
-  // Gamification: dates fully dosed, and the last day we reset daily `taken`.
   const [doseLog, setDoseLog] = useState<string[]>([]);
   const [lastActiveDate, setLastActiveDate] = useState<string>("");
+  const [notifyEnabled, setNotifyEnabled] = useState(false);
 
-  // Interstitial shown on level-up. prevLevelRef seeds after hydration so we
-  // never fire an ad just for loading into an existing level.
+  // No server means no verified purchase, so nothing can grant ad-free yet.
+  // Kept as a field so the ad gating below stays a single, obvious switch.
+  const subscribed = false;
+
   const { show: showLevelUpAd } = useInterstitial();
   const prevLevelRef = useRef<number | null>(null);
 
-  // ── hydrate from Firestore for this user ──
+  // ── hydrate from device storage ──
   useEffect(() => {
     let cancelled = false;
-    setHydrated(false);
     (async () => {
-      try {
-        const data = await loadUserData(uid);
-        if (cancelled) return;
-        if (data) {
-          const today = dayKey();
-          const base = data.supplements;
-          // New day since last open → clear the daily "taken" checkmarks.
-          const fresh =
-            data.lastActiveDate !== today
-              ? base.map((s) => ({ ...s, taken: false }))
-              : base;
-          setSupps(fresh);
-          setDiaries(data.diaries);
-          setOnbSelected(data.onbSelected);
-          setAddedRecs(data.addedRecs);
-          setOnboarded(data.onboarded);
-          setSubscribed(data.subscribed);
-          setCreatedAt(data.createdAt);
-          setDoseLog(data.doseLog);
-          setLastActiveDate(today);
-          setScreen(data.onboarded ? "home" : "onboarding");
-        } else {
-          // new account → seed an empty profile and start onboarding
-          const seed = {
-            supplements: [],
-            diaries: [],
-            onbSelected: DEFAULT_ONB,
-            addedRecs: [],
-            onboarded: false,
-            doseLog: [],
-            lastActiveDate: dayKey(),
-          };
-          await seedUserData(uid, seed);
-          if (cancelled) return;
-          setCreatedAt(Date.now());
-          setLastActiveDate(dayKey());
-          setScreen("onboarding");
-        }
-      } catch (e) {
-        console.warn("[app] hydrate failed", e);
-        // fall back to local defaults so the app still works offline
-      } finally {
-        if (!cancelled) setHydrated(true);
-      }
+      const p = await loadProfile();
+      if (cancelled) return;
+      const today = dayKey();
+      setSupps(
+        // New day since last open → clear the daily "taken" checkmarks.
+        p.lastActiveDate !== today
+          ? p.supplements.map((s) => ({ ...s, taken: false }))
+          : p.supplements
+      );
+      setDiaries(p.diaries);
+      setSurvey(p.survey);
+      setDoseLog(p.doseLog);
+      setLastActiveDate(today);
+      setOnboarded(p.onboarded);
+      setCreatedAt(p.createdAt);
+      setNotifyEnabled(p.notifyEnabled);
+      setScreen(p.onboarded ? "home" : "survey");
+      setHydrated(true);
     })();
     return () => {
       cancelled = true;
     };
-  }, [uid]);
+  }, []);
 
   // ── persist on change (debounced), only after hydration ──
   const firstWrite = useRef(true);
@@ -196,33 +209,28 @@ export function AppProvider({
       return; // skip the write triggered by hydration itself
     }
     const t = setTimeout(() => {
-      saveUserData(uid, {
+      saveProfile({
         supplements: supps,
         diaries,
-        onbSelected,
-        addedRecs,
-        onboarded,
+        survey,
         doseLog,
         lastActiveDate,
-      }).catch((e) => console.warn("[app] save failed", e));
+        onboarded,
+        createdAt: createdAt ?? Date.now(),
+        notifyEnabled,
+      });
     }, 400);
     return () => clearTimeout(t);
-  }, [
-    hydrated,
-    uid,
-    supps,
-    diaries,
-    onbSelected,
-    addedRecs,
-    onboarded,
-    doseLog,
-    lastActiveDate,
-  ]);
+  }, [hydrated, supps, diaries, survey, doseLog, lastActiveDate, onboarded, createdAt, notifyEnabled]);
+
+  // Reminders mirror the supplement list — rebuild whenever either changes.
+  useEffect(() => {
+    if (!hydrated) return;
+    syncReminders(supps, notifyEnabled);
+  }, [hydrated, supps, notifyEnabled]);
 
   const takenCount = useMemo(() => supps.filter((s) => s.taken).length, [supps]);
 
-  // When every supplement is checked off today, log today's date once — this is
-  // what feeds the streak and dosing XP.
   useEffect(() => {
     if (!hydrated) return;
     if (supps.length > 0 && takenCount === supps.length) {
@@ -231,21 +239,27 @@ export function AppProvider({
     }
   }, [hydrated, takenCount, supps.length]);
 
-  // Derived gamification state (pure functions of real events).
   const xp = useMemo(() => xpFrom(doseLog.length), [doseLog.length]);
   const levelInfo = useMemo(() => levelProgress(xp), [xp]);
   const streak = useMemo(() => computeStreak(doseLog), [doseLog]);
-  const unlockedExprs = useMemo(
-    () => unlockedKeys(levelInfo.level),
-    [levelInfo.level]
-  );
-  const nextUnlock = useMemo(
-    () => nextLocked(levelInfo.level),
-    [levelInfo.level]
-  );
+  const unlockedExprs = useMemo(() => unlockedKeys(levelInfo.level), [levelInfo.level]);
+  const nextUnlock = useMemo(() => nextLocked(levelInfo.level), [levelInfo.level]);
 
-  // Level-up → interstitial ad (a new face just unlocked). Subscribers skip
-  // ads; the first post-hydration run only records the baseline level.
+  // Recomputed from stored answers rather than stored itself: the engine is
+  // deterministic, so persisting the output would only risk it going stale
+  // against an updated supplement table.
+  const result = useMemo<SurveyResult | null>(() => {
+    if (!survey) return null;
+    // Recent diary entries ride along with the survey's own free text. They
+    // only nudge (see logic/freeText.ts), but it means the AI tab shifts a
+    // little as the user journals instead of being frozen at survey time.
+    const recentDiaries = diaries.slice(0, 7).join(" ");
+    return recommend(survey.answers, {
+      alreadyTaking: supps.map((s) => s.name),
+      freeText: `${survey.freeText} ${recentDiaries}`.trim(),
+    });
+  }, [survey, supps, diaries]);
+
   useEffect(() => {
     if (!hydrated) return;
     const lvl = levelInfo.level;
@@ -253,14 +267,11 @@ export function AppProvider({
       prevLevelRef.current = lvl;
       return;
     }
-    if (lvl > prevLevelRef.current && !subscribed) {
-      showLevelUpAd();
-    }
+    if (lvl > prevLevelRef.current && !subscribed) showLevelUpAd();
     prevLevelRef.current = lvl;
   }, [hydrated, levelInfo.level, subscribed, showLevelUpAd]);
 
   const submitDiary = () => {
-    // Clamp length as a safety net even if the input's maxLength is bypassed.
     const t = diary.trim().slice(0, 200);
     if (!t) return;
     setDiaries((prev) => [t, ...prev]);
@@ -269,80 +280,67 @@ export function AppProvider({
   };
 
   const toggleSupp = (i: number) =>
+    setSupps((prev) => prev.map((s, idx) => (idx === i ? { ...s, taken: !s.taken } : s)));
+
+  const removeSupp = (i: number) => setSupps((prev) => prev.filter((_, idx) => idx !== i));
+
+  const updateSupp = (i: number, patch: Partial<Supplement>) =>
+    setSupps((prev) => prev.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
+
+  const addByName = (name: string) => {
+    const trimmed = name.trim().slice(0, 40);
+    if (!trimmed) return;
     setSupps((prev) =>
-      prev.map((s, idx) => (idx === i ? { ...s, taken: !s.taken } : s))
-    );
-
-  const removeSupp = (i: number) =>
-    setSupps((prev) => prev.filter((_, idx) => idx !== i));
-
-  // Manual override of the AI-suggested intake time / dosage string.
-  const updateSuppTime = (i: number, time: string) =>
-    setSupps((prev) => prev.map((s, idx) => (idx === i ? { ...s, time } : s)));
-
-  // Adds a recommended supplement to the actual list (with the AI's suggested
-  // time + colour) and marks it added. Idempotent — ignores duplicates by name.
-  const addRec = (rec: { name: string; time: string; color: string }) => {
-    setAddedRecs((prev) =>
-      prev.includes(rec.name) ? prev : [...prev, rec.name]
-    );
-    setSupps((prev) =>
-      prev.some((s) => s.name === rec.name)
-        ? prev
-        : [
-            ...prev,
-            { name: rec.name, time: rec.time, color: rec.color, taken: false },
-          ]
+      prev.some((s) => s.name === trimmed) ? prev : [...prev, suppFromName(trimmed, prev.length)]
     );
   };
 
-  const toggleOnb = (name: string) =>
-    setOnbSelected((prev) =>
-      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
-    );
+  const completeSurvey = useCallback(
+    (answers: Answers, freeText: string, picks: Recommendation[]) => {
+      setSurvey({ answers, freeText, takenAt: Date.now() });
+      if (picks.length) {
+        setSupps((prev) => {
+          const have = new Set(prev.map((s) => s.name));
+          const added = picks
+            .filter((r) => !have.has(r.supplement.name))
+            .map((r, i) => suppFromRecommendation(r, prev.length + i));
+          return [...prev, ...added];
+        });
+      }
+      setOnboarded(true);
+      setScreen("home");
+    },
+    []
+  );
 
-  // Re-open onboarding to edit the list, starting with every currently-taken
-  // supplement pre-selected (so re-registration reflects the real state).
-  const reRegister = () => {
-    setOnbSelected(supps.map((s) => s.name));
-    setScreen("onboarding");
-  };
+  const startSurvey = useCallback(() => setScreen("survey"), []);
 
-  // Fallback pill colours for user-typed supplements (not in suppColor).
-  const FALLBACK_COLORS = [
-    colors.pink,
-    colors.cyan,
-    colors.mango,
-    colors.purple,
-    colors.yellow,
-  ];
+  const toggleNotify = useCallback(
+    async (on: boolean) => {
+      if (!on) {
+        setNotifyEnabled(false);
+        return false;
+      }
+      // Only claim reminders are on once the OS actually agreed.
+      const granted = await requestPermission();
+      setNotifyEnabled(granted);
+      return granted;
+    },
+    []
+  );
 
-  const completeOnboarding = (
-    timings?: Record<string, { time: string; color?: string }>
-  ) => {
-    // Turn the onboarding picks into the user's actual supplement list. Intake
-    // time + colour come from the AI timing pass when available, else fall back
-    // to sensible defaults. Only replace when something was chosen so we never
-    // wipe the list down to empty.
-    if (onbSelected.length) {
-      setSupps(
-        onbSelected.map((name, i) => {
-          const t = timings?.[name];
-          return {
-            name,
-            time: t?.time ?? "아침 식후 · 1정",
-            color:
-              t?.color ??
-              suppColor[name] ??
-              FALLBACK_COLORS[i % FALLBACK_COLORS.length],
-            taken: false,
-          };
-        })
-      );
-    }
-    setOnboarded(true);
-    setScreen("home");
-  };
+  const resetEverything = useCallback(async () => {
+    await clearProfile();
+    await syncReminders([], false);
+    setSupps([]);
+    setDiaries([]);
+    setSurvey(null);
+    setDoseLog([]);
+    setNotifyEnabled(false);
+    setOnboarded(false);
+    setCreatedAt(Date.now());
+    setScreen("survey");
+  }, []);
 
   const lastDiary = diaries[0] || "";
   const jellyMood: JellyMood = justLogged
@@ -356,7 +354,7 @@ export function AppProvider({
   const speech = justLogged
     ? "기록 고마워! 잘 기억해둘게 🥭"
     : takenCount < supps.length
-    ? `자기 전 영양제 ${supps.length - takenCount}개 남았어 🌙 잊지마!`
+    ? `오늘 영양제 ${supps.length - takenCount}개 남았어 🌙 잊지마!`
     : "오늘 영양제 다 챙겼어! 최고야 🎉";
 
   const value: AppState = {
@@ -370,19 +368,21 @@ export function AppProvider({
     supps,
     toggleSupp,
     removeSupp,
-    updateSuppTime,
+    updateSupp,
+    addByName,
     takenCount,
-    addedRecs,
-    addRec,
-    onbSelected,
-    toggleOnb,
-    reRegister,
-    completeOnboarding,
+    survey,
+    result,
+    completeSurvey,
+    startSurvey,
+    notifyEnabled,
+    toggleNotify,
     jellyMood,
     speech,
     progress: `${takenCount}/${supps.length}`,
     subscribed,
     createdAt,
+    resetEverything,
     level: levelInfo.level,
     xp,
     levelInfo,

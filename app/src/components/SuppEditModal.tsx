@@ -5,7 +5,7 @@ import { fonts } from "../theme/fonts";
 import { hardShadow } from "../theme/ui";
 
 // Edit a supplement's intake time + dosage. The AI fills these in by default
-// (see api/timing.ts); this lets the user override them. The stored value is a
+// (see data/supplements.ts); this lets the user override them. The stored value is a
 // single "시점 · N정" string, so we parse it in and re-compose it on save.
 const WHENS = ["아침 식후", "점심 식후", "저녁 식후", "공복", "자기 전"];
 
