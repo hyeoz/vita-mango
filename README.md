@@ -79,28 +79,63 @@ in `app.json`; nothing else is configured.
 
 ## How the recommendation works
 
-It is deterministic, offline, and unit-checked — the same answers always produce
-the same result.
+Deterministic, offline, and unit-checked — the same answers always produce the
+same result.
 
-1. **Answers → domain needs.** Each of the 44 scoring questions contributes
-   weight to one or more of 24 health domains (수면, 피로, 장 건강, 눈 …).
-   Scores are normalised per domain so a domain with four questions isn't twice
-   as loud as one with two. `그렇다` = 1.0, `모르겠다` = 0.3, `아니다` = 0.
-   Habit questions phrased positively ("채소를 매일 먹어요") are inverted, so it
-   is the *no* answer that signals a gap.
-2. **Needs → supplement fit.** Every supplement in `data/supplements.ts` declares
-   how well it covers each domain (0–1). Fit is the dot product, then multiplied
-   by an evidence weight (A = 1.0, B = 0.85, C = 0.68) so a well-studied option
-   outranks a trendy one at equal fit.
-3. **Safety filter.** The last 6 questions set exclusion flags — 임신·수유,
-   항응고제, 신장 질환, 갑상선약, 호르몬 민감 질환, 수술 예정. Supplements
-   listing a flag in `avoidIf` are dropped and the result says why; `warnIf`
-   attaches a caution instead. Prescription-only substances are never suggested.
-4. **Free text** nudges (max +0.15 per domain) and is echoed back as signal
-   chips. The survey is the instrument; the text box is colour.
+### The survey adapts
+
+Three stages, and only the first is asked in full:
+
+| stage | count | when |
+|---|---|---|
+| `screen` | 18 | always — one broad probe per area |
+| `deep` | 30 | only where the screener found something (`gate`) |
+| `safety` | 6 | only when a supplement still in contention cares |
+
+A typical profile answers **~25–32 questions**; someone who says yes to
+everything reaches the full bank. Length now reflects how much there is to know
+about *you*, not how much the form can hold.
+
+Deep questions are written to **discriminate**, not re-confirm. By the time they
+run the engine already knows you sleep badly; what it still needs is whether
+that's cramping legs (마그네슘), a racing mind (아슈와간다·테아닌), or trouble
+falling asleep at all.
+
+### Scoring
+
+1. **Answers → domain needs.** Each scoring question adds weight to one or more
+   of 24 domains, normalised per domain so 수면 (more questions) isn't louder
+   than 뼈 (fewer). `그렇다` = 1.0, `모르겠다` = 0.3, `아니다` = 0. Positively
+   phrased habit questions are inverted — the *no* is the signal.
+2. **Needs → value.** Value is mostly *absolute* coverage of your needs, nudged
+   by focus and damped by evidence grade (A = 1.0, B = 0.85, C = 0.68). The
+   obvious metric — "what fraction of this pill's abilities do you need" —
+   punishes broad products: a multivitamin covering three of five gaps would
+   score below a selenium tablet covering one gap perfectly. A dietitian ranks
+   by benefit delivered.
+3. **Overlap discounting.** Picks are greedy, and each one saturates the needs
+   it covers before the next is scored. Without this, answering "잠을 못 자요"
+   returns five sleep aids. The displayed percentage *is* the marginal score, so
+   the order on screen always matches the numbers on screen; a card discounted
+   by overlap says which earlier pick covers the same ground and what it scored
+   on its own.
+4. **Safety filter.** `avoidIf` drops the supplement with a stated reason;
+   `warnIf` attaches a caution. Prescription-only substances are never suggested.
+5. **Free text** nudges (max +0.15 per domain) and is echoed back as chips. The
+   survey is the instrument; the text box is colour.
 
 The 3-second "analysing" screen is deliberate theatre — the engine finishes in
 under a millisecond.
+
+### The radar
+
+24 domains is the right resolution for scoring and the wrong one for a chart, so
+they roll up into six macro axes — 활력·집중, 면역·항산화, 순환·대사,
+수면·스트레스, 근골격, 장·피부. The chart shows **capability** (higher is
+better) on a 30–100 band, with a dashed overlay projecting where the selected
+supplements would take each axis. Ticking a card off shrinks the overlay live.
+여성/남성 건강 stay off the radar — sex-specific rather than universal — and
+surface as chips instead.
 
 Run the regression check after editing either table:
 
@@ -108,8 +143,9 @@ Run the regression check after editing either table:
 cd app && npm run verify:engine
 ```
 
-It asserts domain coverage, alias collisions, safety exclusions actually
-excluding, and that known archetypes still get sensible top picks.
+It asserts stage coverage, gates that nothing can open, alias collisions, axis
+mapping, safety exclusions actually excluding, that a sleep complaint doesn't
+return an all-sleep list, and that known archetypes still get sensible top picks.
 
 ## Data model (on-device)
 
