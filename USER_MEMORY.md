@@ -23,4 +23,7 @@
 
 ## 프로젝트별 메모
 
-- 아직 기록된 프로젝트별 피드백 없음.
+- 개인정보처리방침과 공통 지원 페이지는 별도 `hyeoz/privacy` 저장소의 GitHub Pages에서 운영한다.
+- AdMob `app-ads.txt`는 `hyeoz/hyeoz.github.io` 루트 GitHub Pages에서 운영한다.
+- 앱은 계정·Firebase 백엔드 없이 기기 내 저장만 사용하며, 기존 `vita-mango` Firebase 프로젝트는 삭제 예약했다.
+- iOS 릴리스는 앱 코드 정리를 먼저 완료하고 TestFlight 내부 테스트에서 사용자가 확인한 뒤, App Store Connect 메타데이터·개인정보·심사 정보를 작성하고 제출한다.

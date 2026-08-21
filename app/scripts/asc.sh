@@ -38,12 +38,9 @@ export ASC_BYPASS_KEYCHAIN=1
 export ASC_STRICT_AUTH=true
 export ASC_TELEMETRY_DISABLED=1
 
-# app/.env also contains runtime and backend settings. Keep the App Store
-# Connect subprocess scoped to only the credentials and options it needs.
+# Keep the App Store Connect subprocess scoped to only the credentials and
+# options it needs.
 unset APPLE_TEAM_ID
-unset EXPO_PUBLIC_API_URL
-unset EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID
-unset GEMINI_API_KEY
 unset PLAY_JSON_KEY_PATH
 
 exec "${ASC_BIN}" "$@"

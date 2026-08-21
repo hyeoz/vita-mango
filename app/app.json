@@ -14,7 +14,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.vitamango.app",
-      "buildNumber": "12",
+      "buildNumber": "14",
       "config": {
         "usesNonExemptEncryption": false
       }
@@ -101,6 +101,7 @@
         }
       ],
       "./plugins/withDevelopmentTeam",
+      "./plugins/withLocalNotificationsOnly",
       [
         "expo-notifications",
         {

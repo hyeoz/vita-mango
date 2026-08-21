@@ -54,6 +54,45 @@ def bump_android_build!
   UI.success("Bumped → Android versionCode #{android['versionCode']} (v#{app_version})")
 end
 
+# App Review contact info.
+#
+# Apple has no appStoreReviewDetail record for a brand-new app until it is saved
+# once. deliver's `review_attachment_file` calls `fetch_app_store_review_detail`
+# WITHOUT a rescue (upload_metadata.rb:751), so a missing record blows up the
+# whole upload with a bare `[!] No data (RuntimeError)`. `review_information`
+# runs just before it and *creates* the record when we pass this hash — so
+# always pass it.
+REVIEW_NOTES = <<~NOTES.strip
+  No account or demo credentials are needed. On first launch the app opens the
+  adaptive survey; completing or skipping it leads directly to the full app.
+  Supplements, dose history, diary entries, survey answers, and Jelly growth
+  stay on the device and can be deleted from My Page.
+
+  Supplement suggestions are computed deterministically on device from bundled
+  general-wellness reference data. They do not diagnose or prescribe. The app
+  shows a disclaimer and tells users who are pregnant, taking medication, or
+  managing a condition to consult a qualified professional.
+NOTES
+
+def app_review_information_hash
+  info = {
+    first_name: ENV["ASC_REVIEW_FIRST_NAME"],
+    last_name: ENV["ASC_REVIEW_LAST_NAME"],
+    phone_number: ENV["ASC_REVIEW_PHONE"],
+    email_address: ENV["ASC_REVIEW_EMAIL"],
+    notes: ENV["ASC_REVIEW_NOTES"] || REVIEW_NOTES
+  }
+  missing = info.reject { |k, _| k == :notes }.select { |_, v| v.to_s.strip.empty? }.keys
+  unless missing.empty?
+    UI.user_error!(
+      "App Review \uC5F0\uB77D\uCC98\uAC00 \uBE44\uC5B4 \uC788\uC2B5\uB2C8\uB2E4 (#{missing.join(', ')}). " \
+      "app/.env \uC5D0 ASC_REVIEW_FIRST_NAME / ASC_REVIEW_LAST_NAME / " \
+      "ASC_REVIEW_PHONE / ASC_REVIEW_EMAIL \uB97C \uCC44\uC6B0\uACE0 \uB2E4\uC2DC \uC2E4\uD589\uD558\uC138\uC694."
+    )
+  end
+  info
+end
+
 # Resolve ASC_KEY_PATH to an ABSOLUTE path (xcodebuild rejects relative ones),
 # trying it as-is and relative to the app dir / repo root.
 def asc_key_path
@@ -216,6 +255,7 @@ platform :ios do
       automatic_release: false,
       force: true,
       run_precheck_before_submit: false,
+      app_review_information: app_review_information_hash,
       submission_information: {
         add_id_info_uses_idfa: true,
         add_id_info_serves_ads: true,
@@ -230,8 +270,10 @@ platform :ios do
 
   desc "Upload the already-built .ipa to TestFlight (no rebuild)"
   lane :upload do
-    ipa = File.join(APP_DIR, "build", "app.ipa")
-    UI.user_error!("No .ipa at #{ipa} — run `fastlane ios beta` first") unless File.exist?(ipa)
+    candidates = ["vita-mango.ipa", "app.ipa"].map { |n| File.join(APP_DIR, "build", n) }
+    ipa = candidates.find { |path| File.exist?(path) }
+    UI.user_error!("No .ipa in #{File.join(APP_DIR, 'build')} — run `fastlane ios beta` first") unless ipa
+    UI.message("Uploading #{File.basename(ipa)}")
     upload_to_testflight(
       api_key: asc_api_key,
       ipa: ipa,

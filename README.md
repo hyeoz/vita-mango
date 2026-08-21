@@ -10,21 +10,20 @@ This is the real implementation of the design exported from Claude Design
 
 ```
 app/      Expo React Native app (TypeScript) — the entire product
-public/   Static privacy policy + app-ads.txt (Firebase Hosting, free tier)
 project/  Original Claude Design HTML/CSS prototype (reference only)
 chats/    The design conversation that produced the prototype
 ```
 
 ## Features
 
-- **50-question survey** (그렇다 / 모르겠다 / 아니다) that profiles you across 24
+- **Adaptive survey** (그렇다 / 모르겠다 / 아니다) that profiles you across 24
   health domains and recommends from a bundled table of **53 supplements**,
   ranked by fit and damped by how strong the clinical evidence is.
-- **No account, no server, no network** — answers, supplements, doses, diaries
-  and progress live only on the device.
+- **No account or app backend** — answers, supplements, doses, diaries and
+  progress live only on the device. AdMob is the only networked SDK.
 - **Local reminders** — a daily repeating notification per supplement, with its
   own time you can adjust.
-- **5 screens**: 설문 · 홈 · 기록(한 줄 일기) · AI추천 · 젤리(마이페이지), in the
+- **5 screens**: 설문 · 홈 · 기록(한 줄 일기) · 맞춤추천 · 젤리(마이페이지), in the
   design's chunky-outline / vivid-pill style.
 - **Jelly mascot** — expressions, idle bob + blink, and a squishy heart-burst on
   tap. Its home-screen mood reflects the day's state.
@@ -48,10 +47,8 @@ chats/    The design conversation that produced the prototype
               └─▶ Google Mobile Ads (the only external SDK)
 ```
 
-Everything the app knows is bundled text plus device storage. The one remaining
-piece of hosting is `public/` — a static privacy policy and `app-ads.txt`, served
-free from Firebase Hosting because the App Store needs a privacy URL and AdMob
-verifies `app-ads.txt`.
+Everything the app knows is bundled text plus device storage. Privacy and
+support pages live in the separate `hyeoz/privacy` GitHub Pages repository.
 
 > **Note on the workflow:** the app runs in a **custom dev build**, not Expo Go
 > (AdMob and notifications are native modules). Once installed, JS changes still
