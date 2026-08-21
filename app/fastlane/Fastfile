@@ -268,6 +268,106 @@ platform :ios do
     UI.success("Uploaded v#{app_version} and requested App Review (manual release after approval).")
   end
 
+  desc "Submit the already-uploaded current iOS build for App Review"
+  lane :submit do
+    key = asc_api_key
+    ensure_connect_app!(key)
+    build_number = app_json.dig("expo", "ios", "buildNumber")
+    UI.user_error!("No iOS build number in app.json") if build_number.to_s.strip.empty?
+
+    upload_to_app_store(
+      api_key: key,
+      app_identifier: APP_IDENTIFIER,
+      app_version: app_version,
+      build_number: build_number,
+      skip_binary_upload: true,
+      skip_metadata: false,
+      metadata_path: File.join(APP_DIR, "fastlane", "metadata"),
+      skip_screenshots: false,
+      screenshots_path: File.join(APP_DIR, "fastlane", "screenshots"),
+      overwrite_screenshots: true,
+      submit_for_review: true,
+      automatic_release: false,
+      force: true,
+      run_precheck_before_submit: false,
+      app_review_information: app_review_information_hash,
+      submission_information: {
+        add_id_info_uses_idfa: true,
+        add_id_info_serves_ads: true,
+        add_id_info_tracks_action: false,
+        add_id_info_tracks_install: false,
+        add_id_info_limits_tracking: true,
+        export_compliance_uses_encryption: false
+      }
+    )
+    UI.success("Submitted v#{app_version} (build #{build_number}) for App Review with manual release after approval.")
+  end
+
+  desc "Replace App Store screenshots and resubmit the same build for review"
+  lane :screenshots do
+    key = asc_api_key
+    ensure_connect_app!(key)
+    build_number = app_json.dig("expo", "ios", "buildNumber")
+    sh("cd #{APP_DIR.shellescape} && bundle exec ruby scripts/replace-ios-store-screenshots.rb")
+    upload_to_app_store(
+      api_key: key,
+      app_identifier: APP_IDENTIFIER,
+      app_version: app_version,
+      build_number: build_number,
+      skip_binary_upload: true,
+      skip_metadata: false,
+      metadata_path: File.join(APP_DIR, "fastlane", "metadata"),
+      skip_screenshots: true,
+      submit_for_review: true,
+      automatic_release: false,
+      force: true,
+      run_precheck_before_submit: false,
+      app_review_information: app_review_information_hash,
+      submission_information: {
+        add_id_info_uses_idfa: true,
+        add_id_info_serves_ads: true,
+        add_id_info_tracks_action: false,
+        add_id_info_tracks_install: false,
+        add_id_info_limits_tracking: true,
+        export_compliance_uses_encryption: false
+      }
+    )
+    UI.success("Replaced App Store screenshots and resubmitted v#{app_version} (build #{build_number}) for review.")
+  end
+
+  desc "Resubmit the current iOS build without modifying screenshots"
+  lane :resubmit do
+    key = asc_api_key
+    ensure_connect_app!(key)
+    build_number = app_json.dig("expo", "ios", "buildNumber")
+    UI.user_error!("No iOS build number in app.json") if build_number.to_s.strip.empty?
+
+    upload_to_app_store(
+      api_key: key,
+      app_identifier: APP_IDENTIFIER,
+      app_version: app_version,
+      build_number: build_number,
+      skip_binary_upload: true,
+      skip_metadata: false,
+      metadata_path: File.join(APP_DIR, "fastlane", "metadata"),
+      skip_screenshots: true,
+      submit_for_review: true,
+      automatic_release: false,
+      force: true,
+      run_precheck_before_submit: false,
+      app_review_information: app_review_information_hash,
+      submission_information: {
+        add_id_info_uses_idfa: true,
+        add_id_info_serves_ads: true,
+        add_id_info_tracks_action: false,
+        add_id_info_tracks_install: false,
+        add_id_info_limits_tracking: true,
+        export_compliance_uses_encryption: false
+      }
+    )
+    UI.success("Resubmitted v#{app_version} (build #{build_number}) without changing screenshots.")
+  end
+
   desc "Upload the already-built .ipa to TestFlight (no rebuild)"
   lane :upload do
     candidates = ["vita-mango.ipa", "app.ipa"].map { |n| File.join(APP_DIR, "build", n) }
