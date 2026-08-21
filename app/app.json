@@ -101,6 +101,7 @@
         }
       ],
       "./plugins/withDevelopmentTeam",
+      "./plugins/withLocalNotificationsOnly",
       [
         "expo-notifications",
         {
