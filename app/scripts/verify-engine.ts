@@ -19,6 +19,15 @@ import { AXES, AXIS_DOMAINS, DOMAIN_AXIS } from "../src/data/axes";
 import { SUPPLEMENTS, findSupplement, normalizeName } from "../src/data/supplements";
 import { DOMAIN_LABELS, TIME_SLOTS, type Domain, type SafetyFlag } from "../src/data/types";
 import { recommend, type Answers } from "../src/logic/recommend";
+import {
+  COLLECTIBLES,
+  DOSE_XP,
+  XP_PER_LEVEL,
+  computeStreak,
+  levelProgress,
+  unlockedKeys,
+  xpFrom,
+} from "../src/state/gamification";
 
 const ALL_DOMAINS = Object.keys(DOMAIN_LABELS) as Domain[];
 const COLORS = ["pink", "purple", "yellow", "orange", "cyan", "mixed"];
@@ -250,6 +259,30 @@ check(
     ["마그네슘", "아슈와간다"].includes(r.supplement.name)
   )
 );
+
+section("게이미피케이션");
+check("완전 복용일 XP = 10", DOSE_XP === 10 && xpFrom(10) === 100);
+check("레벨 간격 = 100 XP", XP_PER_LEVEL === 100);
+check("신규 사용자는 Lv.1", levelProgress(0).level === 1);
+check("100 XP에서 Lv.2", levelProgress(100).level === 2);
+const maxLevel = levelProgress(800);
+check("800 XP에서 Lv.9 최대 레벨", maxLevel.level === 9 && maxLevel.isMax);
+check("표정 도감은 Lv.1~9에 하나씩", COLLECTIBLES.length === 9 && COLLECTIBLES.every((c, i) => c.minLevel === i + 1));
+check("Lv.1 기본 표정 하나 해금", unlockedKeys(1).length === 1 && unlockedKeys(1)[0] === "happy");
+check("Lv.9에서 전체 표정 해금", unlockedKeys(9).length === COLLECTIBLES.length);
+check(
+  "오늘까지 연속 복용 스트릭",
+  computeStreak(["2026-08-18", "2026-08-19", "2026-08-20"], "2026-08-20") === 3
+);
+check(
+  "오늘 미복용이어도 어제까지 스트릭 유지",
+  computeStreak(["2026-08-18", "2026-08-19", "2026-08-20"], "2026-08-21") === 3
+);
+check(
+  "중간 공백이 있으면 현재 연속일만 계산",
+  computeStreak(["2026-08-18", "2026-08-20"], "2026-08-20") === 1
+);
+check("복용 기록 없음 = 스트릭 0", computeStreak([], "2026-08-20") === 0);
 
 console.log(
   failures === 0

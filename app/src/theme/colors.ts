@@ -21,7 +21,7 @@ export const colors = {
   shadowSoft: "rgba(43,35,53,0.18)",
 };
 
-// Maps a colour key returned by the AI backend to a real pill colour.
+// Maps a supplement data colour key to a real pill colour.
 // `mixed` is the split pink/purple capsule used for 오메가-3.
 export const pillColor: Record<string, string> = {
   pink: colors.pink,

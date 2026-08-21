@@ -57,7 +57,7 @@ type FloatingProps = {
   drift?: number; // vertical drift px
 };
 
-// A vivid pill that bobs and rotates behind the character on the home/AI screens.
+// A vivid pill that bobs and rotates behind the character on the home/recommendation screens.
 export function FloatingPill({
   color,
   size,

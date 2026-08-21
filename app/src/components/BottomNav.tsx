@@ -8,7 +8,7 @@ import { useApp, Screen } from "../state/AppContext";
 const TABS: { key: Screen; icon: string; label: string }[] = [
   { key: "home", icon: "🏠", label: "홈" },
   { key: "record", icon: "📔", label: "기록" },
-  { key: "ai", icon: "🔮", label: "AI추천" },
+  { key: "ai", icon: "🔮", label: "맞춤추천" },
   { key: "my", icon: "🥭", label: "마이" },
 ];
 

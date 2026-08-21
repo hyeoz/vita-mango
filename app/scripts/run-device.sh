@@ -3,11 +3,8 @@
 # Dev build onto a physical iOS device (not the simulator).
 #
 # What it does:
-#   1. Detects this Mac's LAN IP so the device can reach Metro + the Claude
-#      backend over Wi-Fi (localhost doesn't work from a real device).
-#   2. Auto-selects the connected physical iPhone/iPad (or honours DEVICE_ID).
-#   3. Runs the Expo dev build (`expo run:ios --device`), pointing the app's
-#      API base URL at this Mac.
+#   1. Auto-selects the connected physical iPhone/iPad (or honours DEVICE_ID).
+#   2. Runs the Expo dev build (`expo run:ios --device`).
 #
 # Usage:
 #   npm run ios:device                 # build, install, and start Metro
@@ -15,8 +12,6 @@
 #
 # Overrides (env vars):
 #   DEVICE_ID=<udid>   pick a specific device (see: xcrun xctrace list devices)
-#   API_HOST=<ip>      override the auto-detected LAN IP
-#   API_PORT=<port>    backend port (default 4000)
 #
 set -euo pipefail
 
@@ -31,15 +26,6 @@ for arg in "$@"; do
     *) echo "unknown option: $arg" >&2; exit 2 ;;
   esac
 done
-
-# --- LAN IP (for Metro + backend reachable from the device) ------------------
-API_HOST="${API_HOST:-$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || true)}"
-if [ -z "$API_HOST" ]; then
-  echo "❌ Wi-Fi LAN IP를 못 찾았어요. Wi-Fi 연결을 확인하거나 API_HOST=<ip>로 지정하세요." >&2
-  exit 1
-fi
-API_PORT="${API_PORT:-4000}"
-API_URL="http://${API_HOST}:${API_PORT}"
 
 # --- pick the physical device ------------------------------------------------
 # xctrace lists real devices before the "== Simulators ==" section. Physical
@@ -67,15 +53,13 @@ fi
 
 # --- build -------------------------------------------------------------------
 echo "📱 기기: $DEVICE_ID"
-echo "🌐 API/Metro 호스트: $API_URL"
 [ "$BUILD_ONLY" -eq 1 ] && echo "🔧 빌드 전용 (Metro 미실행)"
 echo
 
 NO_BUNDLER=""
 [ "$BUILD_ONLY" -eq 1 ] && NO_BUNDLER="--no-bundler"
 
-EXPO_PUBLIC_API_URL="$API_URL" \
-  npx expo run:ios --device "$DEVICE_ID" $NO_BUNDLER
+npx expo run:ios --device "$DEVICE_ID" $NO_BUNDLER
 
 echo
 echo "✅ 완료. 무료 Apple ID로 서명했다면 기기에서 설정 → 일반 → VPN 및 기기 관리 → 개발자 앱 '신뢰'가 필요할 수 있어요."

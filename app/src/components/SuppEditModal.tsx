@@ -4,7 +4,7 @@ import { colors } from "../theme/colors";
 import { fonts } from "../theme/fonts";
 import { hardShadow } from "../theme/ui";
 
-// Edit a supplement's intake time + dosage. The AI fills these in by default
+// Edit a supplement's intake time + dosage. The recommendation table fills these in by default
 // (see data/supplements.ts); this lets the user override them. The stored value is a
 // single "시점 · N정" string, so we parse it in and re-compose it on save.
 const WHENS = ["아침 식후", "점심 식후", "저녁 식후", "공복", "자기 전"];
@@ -43,7 +43,7 @@ export default function SuppEditModal({
     setCount(p.count);
   }, [visible, time]);
 
-  // Keep an AI-picked time that isn't one of the presets selectable.
+  // Keep a recommended time that isn't one of the presets selectable.
   const whens = WHENS.includes(when) ? WHENS : [when, ...WHENS];
 
   return (

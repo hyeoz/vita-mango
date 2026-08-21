@@ -251,7 +251,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const result = useMemo<SurveyResult | null>(() => {
     if (!survey) return null;
     // Recent diary entries ride along with the survey's own free text. They
-    // only nudge (see logic/freeText.ts), but it means the AI tab shifts a
+    // only nudge (see logic/freeText.ts), but it means the recommendation tab shifts a
     // little as the user journals instead of being frozen at survey time.
     const recentDiaries = diaries.slice(0, 7).join(" ");
     return recommend(survey.answers, {

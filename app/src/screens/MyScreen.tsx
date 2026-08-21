@@ -266,7 +266,7 @@ export default function MyScreen() {
 
         <Pressable
           style={styles.privacy}
-          onPress={() => Linking.openURL("https://vita-mango.web.app/privacy.html")}
+          onPress={() => Linking.openURL("https://hyeoz.github.io/privacy/vitamango/")}
           accessibilityRole="link"
         >
           <Text style={styles.privacyText}>개인정보처리방침</Text>
