@@ -5,7 +5,7 @@
     "en-US": "Stability improvements and bug fixes. Enjoy a smoother 비타망고!"
   },
   "1.0.0": {
-    "ko": "비타망고 첫 출시! 젤리와 함께 영양제를 기록하고, 맞춤 추천과 복용 알림까지 챙겨보세요 🍮",
-    "en-US": "비타망고 is here — track supplements with Jelly, get on-device personalized suggestions, and keep up with reminders."
+    "ko": "스플래시 애니메이션을 복원하고, 마이에서 53종 영양제를 검색·카테고리별로 골라 직접 추가할 수 있어요. 중복 추가도 막았어요 🥭",
+    "en-US": "Restored the animated splash and added manual supplement selection with search, category filters, and duplicate prevention."
   }
 }

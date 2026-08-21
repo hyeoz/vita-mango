@@ -16,6 +16,7 @@ import { hardShadow } from "../theme/ui";
 import Jelly from "../components/Jelly";
 import { PillSwatch } from "../components/Pill";
 import Bouncy from "../components/Bouncy";
+import SupplementPickerModal from "../components/SupplementPickerModal";
 import { useApp } from "../state/AppContext";
 import { COLLECTIBLES } from "../state/gamification";
 import { useAds } from "../ads/AdsContext";
@@ -31,12 +32,14 @@ export default function MyScreen() {
     nextUnlock,
     unlockedExprs,
     startSurvey,
+    addByName,
     updateSupp,
     notifyEnabled,
     toggleNotify,
     resetEverything,
   } = useApp();
   const { privacyOptionsRequired, showPrivacyOptions } = useAds();
+  const [pickerOpen, setPickerOpen] = React.useState(false);
   // No account means no profile name to greet with — the mascot's name it is.
   const nickname = "젤리";
 
@@ -260,9 +263,34 @@ export default function MyScreen() {
           )}
         </View>
 
-        <Bouncy style={styles.reset} haptic="medium" onPress={startSurvey}>
-          <Text style={styles.resetText}>🔮 영양제 추천 다시 받기</Text>
-        </Bouncy>
+        <View style={styles.actionRow}>
+          <Bouncy style={styles.actionButton} haptic="medium" onPress={startSurvey}>
+            <Text style={styles.actionIcon}>🔮</Text>
+            <Text
+              style={styles.actionText}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.88}
+            >
+              영양제 추천 다시 받기
+            </Text>
+          </Bouncy>
+          <Bouncy
+            style={[styles.actionButton, styles.actionButtonAdd]}
+            haptic="medium"
+            onPress={() => setPickerOpen(true)}
+          >
+            <Text style={styles.actionIcon}>💊</Text>
+            <Text
+              style={styles.actionText}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.88}
+            >
+              영양제 직접 추가하기
+            </Text>
+          </Bouncy>
+        </View>
 
         <Pressable
           style={styles.privacy}
@@ -298,6 +326,13 @@ export default function MyScreen() {
           <Text style={styles.deleteAccountText}>모든 데이터 삭제</Text>
         </Pressable>
       </ScrollView>
+
+      <SupplementPickerModal
+        visible={pickerOpen}
+        existingNames={supps.map((s) => s.name)}
+        onAdd={addByName}
+        onClose={() => setPickerOpen(false)}
+      />
     </LinearGradient>
   );
 }
@@ -403,9 +438,13 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   gaugeFill: { height: "100%", backgroundColor: colors.mango },
-  reset: {
-    marginTop: 16,
-    height: 46,
+  actionRow: { flexDirection: "row", gap: 10, marginTop: 16 },
+  actionButton: {
+    flex: 1,
+    minHeight: 70,
+    flexDirection: "row",
+    gap: 4,
+    paddingHorizontal: 6,
     borderWidth: 2.5,
     borderColor: colors.ink,
     borderRadius: 16,
@@ -414,7 +453,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     ...hardShadow(3, 4),
   },
-  resetText: { fontFamily: fonts.display, fontSize: 14, color: colors.ink },
+  actionButtonAdd: { backgroundColor: "#eafcff" },
+  actionIcon: { fontSize: 16 },
+  actionText: {
+    flexShrink: 1,
+    fontFamily: fonts.display,
+    fontSize: 12,
+    lineHeight: 16,
+    color: colors.ink,
+  },
   logout: { marginTop: 14, alignItems: "center", paddingVertical: 6 },
   logoutText: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
   privacy: { alignItems: "center", paddingVertical: 7 },

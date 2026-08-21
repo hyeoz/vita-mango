@@ -9,12 +9,14 @@
     "newArchEnabled": true,
     "icon": "./assets/icon.png",
     "splash": {
-      "backgroundColor": "#fff4ea"
+      "image": "./assets/splash-jelly.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#fff2d6"
     },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.vitamango.app",
-      "buildNumber": "14",
+      "buildNumber": "17",
       "config": {
         "usesNonExemptEncryption": false
       }
@@ -106,6 +108,14 @@
         "expo-notifications",
         {
           "color": "#ffb43d"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#fff2d6",
+          "image": "./assets/splash-jelly.png",
+          "imageWidth": 220
         }
       ]
     ]
