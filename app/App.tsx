@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import * as NativeSplashScreen from "expo-splash-screen";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts, Jua_400Regular } from "@expo-google-fonts/jua";
 import { GowunDodum_400Regular } from "@expo-google-fonts/gowun-dodum";
@@ -16,6 +17,14 @@ import AiScreen from "./src/screens/AiScreen";
 import MyScreen from "./src/screens/MyScreen";
 import SurveyScreen from "./src/screens/SurveyScreen";
 import SplashScreen from "./src/screens/SplashScreen";
+
+// The branded splash animation runs on a 3.4 second cycle. Keep it on screen
+// for one complete cycle even when the bundled fonts resolve immediately.
+const MIN_SPLASH_MS = 3400;
+
+// Keep the native launch screen mounted until React has painted the animated
+// splash. This avoids a blank frame between the two splash layers on cold start.
+NativeSplashScreen.preventAutoHideAsync().catch(() => {});
 
 // There is no account and no backend: the survey, the supplement list, and the
 // reminders all live on the device. That removes the login gate entirely — the
@@ -46,10 +55,23 @@ export default function App() {
     Jua_400Regular,
     GowunDodum_400Regular,
   });
+  const [minimumSplashElapsed, setMinimumSplashElapsed] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMinimumSplashElapsed(true), MIN_SPLASH_MS);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+    NativeSplashScreen.hideAsync().catch(() => {});
+  }, [loaded]);
+
+  const ready = loaded && minimumSplashElapsed;
 
   return (
     <SafeAreaProvider>
-      {loaded ? (
+      {ready ? (
         <AdsProvider>
           {/* Full-bleed: each screen paints its own gradient edge-to-edge and
               applies safe-area insets to its own content. */}

@@ -29,7 +29,31 @@ Local build → upload to TestFlight with release notes
 [bundle exec] fastlane ios production
 ```
 
-After the initial App Store Connect app is created: local archive → upload → submit for App Review
+One command after initial ASC app creation: local archive → upload → submit for App Review
+
+### ios submit
+
+```sh
+[bundle exec] fastlane ios submit
+```
+
+Submit the already-uploaded current iOS build for App Review
+
+### ios screenshots
+
+```sh
+[bundle exec] fastlane ios screenshots
+```
+
+Replace App Store screenshots and resubmit the same build for review
+
+### ios resubmit
+
+```sh
+[bundle exec] fastlane ios resubmit
+```
+
+Resubmit the current iOS build without modifying screenshots
 
 ### ios upload
 
