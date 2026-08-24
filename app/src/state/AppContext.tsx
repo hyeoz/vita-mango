@@ -7,7 +7,8 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+// Aliased: `AppState` is already this file's own context-value type.
+import { ActivityIndicator, AppState as RNAppState, StyleSheet, View } from "react-native";
 import { colors, suppColor } from "../theme/colors";
 import {
   clearProfile,
@@ -16,7 +17,7 @@ import {
   type StoredSupplement,
   type StoredSurvey,
 } from "../storage/local";
-import { syncReminders, requestPermission } from "../notifications/reminders";
+import { syncReminders, requestPermission, setTakenToday } from "../notifications/reminders";
 import { recommend, type Answers, type Recommendation, type SurveyResult } from "../logic/recommend";
 import { findSupplement } from "../data/supplements";
 import { TIME_SLOTS } from "../data/types";
@@ -164,6 +165,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [doseLog, setDoseLog] = useState<string[]>([]);
   const [lastActiveDate, setLastActiveDate] = useState<string>("");
   const [notifyEnabled, setNotifyEnabled] = useState(false);
+  // Bumped to force a reminder rebuild when nothing in the list changed but the
+  // *clock* did — see the foreground effect below.
+  const [resyncTick, setResyncTick] = useState(0);
+  // Mirrors `lastActiveDate` so the rollover check can read it without making
+  // every listener re-subscribe on each state change.
+  const lastActiveRef = useRef("");
 
   // No server means no verified purchase, so nothing can grant ad-free yet.
   // Kept as a field so the ad gating below stays a single, obvious switch.
@@ -189,6 +196,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setSurvey(p.survey);
       setDoseLog(p.doseLog);
       setLastActiveDate(today);
+      lastActiveRef.current = today;
       setOnboarded(p.onboarded);
       setCreatedAt(p.createdAt);
       setNotifyEnabled(p.notifyEnabled);
@@ -223,11 +231,58 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => clearTimeout(t);
   }, [hydrated, supps, diaries, survey, doseLog, lastActiveDate, onboarded, createdAt, notifyEnabled]);
 
-  // Reminders mirror the supplement list — rebuild whenever either changes.
+  // ── day rollover ──
+  // Today's checkmarks are what suppress today's reminders, so they have to be
+  // cleared the moment the date changes — otherwise yesterday's "다 먹었어"
+  // would silence today's reminders too. Cold start handles this during
+  // hydration; this covers an app that was merely backgrounded, or left open
+  // across midnight.
+  const rollOverIfNeeded = useCallback(() => {
+    const today = dayKey();
+    if (lastActiveRef.current === today) return;
+    lastActiveRef.current = today;
+    setLastActiveDate(today);
+    setSupps((prev) =>
+      prev.some((s) => s.taken) ? prev.map((s) => ({ ...s, taken: false })) : prev
+    );
+  }, []);
+
   useEffect(() => {
     if (!hydrated) return;
-    syncReminders(supps, notifyEnabled);
-  }, [hydrated, supps, notifyEnabled]);
+    const sub = RNAppState.addEventListener("change", (next) => {
+      if (next !== "active") return;
+      rollOverIfNeeded();
+      // Even with an unchanged list the right schedule may have changed: a
+      // supplement taken before its time got a one-off for tomorrow, and once
+      // that time passes it can go back to a self-sustaining daily trigger.
+      setResyncTick((t) => t + 1);
+    });
+    // A minute-granular heartbeat catches midnight while the app is open. It is
+    // a string compare on a no-op day, and iOS suspends JS in the background, so
+    // this costs nothing when it has nothing to do.
+    const midnight = setInterval(rollOverIfNeeded, 60_000);
+    return () => {
+      sub.remove();
+      clearInterval(midnight);
+    };
+  }, [hydrated, rollOverIfNeeded]);
+
+  // Reminders mirror the supplement list *and* today's checkmarks — rebuild
+  // whenever either changes. Debounced because `taken` now feeds the schedule,
+  // and ticking several supplements off in a row would otherwise mean several
+  // full cancel-and-rebuild passes through the native module.
+  useEffect(() => {
+    if (!hydrated) return;
+    const t = setTimeout(() => {
+      syncReminders(supps, notifyEnabled);
+    }, 400);
+    return () => clearTimeout(t);
+  }, [hydrated, supps, notifyEnabled, resyncTick]);
+
+  // Keep the foreground handler's view of "already taken" current.
+  useEffect(() => {
+    setTakenToday(supps.filter((s) => s.taken).map((s) => s.name));
+  }, [supps]);
 
   const takenCount = useMemo(() => supps.filter((s) => s.taken).length, [supps]);
 

@@ -28,6 +28,7 @@ import {
   unlockedKeys,
   xpFrom,
 } from "../src/state/gamification";
+import { planReminder, planReminders, type ReminderInput } from "../src/notifications/schedule";
 
 const ALL_DOMAINS = Object.keys(DOMAIN_LABELS) as Domain[];
 const COLORS = ["pink", "purple", "yellow", "orange", "cyan", "mixed"];
@@ -283,6 +284,68 @@ check(
   computeStreak(["2026-08-18", "2026-08-20"], "2026-08-20") === 1
 );
 check("복용 기록 없음 = 스트릭 0", computeStreak([], "2026-08-20") === 0);
+
+// ── reminders ────────────────────────────────────────────────────────────────
+// Local notifications freeze their content at scheduling time, so "이미 먹은 건
+// 알리지 않는다" is decided here. What must never break: skipping today can't
+// skip tomorrow, and a supplement whose slot already passed keeps its repeat.
+section("복용 알림");
+const supp = (over: Partial<ReminderInput> = {}): ReminderInput => ({
+  name: "마그네슘",
+  taken: false,
+  notify: true,
+  hour: 20,
+  minute: 0,
+  ...over,
+});
+const at = (h: number, m: number) => new Date(2026, 7, 20, h, m, 0, 0); // 2026-08-20
+
+check("알림 끈 영양제는 예약 안 함", planReminder(supp({ notify: false }), at(9, 0)) === null);
+check(
+  "미복용은 매일 반복 예약",
+  planReminder(supp(), at(9, 0))?.kind === "daily"
+);
+const beforeSlot = planReminder(supp({ taken: true }), at(9, 0));
+check(
+  "복용 체크 후 아직 시간 전이면 오늘은 건너뜀",
+  beforeSlot?.kind === "once",
+  `got ${beforeSlot?.kind}`
+);
+check(
+  "건너뛴 알림은 내일 같은 시각에 다시 울림",
+  beforeSlot?.kind === "once" &&
+    beforeSlot.at.getDate() === 21 &&
+    beforeSlot.at.getHours() === 20 &&
+    beforeSlot.at.getMinutes() === 0
+);
+check(
+  "복용 체크했어도 시간이 지났으면 매일 반복 유지",
+  planReminder(supp({ taken: true }), at(21, 0))?.kind === "daily"
+);
+check(
+  "복용 시각과 같은 분에는 즉시 발송을 피해 건너뜀",
+  planReminder(supp({ taken: true }), at(20, 0))?.kind === "once"
+);
+check(
+  "자정 넘김이 다음 달로 넘어가도 날짜 정상",
+  planReminder(supp({ taken: true }), new Date(2026, 7, 31, 9, 0))?.kind === "once" &&
+    (planReminder(supp({ taken: true }), new Date(2026, 7, 31, 9, 0)) as any).at.getMonth() === 8
+);
+check(
+  "복용 체크는 그 영양제 하나만 건너뛴다",
+  planReminders(
+    [supp({ name: "마그네슘", taken: true }), supp({ name: "비타민 D", taken: false })],
+    at(9, 0)
+  ).map((p) => p.plan.kind).join(",") === "once,daily"
+);
+check(
+  "저장값이 깨져도 예약은 유효한 시각으로",
+  (() => {
+    const p = planReminder(supp({ hour: NaN as unknown as number, minute: 99 }), at(9, 0));
+    // hour NaN → 8시 기본값, 분 99 → 8:99 = 9:39 으로 정규화
+    return p?.kind === "daily" && p.hour === 9 && p.minute === 39;
+  })()
+);
 
 console.log(
   failures === 0

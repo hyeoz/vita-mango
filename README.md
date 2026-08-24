@@ -22,7 +22,8 @@ chats/    The design conversation that produced the prototype
 - **No account or app backend** — answers, supplements, doses, diaries and
   progress live only on the device. AdMob is the only networked SDK.
 - **Local reminders** — a daily repeating notification per supplement, with its
-  own time you can adjust.
+  own time you can adjust. A supplement you have already ticked off today is
+  skipped for the rest of the day and reminds again tomorrow.
 - **5 screens**: 설문 · 홈 · 기록(한 줄 일기) · 맞춤추천 · 젤리(마이페이지), in the
   design's chunky-outline / vivid-pill style.
 - **Jelly mascot** — expressions, idle bob + blink, and a squishy heart-burst on
@@ -169,6 +170,13 @@ an updated table.
 - Storage: `@react-native-async-storage/async-storage`. Reminders:
   `expo-notifications` (local only — no push tokens, no server). Screen nav is
   local state + a custom bottom tab bar (no router dependency).
+- A local notification's content and fire time are frozen when it is scheduled —
+  there is no delivery-time hook to ask "did they already take this?". So
+  `notifications/schedule.ts` decides it at *scheduling* time and the whole queue
+  is rebuilt whenever a checkmark changes, the app is foregrounded, or the date
+  rolls over. A taken supplement whose time has already passed keeps its daily
+  repeat (the next fire is tomorrow anyway); one taken *before* its time gets a
+  single one-off for tomorrow instead, and the next resync restores the repeat.
 - The supplement table is general wellness information, not medical advice. The
   UI says so and tells anyone pregnant, medicated, or managing a condition to
   consult a professional.
