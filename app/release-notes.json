@@ -5,7 +5,7 @@
     "en-US": "Stability improvements and bug fixes. Enjoy a smoother 비타망고!"
   },
   "1.0.0": {
-    "ko": "스플래시 애니메이션을 복원하고, 마이에서 53종 영양제를 검색·카테고리별로 골라 직접 추가할 수 있어요. 중복 추가도 막았어요 🥭",
-    "en-US": "Restored the animated splash and added manual supplement selection with search, category filters, and duplicate prevention."
+    "ko": "복용 알림이 똑똑해졌어요! 이미 체크한 영양제는 그날 알림을 보내지 않고, 날짜가 바뀌면 다시 챙겨드려요. 영양제마다 알림 시간도 따로 정할 수 있어요.\n\n스플래시 애니메이션을 복원하고, 마이에서 53종 영양제를 검색·카테고리별로 골라 직접 추가할 수 있어요 🥭",
+    "en-US": "Smarter reminders: a supplement you have already ticked off is skipped for the rest of the day and reminds you again tomorrow, with a per-supplement reminder time. Also restores the animated splash and adds manual supplement selection with search and category filters."
   }
 }
