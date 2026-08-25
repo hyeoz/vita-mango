@@ -29,3 +29,8 @@
 - iOS 릴리스는 앱 코드 정리를 먼저 완료하고 TestFlight 내부 테스트에서 사용자가 확인한 뒤, App Store Connect 메타데이터·개인정보·심사 정보를 작성하고 제출한다.
 - TestFlight·App Store 제출 전 출시 대상 변경을 모두 커밋하고 `main` 반영 여부를 확인한다. 커밋되지 않은 작업 트리나 미병합 브랜치에서 바로 아카이브하지 않으며, 예외가 필요하면 제출 전에 사용자에게 명확히 알린다.
 - App Store 스크린샷은 실제 앱 화면을 기능별 세트로 구성하고, 각 장 상단에 핵심 기능을 설명하는 짧은 문구를 넣는다. 원본 화면 한 장만 그대로 올리지 않으며, 제출 전 테스트 광고·디버그 UI·중복 업로드 여부를 시각 및 원격 상태로 확인한다.
+- 앱 언어를 한국어로 표시하려면 `ios.infoPlist`의 `CFBundleDevelopmentRegion`·`CFBundleLocalizations`만으로는 부족하고, app.json 최상위 `locales`가 실제 strings 파일을 가리켜야 `ko.lproj`가 번들에 생긴다. 빌드 후 IPA에서 실측 확인한다.
+- 초판(1.0.0) 심사에는 "이번 버전의 새로운 기능"(`whatsNew`) 필드가 존재하지 않아 ASC API가 409로 거부한다. 초판 릴리스 노트는 설명·프로모션 텍스트로 전달하고, `release_notes.txt`는 첫 업데이트부터 적용된다.
+- `plutil -extract`는 `-o -`를 빼면 대상 파일을 추출값으로 **덮어쓴다**. plist 검사는 반드시 `-o -`를 붙인다.
+- fastlane은 전역이 아니라 `app/vendor/bundle`(bundler)에 설치돼 있다. `bundle exec fastlane`으로 실행하고 `LANG/LC_ALL`을 UTF-8로 준다.
+- `fastlane ios production` 레인은 `fastlane/metadata/`의 값을 업로드하므로, ASC에서 직접 바꾼 URL은 해당 txt 파일도 함께 고쳐야 되돌아가지 않는다.
