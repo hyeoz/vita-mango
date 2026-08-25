@@ -19,13 +19,15 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.vitamango.app",
-      "buildNumber": "17",
+      "buildNumber": "18",
       "config": {
         "usesNonExemptEncryption": false
       },
       "infoPlist": {
         "CFBundleDevelopmentRegion": "ko",
-        "CFBundleLocalizations": ["ko"]
+        "CFBundleLocalizations": [
+          "ko"
+        ]
       }
     },
     "android": {
