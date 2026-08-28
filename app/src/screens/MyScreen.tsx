@@ -17,6 +17,7 @@ import Jelly from "../components/Jelly";
 import { PillSwatch } from "../components/Pill";
 import Bouncy from "../components/Bouncy";
 import SupplementPickerModal from "../components/SupplementPickerModal";
+import Disclaimer from "../components/Disclaimer";
 import { useApp } from "../state/AppContext";
 import { COLLECTIBLES } from "../state/gamification";
 import { useAds } from "../ads/AdsContext";
@@ -37,6 +38,7 @@ export default function MyScreen() {
     notifyEnabled,
     toggleNotify,
     resetEverything,
+    setScreen,
   } = useApp();
   const { privacyOptionsRequired, showPrivacyOptions } = useAds();
   const [pickerOpen, setPickerOpen] = React.useState(false);
@@ -121,6 +123,26 @@ export default function MyScreen() {
             </View>
           ))}
         </View>
+
+        {/* Kept directly under the stats, above the collections, so the
+            citations App Review asked for are visible without scrolling. */}
+        <Bouncy
+          scaleTo={0.97}
+          haptic="medium"
+          style={styles.refsCard}
+          onPress={() => setScreen("references")}
+          accessibilityRole="button"
+          accessibilityLabel="근거 및 출처 화면 열기"
+        >
+          <Text style={styles.refsIcon}>📚</Text>
+          <View style={styles.refsBody}>
+            <Text style={styles.refsTitle}>근거 및 출처</Text>
+            <Text style={styles.refsSub}>
+              추천에 참고한 기관 자료와 성분별 출처 링크를 볼 수 있어요.
+            </Text>
+          </View>
+          <Text style={styles.refsChevron}>›</Text>
+        </Bouncy>
 
         <Text style={styles.sectionTitle}>영양제 도감 📒</Text>
         <View style={styles.grid}>
@@ -322,6 +344,8 @@ export default function MyScreen() {
           앱을 삭제하면 함께 지워져요.
         </Text>
 
+        <Disclaimer style={styles.disclaimerBlock} />
+
         <Pressable style={styles.deleteAccount} onPress={confirmReset}>
           <Text style={styles.deleteAccountText}>모든 데이터 삭제</Text>
         </Pressable>
@@ -439,6 +463,24 @@ const styles = StyleSheet.create({
   },
   gaugeFill: { height: "100%", backgroundColor: colors.mango },
   actionRow: { flexDirection: "row", gap: 10, marginTop: 16 },
+  refsCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 11,
+    marginTop: 14,
+    padding: 14,
+    borderRadius: 20,
+    borderWidth: 2.5,
+    borderColor: colors.ink,
+    backgroundColor: colors.white,
+    ...hardShadow(),
+  },
+  refsIcon: { fontSize: 24 },
+  refsBody: { flex: 1, gap: 2 },
+  refsTitle: { fontFamily: fonts.display, fontSize: 16, color: colors.ink },
+  refsSub: { fontFamily: fonts.body, fontSize: 11.5, lineHeight: 17, color: colors.muted3 },
+  refsChevron: { fontFamily: fonts.display, fontSize: 22, color: colors.muted4 },
+  disclaimerBlock: { marginTop: 14 },
   actionButton: {
     flex: 1,
     minHeight: 70,

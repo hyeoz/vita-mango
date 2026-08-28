@@ -9,6 +9,9 @@ import Jelly from "../components/Jelly";
 import { FloatingPill, PillSwatch } from "../components/Pill";
 import Bouncy from "../components/Bouncy";
 import RadarChart from "../components/RadarChart";
+import Disclaimer from "../components/Disclaimer";
+import SourceLink from "../components/SourceLink";
+import { sourcesFor, NO_FACTSHEET_NOTE } from "../data/sources";
 import { joinWithParticle } from "../logic/korean";
 import { useApp, suppFromRecommendation } from "../state/AppContext";
 import { DOMAIN_LABELS, EVIDENCE_LABELS } from "../data/types";
@@ -128,10 +131,7 @@ export default function AiScreen() {
               </>
             )}
 
-            <Text style={styles.disclaimer}>
-              일반적인 영양 정보를 바탕으로 한 참고용 안내예요. 질병의 진단·치료·예방을 목적으로
-              하지 않아요. 복용 중인 약이 있다면 의사·약사와 상의하세요.
-            </Text>
+            <Disclaimer variant="short" style={styles.disclaimerBlock} />
 
             <Bouncy style={styles.secondary} haptic="medium" onPress={startSurvey}>
               <Text style={styles.secondaryText}>다시 추천받기</Text>
@@ -154,6 +154,7 @@ function RecCard({
 }) {
   const s = rec.supplement;
   const lifts = Object.entries(rec.axisLift) as [Axis, number][];
+  const sourceInfo = sourcesFor(s.id);
   return (
     <View style={styles.card}>
       <View style={styles.cardTop}>
@@ -207,6 +208,16 @@ function RecCard({
       {rec.warnings.map((w) => (
         <Text key={w} style={styles.warning}>⚠️ {w}</Text>
       ))}
+
+      {/* Guideline 1.4.1: the claim and its citation belong on the same card,
+          not one screen away. */}
+      <View style={styles.sourceBox}>
+        <Text style={styles.sourceTitle}>📚 이 성분의 출처</Text>
+        {!sourceInfo.hasOwn && <Text style={styles.sourceNote}>{NO_FACTSHEET_NOTE}</Text>}
+        {sourceInfo.sources.map((src) => (
+          <SourceLink key={src.url + src.label} source={src} />
+        ))}
+      </View>
 
       <Bouncy
         scaleTo={0.97}
@@ -369,12 +380,20 @@ const styles = StyleSheet.create({
   addBtnOff: { backgroundColor: "#e9eef0", opacity: 0.7 },
   addBtnText: { fontFamily: fonts.display, fontSize: 14, color: colors.ink },
 
-  disclaimer: {
+  disclaimerBlock: { marginTop: 18 },
+  sourceBox: {
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1.5,
+    borderTopColor: colors.muted4,
+    gap: 2,
+  },
+  sourceTitle: { fontFamily: fonts.display, fontSize: 13, color: colors.ink },
+  sourceNote: {
     fontFamily: fonts.body,
     fontSize: 11,
-    lineHeight: 17,
-    color: colors.muted4,
-    marginTop: 18,
+    lineHeight: 16,
+    color: colors.muted2,
   },
   cta: {
     alignSelf: "stretch",

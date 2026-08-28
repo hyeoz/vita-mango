@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/fonts";
 import { hardShadow } from "../theme/ui";
+import Disclaimer from "../components/Disclaimer";
 import { useApp, moodFor } from "../state/AppContext";
 
 export default function RecordScreen() {
@@ -67,12 +68,15 @@ export default function RecordScreen() {
             ))}
           </View>
         </View>
+
+        <Disclaimer variant="short" style={styles.disclaimerBlock} />
       </ScrollView>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  disclaimerBlock: { marginTop: 18 },
   fill: { flex: 1 },
   content: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 24 },
   title: { fontFamily: fonts.display, fontSize: 22, color: colors.ink },

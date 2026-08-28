@@ -17,6 +17,7 @@ import AiScreen from "./src/screens/AiScreen";
 import MyScreen from "./src/screens/MyScreen";
 import SurveyScreen from "./src/screens/SurveyScreen";
 import SplashScreen from "./src/screens/SplashScreen";
+import ReferencesScreen from "./src/screens/ReferencesScreen";
 
 // The branded splash animation runs on a 3.4 second cycle. Keep it on screen
 // for one complete cycle even when the bundled fonts resolve immediately.
@@ -43,6 +44,7 @@ function Screens() {
         {screen === "ai" && <AiScreen />}
         {screen === "my" && <MyScreen />}
         {screen === "survey" && <SurveyScreen />}
+        {screen === "references" && <ReferencesScreen />}
       </View>
       {showAds && <AdBanner />}
       {showNav && <BottomNav />}

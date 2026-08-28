@@ -21,6 +21,7 @@ import Jelly from "../components/Jelly";
 import Bouncy from "../components/Bouncy";
 import RadarChart from "../components/RadarChart";
 import { PillSwatch } from "../components/Pill";
+import Disclaimer from "../components/Disclaimer";
 import { DOMAIN_LABELS, EVIDENCE_LABELS, type Answer } from "../data/types";
 import { AXIS_SHORT, type Axis } from "../data/axes";
 import { nextQuestion, progressOf } from "../logic/adaptive";
@@ -454,11 +455,7 @@ export default function SurveyScreen() {
           </View>
         )}
 
-        <Text style={styles.disclaimer}>
-          이 결과는 일반적인 영양 정보를 바탕으로 한 참고용 안내예요. 질병의 진단·치료·예방을
-          목적으로 하지 않아요. 임신·수유 중이거나 약을 복용 중이라면 복용 전에 의사·약사와
-          상의하세요.
-        </Text>
+        <Disclaimer style={styles.disclaimerBlock} />
 
         <Bouncy style={styles.cta} haptic="medium" onPress={finish}>
           <Text style={styles.ctaText}>
@@ -872,13 +869,7 @@ const styles = StyleSheet.create({
   excludedHead: { fontFamily: fonts.display, fontSize: 13, color: colors.ink },
   excludedItem: { fontFamily: fonts.body, fontSize: 11.5, lineHeight: 18, color: colors.muted3 },
 
-  disclaimer: {
-    fontFamily: fonts.body,
-    fontSize: 11,
-    lineHeight: 17,
-    color: colors.muted4,
-    marginTop: 16,
-  },
+  disclaimerBlock: { marginTop: 16 },
 
   cta: {
     alignSelf: "stretch",

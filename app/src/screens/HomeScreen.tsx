@@ -17,6 +17,7 @@ import Jelly from "../components/Jelly";
 import { FloatingPill, PillSwatch } from "../components/Pill";
 import SuppEditModal from "../components/SuppEditModal";
 import Bouncy from "../components/Bouncy";
+import Disclaimer from "../components/Disclaimer";
 import { useApp } from "../state/AppContext";
 
 export default function HomeScreen() {
@@ -221,6 +222,8 @@ export default function HomeScreen() {
             </Bouncy>
           ))}
         </View>
+
+        <Disclaimer variant="short" style={styles.disclaimerBlock} />
       </ScrollView>
 
       <SuppEditModal
@@ -238,6 +241,7 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  disclaimerBlock: { marginTop: 18 },
   fill: { flex: 1 },
   content: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 24 },
   headerRow: {

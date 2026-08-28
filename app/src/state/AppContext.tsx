@@ -35,7 +35,7 @@ import {
 
 export type Supplement = StoredSupplement;
 
-export type Screen = "survey" | "home" | "record" | "ai" | "my";
+export type Screen = "survey" | "home" | "record" | "ai" | "my" | "references";
 
 export type JellyMood =
   | "happy"
