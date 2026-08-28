@@ -34,3 +34,6 @@
 - `plutil -extract`는 `-o -`를 빼면 대상 파일을 추출값으로 **덮어쓴다**. plist 검사는 반드시 `-o -`를 붙인다.
 - fastlane은 전역이 아니라 `app/vendor/bundle`(bundler)에 설치돼 있다. `bundle exec fastlane`으로 실행하고 `LANG/LC_ALL`을 UTF-8로 준다.
 - `fastlane ios production` 레인은 `fastlane/metadata/`의 값을 업로드하므로, ASC에서 직접 바꾼 URL은 해당 txt 파일도 함께 고쳐야 되돌아가지 않는다.
+- `fastlane ios beta` 레인은 심사 메모(`REVIEW_NOTES`)를 업로드하지 않는다. beta로 빌드했다면 `PATCH /v1/appStoreReviewDetails/{id}`로 직접 반영해야 한다.
+- 기본 카테고리가 **Health & Fitness**(또는 Medical)이거나 연령등급 설문에서 의료·치료 정보를 표시한 앱은, 2026년 3월 Apple 정책에 따라 **"규제 대상 의료기기 여부" 선언**을 마쳐야 심사 제출이 된다. 미선언 시 제출이 `CANNOT_SUBMIT_MISSING_REGULATED_MEDICAL_DEVICE_APP_DECLARATION` 409로 막힌다. ASC API에 노출되지 않고 Account Holder/Admin 권한이 필요하므로 웹 UI에서 사람이 직접 해야 한다: `앱 → General → App Information → App Store Regulations & Permits → Declare Regulated Medical Device`.
+- 건강·의료 앱은 App Review Guideline 1.4.1에 따라 **앱 안에 출처(가능하면 링크)를 명시**해야 한다. 출처 링크는 반드시 실제로 열리는지 확인하고, 봇 차단으로 검증 못 한 링크(NIH ODS, Springer/JISSN 논문)는 넣지 않는다.
