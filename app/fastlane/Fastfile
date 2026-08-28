@@ -63,15 +63,53 @@ end
 # runs just before it and *creates* the record when we pass this hash — so
 # always pass it.
 REVIEW_NOTES = <<~NOTES.strip
-  No account or demo credentials are needed. On first launch the app opens the
-  adaptive survey; completing or skipping it leads directly to the full app.
-  Supplements, dose history, diary entries, survey answers, and Jelly growth
-  stay on the device and can be deleted from My Page.
+  RESPONSE TO GUIDELINE 1.4.1 (build 18 rejection: health information without
+  citations). This build adds citations with working links throughout the app.
+
+  WHERE TO FIND THE CITATIONS
+  1. Bottom tab "마이" (rightmost, mango icon) -> the "📚 근거 및 출처"
+     ("Evidence and Sources") card, directly under the three stat tiles and
+     visible without scrolling. It opens a full citations screen containing:
+       - the institutions consulted, each an openable link
+       - the definition of the A/B/C evidence grades
+       - every one of the 53 ingredients with its own source link
+       - the date the links were last checked
+  2. Tab "맞춤추천" (Recommendations) -> each recommendation card ends with a
+     "📚 이 성분의 출처" ("Sources for this ingredient") section linking that
+     specific ingredient's reference.
+  3. Every screen (홈 / 기록 / 맞춤추천 / 마이 and the survey result) carries a
+     disclaimer block with a "📚 근거 및 출처 보기" link into the same screen.
+
+  All links open in Safari via the system URL handler. Sources are the Korean
+  Ministry of Food and Drug Safety notice on functional ingredients (National
+  Law Information Center), the MFDS functional-ingredient database, the Korean
+  Dietary Reference Intakes (Ministry of Health and Welfare), the Australian
+  Institute of Sport supplement framework, the International Society of Sports
+  Nutrition, NIH MedlinePlus and NIH NCCIH. Every URL was opened and verified
+  before shipping.
+
+  IMPORTANT ON THE EVIDENCE GRADES: the A/B/C grades are this app's own
+  classification, informed by the sources above. They are not any institution's
+  official rating, and the app states this explicitly on the citations screen.
+  The grades only weight the ranking; they are not efficacy claims.
+
+  ELEVEN INGREDIENTS (e.g. taurine, propolis, maca) have no dedicated fact sheet
+  at any of these institutions. Rather than invent a citation, those cards say so
+  and link to the MFDS functional-ingredient database instead.
+
+  NOTE ON iPad: the app is iPhone-only (supportsTablet is false) and runs in
+  iPhone compatibility mode on iPad. The citations screen was verified in that
+  mode on an iPad Air 11-inch simulator.
+
+  GENERAL: No account or demo credentials are needed. On first launch the app
+  opens the adaptive survey; completing or skipping it leads directly to the
+  full app. Supplements, dose history, diary entries, survey answers, and Jelly
+  growth stay on the device and can be deleted from My Page.
 
   Supplement suggestions are computed deterministically on device from bundled
   general-wellness reference data. They do not diagnose or prescribe. The app
-  shows a disclaimer and tells users who are pregnant, taking medication, or
-  managing a condition to consult a qualified professional.
+  tells users who are pregnant, taking medication, or managing a condition to
+  consult a qualified professional.
 NOTES
 
 def app_review_information_hash
