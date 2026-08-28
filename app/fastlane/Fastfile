@@ -97,9 +97,10 @@ REVIEW_NOTES = <<~NOTES.strip
   at any of these institutions. Rather than invent a citation, those cards say so
   and link to the MFDS functional-ingredient database instead.
 
-  NOTE ON iPad: the app is iPhone-only (supportsTablet is false) and runs in
-  iPhone compatibility mode on iPad. The citations screen was verified in that
-  mode on an iPad Air 11-inch simulator.
+  NOTE ON iPad: the app is iPhone-only (supportsTablet is false), so on an iPad
+  it runs in iPhone compatibility mode and shows the same layout as on iPhone.
+  The build was installed and launched on an iPad Air 11-inch simulator to
+  confirm it runs correctly there.
 
   GENERAL: No account or demo credentials are needed. On first launch the app
   opens the adaptive survey; completing or skipping it leads directly to the
