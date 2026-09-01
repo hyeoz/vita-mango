@@ -15,3 +15,4 @@ included in the iOS or Android bundle.
 - `09-supplement-picker-close-fix.png` — geometrically centered close icon in the supplement picker
 - `10-source-link-spacing.png` — source link without an underline and with tighter icon spacing
 - `11-localization-es.png` — Spanish app copy and five-language selector
+- `12-language-dropdown.png` — expanded five-language dropdown replacing the button grid

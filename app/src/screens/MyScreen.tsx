@@ -44,6 +44,7 @@ export default function MyScreen() {
   const { privacyOptionsRequired, showPrivacyOptions } = useAds();
   const { language, setLanguage, t, m } = useI18n();
   const [pickerOpen, setPickerOpen] = React.useState(false);
+  const [languageMenuOpen, setLanguageMenuOpen] = React.useState(false);
   // No account means no profile name to greet with — the mascot's name it is.
   const nickname = "젤리";
 
@@ -354,26 +355,45 @@ export default function MyScreen() {
         <View style={styles.languageCard}>
           <Text style={styles.languageTitle}>🌐 앱 언어</Text>
           <Text style={styles.languageHint}>언어를 선택하면 앱 전체와 알림에 바로 적용돼요.</Text>
-          <View style={styles.languageOptions}>
-            {(Object.keys(LANGUAGE_NAMES) as Language[]).map((item) => {
-              const selected = language === item;
-              return (
-                <Bouncy
-                  key={item}
-                  scaleTo={0.96}
-                  haptic="selection"
-                  onPress={() => setLanguage(item)}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected }}
-                  style={[styles.languageButton, selected && styles.languageButtonOn]}
-                >
-                  <Text style={[styles.languageButtonText, selected && styles.languageButtonTextOn]}>
-                    {LANGUAGE_NAMES[item]}
-                  </Text>
-                </Bouncy>
-              );
-            })}
-          </View>
+          <Bouncy
+            scaleTo={0.98}
+            haptic="selection"
+            onPress={() => setLanguageMenuOpen((open) => !open)}
+            accessibilityRole="button"
+            accessibilityLabel={`${t("앱 언어")}: ${LANGUAGE_NAMES[language]}`}
+            accessibilityState={{ expanded: languageMenuOpen }}
+            style={[styles.languageSelect, languageMenuOpen && styles.languageSelectOpen]}
+          >
+            <Text style={styles.languageSelectText}>{LANGUAGE_NAMES[language]}</Text>
+            <Text style={styles.languageChevron}>{languageMenuOpen ? "⌃" : "⌄"}</Text>
+          </Bouncy>
+
+          {languageMenuOpen ? (
+            <View style={styles.languageMenu} accessibilityRole="radiogroup">
+              {(Object.keys(LANGUAGE_NAMES) as Language[]).map((item) => {
+                const selected = language === item;
+                return (
+                  <Bouncy
+                    key={item}
+                    scaleTo={0.98}
+                    haptic="selection"
+                    onPress={() => {
+                      setLanguageMenuOpen(false);
+                      void setLanguage(item);
+                    }}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected }}
+                    style={[styles.languageOption, selected && styles.languageOptionOn]}
+                  >
+                    <Text style={[styles.languageOptionText, selected && styles.languageOptionTextOn]}>
+                      {LANGUAGE_NAMES[item]}
+                    </Text>
+                    {selected ? <Text style={styles.languageCheck}>✓</Text> : null}
+                  </Bouncy>
+                );
+              })}
+            </View>
+          ) : null}
         </View>
 
         <Pressable style={styles.deleteAccount} onPress={confirmReset}>
@@ -422,21 +442,45 @@ const styles = StyleSheet.create({
   },
   languageTitle: { fontFamily: fonts.display, fontSize: 16, color: colors.ink },
   languageHint: { fontFamily: fonts.body, fontSize: 11.5, color: colors.muted2, marginTop: 3 },
-  languageOptions: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 },
-  languageButton: {
-    flexGrow: 1,
-    flexBasis: "30%",
+  languageSelect: {
+    minHeight: 46,
+    marginTop: 12,
+    paddingHorizontal: 14,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     borderWidth: 2,
     borderColor: colors.ink,
     borderRadius: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    backgroundColor: "#faf8ff",
+  },
+  languageSelectOpen: {
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    backgroundColor: "#f4f1ff",
+  },
+  languageSelectText: { fontFamily: fonts.display, fontSize: 14, color: colors.ink },
+  languageChevron: { fontFamily: fonts.display, fontSize: 18, color: colors.purple, marginTop: -2 },
+  languageMenu: {
+    marginTop: 6,
+    padding: 5,
+    borderWidth: 2,
+    borderColor: colors.ink,
+    borderRadius: 14,
     backgroundColor: colors.white,
   },
-  languageButtonOn: { backgroundColor: colors.purple },
-  languageButtonText: { fontFamily: fonts.body, fontSize: 12, color: colors.ink },
-  languageButtonTextOn: { color: colors.white },
+  languageOption: {
+    minHeight: 42,
+    paddingHorizontal: 11,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderRadius: 10,
+  },
+  languageOptionOn: { backgroundColor: "#f0ebff" },
+  languageOptionText: { fontFamily: fonts.body, fontSize: 13, color: colors.ink },
+  languageOptionTextOn: { fontFamily: fonts.display, color: colors.purple },
+  languageCheck: { fontFamily: fonts.display, fontSize: 16, color: colors.purple },
   sectionTitle: {
     fontFamily: fonts.display,
     fontSize: 17,
