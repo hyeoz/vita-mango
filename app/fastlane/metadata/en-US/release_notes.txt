@@ -1,0 +1,3 @@
+Vita Mango now supports English, Japanese, and French. Your first language follows your device language and region, and you can switch anytime from My Jelly.
+
+We also polished the splash loading text and centered the supplement add button.

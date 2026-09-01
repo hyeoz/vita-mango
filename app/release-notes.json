@@ -1,5 +1,5 @@
 {
-  "_comment": "Reusable release notes used by fastlane (see fastlane/Fastfile). For a given app.json version, the matching key is used; otherwise `default`. `default` is the generic 'always usable' note. Locale keys: ko (App Store ko + Play ko-KR), en-US.",
+  "_comment": "Reusable release notes used by fastlane (see fastlane/Fastfile). For a given app.json version, the matching key is used; otherwise `default`. `default` is the generic 'always usable' note.",
   "default": {
     "ko": "안정성을 개선하고 자잘한 버그를 고쳤어요. 더 쾌적해진 비타망고를 즐겨보세요! 🥭",
     "en-US": "Stability improvements and bug fixes. Enjoy a smoother 비타망고!"
@@ -7,5 +7,11 @@
   "1.0.0": {
     "ko": "복용 알림이 똑똑해졌어요! 이미 체크한 영양제는 그날 알림을 보내지 않고, 날짜가 바뀌면 다시 챙겨드려요. 영양제마다 알림 시간도 따로 정할 수 있어요.\n\n스플래시 애니메이션을 복원하고, 마이에서 53종 영양제를 검색·카테고리별로 골라 직접 추가할 수 있어요 🥭",
     "en-US": "Smarter reminders: a supplement you have already ticked off is skipped for the rest of the day and reminds you again tomorrow, with a per-supplement reminder time. Also restores the animated splash and adds manual supplement selection with search and category filters."
+  },
+  "1.0.1": {
+    "ko": "영어·일본어·프랑스어를 새롭게 지원해요. 기기 언어와 지역에 맞춰 처음 언어가 선택되고, 마이에서 언제든 바꿀 수 있어요.\n\n스플래시 로딩 문구와 영양제 추가 버튼의 정렬도 다듬었어요.",
+    "en-US": "Vita Mango now supports English, Japanese, and French. Your first language follows your device language and region, and you can switch anytime from My Jelly.\n\nWe also polished the splash loading text and centered the supplement add button.",
+    "ja": "英語・日本語・フランス語に対応しました。初回は端末の言語と地域に合わせて表示され、「マイジェリー」からいつでも変更できます。\n\nスプラッシュ画面の読み込みテキストと、サプリ追加ボタンの配置も整えました。",
+    "fr-FR": "Vita Mango est désormais disponible en anglais, japonais et français. La langue initiale suit celle et la région de l’appareil, puis peut être modifiée à tout moment dans Mon Jelly.\n\nNous avons aussi amélioré le texte de chargement et centré le bouton d’ajout de complément."
   }
 }
