@@ -23,7 +23,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.vitamango.app",
-      "buildNumber": "22",
+      "buildNumber": "23",
       "config": {
         "usesNonExemptEncryption": false
       },
