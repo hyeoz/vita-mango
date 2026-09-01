@@ -18,6 +18,7 @@ import MyScreen from "./src/screens/MyScreen";
 import SurveyScreen from "./src/screens/SurveyScreen";
 import SplashScreen from "./src/screens/SplashScreen";
 import ReferencesScreen from "./src/screens/ReferencesScreen";
+import { I18nProvider } from "./src/i18n";
 
 // The branded splash animation runs on a 3.4 second cycle. Keep it on screen
 // for one complete cycle even when the bundled fonts resolve immediately.
@@ -72,9 +73,10 @@ export default function App() {
   const ready = loaded && minimumSplashElapsed;
 
   return (
-    <SafeAreaProvider>
-      {ready ? (
-        <AdsProvider>
+    <I18nProvider>
+      <SafeAreaProvider>
+        {ready ? (
+          <AdsProvider>
           {/* Full-bleed: each screen paints its own gradient edge-to-edge and
               applies safe-area insets to its own content. */}
           <View style={styles.safe}>
@@ -83,11 +85,12 @@ export default function App() {
             </AppProvider>
             <StatusBar style="dark" />
           </View>
-        </AdsProvider>
-      ) : (
-        <SplashScreen />
-      )}
-    </SafeAreaProvider>
+          </AdsProvider>
+        ) : (
+          <SplashScreen />
+        )}
+      </SafeAreaProvider>
+    </I18nProvider>
   );
 }
 

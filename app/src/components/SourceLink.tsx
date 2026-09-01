@@ -1,8 +1,10 @@
 import React, { useState } from "react";
-import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { Linking, Pressable, StyleSheet, View } from "react-native";
+import { Text } from "../i18n/components";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/fonts";
 import type { Source } from "../data/sources";
+import { useI18n } from "../i18n";
 
 // A citation the user can actually open. If the OS refuses to hand the URL to a
 // browser the raw address is revealed instead of failing silently — a citation
@@ -10,6 +12,7 @@ import type { Source } from "../data/sources";
 // stays readable (and selectable) even when the tap does nothing.
 
 export default function SourceLink({ source }: { source: Source }) {
+  const { t, m } = useI18n();
   const [failed, setFailed] = useState(false);
 
   const open = async () => {
@@ -25,7 +28,7 @@ export default function SourceLink({ source }: { source: Source }) {
       <Pressable
         onPress={open}
         accessibilityRole="link"
-        accessibilityLabel={`${source.label} 링크 열기`}
+        accessibilityLabel={m("sourceLink", { name: t(source.label) })}
         hitSlop={6}
       >
         <Text style={styles.label}>🔗 {source.label}</Text>

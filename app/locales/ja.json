@@ -1,0 +1,8 @@
+{
+  "ios": {
+    "CFBundleDisplayName": "ビタマンゴー"
+  },
+  "android": {
+    "app_name": "ビタマンゴー"
+  }
+}

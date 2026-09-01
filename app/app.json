@@ -8,7 +8,10 @@
     "scheme": "vitamango",
     "newArchEnabled": true,
     "locales": {
-      "ko": "./locales/ko.json"
+      "ko": "./locales/ko.json",
+      "en": "./locales/en.json",
+      "ja": "./locales/ja.json",
+      "fr": "./locales/fr.json"
     },
     "icon": "./assets/icon.png",
     "splash": {
@@ -26,7 +29,10 @@
       "infoPlist": {
         "CFBundleDevelopmentRegion": "ko",
         "CFBundleLocalizations": [
-          "ko"
+          "ko",
+          "en",
+          "ja",
+          "fr"
         ]
       }
     },
@@ -125,6 +131,17 @@
           "backgroundColor": "#fff2d6",
           "image": "./assets/splash-jelly.png",
           "imageWidth": 220
+        }
+      ],
+      [
+        "expo-localization",
+        {
+          "supportedLocales": [
+            "ko",
+            "en",
+            "ja",
+            "fr"
+          ]
         }
       ]
     ]

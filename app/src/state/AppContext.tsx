@@ -32,6 +32,7 @@ import {
   LevelProgress,
   Collectible,
 } from "./gamification";
+import { msg, useI18n } from "../i18n";
 
 export type Supplement = StoredSupplement;
 
@@ -50,12 +51,12 @@ export type JellyMood =
 
 // Condition keywords → emoji, used for the diary mood stamp.
 export function moodFor(t: string): string {
-  if (/피곤|졸|설|피로|아프|힘들|지친|스트레스/.test(t)) return "😮‍💨";
-  if (/좋|개운|상쾌|괜찮|행복|활기|든든/.test(t)) return "😊";
+  if (/피곤|졸|설|피로|아프|힘들|지친|스트레스|tired|fatigue|sick|stress|疲|だる|ストレス|fatigu|malade/i.test(t)) return "😮‍💨";
+  if (/좋|개운|상쾌|괜찮|행복|활기|든든|good|great|happy|energ|元気|調子.*いい|bien|heureu|énergi/i.test(t)) return "😊";
   return "🙂";
 }
 
-const TIRED_RE = /피곤|졸|설|피로|아프|힘들|지친|스트레스/;
+const TIRED_RE = /피곤|졸|설|피로|아프|힘들|지친|스트레스|tired|fatigue|sick|stress|疲|だる|ストレス|fatigu|malade/i;
 
 const FALLBACK_COLORS = [colors.pink, colors.cyan, colors.mango, colors.purple, colors.yellow];
 
@@ -153,6 +154,7 @@ type AppState = {
 const Ctx = createContext<AppState | null>(null);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
+  const { language, t } = useI18n();
   const [hydrated, setHydrated] = useState(false);
   const [screen, setScreen] = useState<Screen>("survey");
   const [diary, setDiary] = useState("");
@@ -277,7 +279,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       syncReminders(supps, notifyEnabled);
     }, 400);
     return () => clearTimeout(t);
-  }, [hydrated, supps, notifyEnabled, resyncTick]);
+  }, [hydrated, supps, notifyEnabled, resyncTick, language]);
 
   // Keep the foreground handler's view of "already taken" current.
   useEffect(() => {
@@ -313,7 +315,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       alreadyTaking: supps.map((s) => s.name),
       freeText: `${survey.freeText} ${recentDiaries}`.trim(),
     });
-  }, [survey, supps, diaries]);
+  }, [survey, supps, diaries, language]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -407,10 +409,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     : "happy";
 
   const speech = justLogged
-    ? "기록 고마워! 잘 기억해둘게 🥭"
+    ? t("기록 고마워! 잘 기억해둘게 🥭")
     : takenCount < supps.length
-    ? `오늘 영양제 ${supps.length - takenCount}개 남았어 🌙 잊지마!`
-    : "오늘 영양제 다 챙겼어! 최고야 🎉";
+    ? msg("remaining", { count: supps.length - takenCount })
+    : t("오늘 영양제 다 챙겼어! 최고야 🎉");
 
   const value: AppState = {
     screen,

@@ -6,10 +6,9 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
   View,
 } from "react-native";
+import { Text, TextInput } from "../i18n/components";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SUPPLEMENTS } from "../data/supplements";
 import { colors } from "../theme/colors";
@@ -17,6 +16,7 @@ import { fonts } from "../theme/fonts";
 import { hardShadow } from "../theme/ui";
 import Bouncy from "./Bouncy";
 import { PillSwatch } from "./Pill";
+import { useI18n } from "../i18n";
 
 const ALL = "전체";
 const SUPPORT_URL = "https://hyeoz.github.io/privacy/support/";
@@ -39,6 +39,7 @@ export default function SupplementPickerModal({
   onAdd,
   onClose,
 }: Props) {
+  const { t } = useI18n();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState(ALL);
 
@@ -59,15 +60,18 @@ export default function SupplementPickerModal({
           supplement.name,
           supplement.category,
           supplement.benefit,
+          t(supplement.name),
+          t(supplement.category),
+          t(supplement.benefit),
           ...supplement.aliases,
         ].join(" ")
       ).includes(needle);
     });
-  }, [category, query]);
+  }, [category, query, t]);
 
   const openSupport = () => {
     Linking.openURL(SUPPORT_URL).catch(() => {
-      Alert.alert("고객지원을 열지 못했어요", "잠시 후 다시 시도해 주세요.");
+      Alert.alert(t("고객지원을 열지 못했어요"), t("잠시 후 다시 시도해 주세요."));
     });
   };
 
@@ -88,7 +92,7 @@ export default function SupplementPickerModal({
             onPress={onClose}
             hitSlop={10}
             accessibilityRole="button"
-            accessibilityLabel="닫기"
+            accessibilityLabel={t("닫기")}
             style={styles.close}
           >
             <Text style={styles.closeText}>×</Text>
@@ -172,7 +176,14 @@ export default function SupplementPickerModal({
                   </Text>
                 </View>
                 <View style={[styles.addMark, added && styles.addMarkDone]}>
-                  <Text style={styles.addMarkText}>{added ? "✓" : "+"}</Text>
+                  {added ? (
+                    <Text style={styles.addMarkText}>✓</Text>
+                  ) : (
+                    <View style={styles.plusIcon}>
+                      <View style={styles.plusHorizontal} />
+                      <View style={styles.plusVertical} />
+                    </View>
+                  )}
                 </View>
               </Bouncy>
             );
@@ -305,7 +316,26 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   addMarkDone: { backgroundColor: "#dbe4e4" },
-  addMarkText: { fontFamily: fonts.display, fontSize: 17, color: colors.ink },
+  addMarkText: { fontFamily: fonts.display, fontSize: 17, lineHeight: 21, color: colors.ink },
+  plusIcon: { width: 12, height: 12 },
+  plusHorizontal: {
+    position: "absolute",
+    top: 5,
+    left: 0,
+    width: 12,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: colors.ink,
+  },
+  plusVertical: {
+    position: "absolute",
+    top: 0,
+    left: 5,
+    width: 2,
+    height: 12,
+    borderRadius: 1,
+    backgroundColor: colors.ink,
+  },
   empty: { alignItems: "center", paddingVertical: 48 },
   emptyEmoji: { fontSize: 30 },
   emptyTitle: { fontFamily: fonts.display, fontSize: 17, color: colors.ink, marginTop: 8 },

@@ -12,6 +12,7 @@ import { QUESTIONS } from "../data/survey";
 import { SUPPLEMENTS, findSupplement } from "../data/supplements";
 import { AXES, AXIS_DOMAINS, DOMAIN_AXIS, type Axis } from "../data/axes";
 import { scanFreeText } from "./freeText";
+import { currentLanguage, formatList, msg, tx } from "../i18n/runtime";
 
 // ── The recommendation engine ────────────────────────────────────────────────
 // Fully deterministic and on-device. Same answers always produce the same
@@ -187,7 +188,7 @@ export function recommend(
     if (taken.has(s.id)) continue;
 
     if (s.prescriptionOnlyKR) {
-      excluded.push({ name: s.name, reason: "국내에서는 처방이 필요한 성분이에요" });
+      excluded.push({ name: s.name, reason: tx("국내에서는 처방이 필요한 성분이에요") });
       continue;
     }
 
@@ -195,7 +196,9 @@ export function recommend(
     if (blocking.length) {
       excluded.push({
         name: s.name,
-        reason: `${blocking.map((f) => SAFETY_REASON[f]).join(", ")} 때문에 제외했어요`,
+        reason: msg("safetyExcluded", {
+          reasons: formatList(blocking.map((f) => tx(SAFETY_REASON[f]))),
+        }),
       });
       continue;
     }
@@ -445,7 +448,7 @@ const SAFETY_REASON: Record<SafetyFlag, string> = {
 function buildWarnings(s: Supplement, flags: SafetyFlag[]): string[] {
   const out: string[] = [];
   for (const f of s.warnIf) {
-    if (flags.includes(f)) out.push(`${SAFETY_REASON[f]} 중이라면 복용 전 전문가와 상의하세요.`);
+    if (flags.includes(f)) out.push(msg("safetyWarning", { reason: tx(SAFETY_REASON[f]) }));
   }
   return out;
 }
@@ -453,18 +456,22 @@ function buildWarnings(s: Supplement, flags: SafetyFlag[]): string[] {
 function buildProfile(top: Domain[], needs: Record<Domain, number>) {
   if (!top.length || needs[top[0]] < 0.15) {
     return {
-      profileLabel: "균형 잡힌 타입",
+      profileLabel: msg("profileBalanced"),
       profileEmoji: "🥭",
-      profileBlurb: "특별히 튀는 신호가 없어요. 지금 컨디션을 잘 유지하고 있는 편이에요!",
+      profileBlurb: msg("profileBalancedBlurb"),
     };
   }
   const first = DOMAIN_PERSONA[top[0]];
   const second = top[1] ? DOMAIN_PERSONA[top[1]] : first;
   return {
-    profileLabel: `${first.adj} ${second.noun}`,
+    profileLabel: currentLanguage() === "ko"
+      ? `${first.adj} ${second.noun}`
+      : msg("profileLabel", {
+          domains: formatList(top.slice(0, 2).map((domain) => tx(DOMAIN_LABELS[domain]))),
+        }),
     profileEmoji: first.emoji,
-    profileBlurb: `답변을 보니 ${DOMAIN_LABELS[top[0]]}${
-      top[1] ? ` · ${DOMAIN_LABELS[top[1]]}` : ""
-    } 쪽 신호가 제일 뚜렷해. 거기부터 챙겨보자!`,
+    profileBlurb: msg("profileBlurb", {
+      domains: formatList(top.slice(0, 2).map((domain) => tx(DOMAIN_LABELS[domain]))),
+    }),
   };
 }

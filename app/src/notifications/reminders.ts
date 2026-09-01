@@ -2,6 +2,7 @@ import { Platform } from "react-native";
 import * as Notifications from "expo-notifications";
 import type { StoredSupplement } from "../storage/local";
 import { planReminders } from "./schedule";
+import { msg, tx } from "../i18n";
 
 // ── Local reminders ──────────────────────────────────────────────────────────
 // Every reminder is a local notification scheduled on the device. Nothing is
@@ -52,7 +53,7 @@ const ANDROID_CHANNEL = "vm-reminders";
 async function ensureAndroidChannel(): Promise<void> {
   if (Platform.OS !== "android") return;
   await Notifications.setNotificationChannelAsync(ANDROID_CHANNEL, {
-    name: "영양제 알림",
+    name: tx("영양제 알림"),
     importance: Notifications.AndroidImportance.DEFAULT,
     vibrationPattern: [0, 250, 250, 250],
   });
@@ -120,8 +121,8 @@ export async function syncReminders(
     try {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: "젤리가 알려줄게 🥭",
-          body: `${s.name} 먹을 시간이야! (${s.time})`,
+          title: tx("젤리가 알려줄게 🥭"),
+          body: msg("notificationBody", { name: tx(s.name), time: tx(s.time) }),
           data: { name: s.name },
           ...(Platform.OS === "android" ? { channelId: ANDROID_CHANNEL } : {}),
         },

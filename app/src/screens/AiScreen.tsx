@@ -1,5 +1,6 @@
 import React from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { Text } from "../i18n/components";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, pillColor } from "../theme/colors";
@@ -12,11 +13,11 @@ import RadarChart from "../components/RadarChart";
 import Disclaimer from "../components/Disclaimer";
 import SourceLink from "../components/SourceLink";
 import { sourcesFor, NO_FACTSHEET_NOTE } from "../data/sources";
-import { joinWithParticle } from "../logic/korean";
 import { useApp, suppFromRecommendation } from "../state/AppContext";
 import { DOMAIN_LABELS, EVIDENCE_LABELS } from "../data/types";
 import { AXIS_SHORT, type Axis } from "../data/axes";
 import type { Recommendation } from "../logic/recommend";
+import { formatList, useI18n } from "../i18n";
 
 // The recommendation tab. Everything shown here is computed on the device from
 // the saved survey answers — no network call, no cost, no spinner. The result
@@ -28,6 +29,7 @@ function daysSince(ms: number): number {
 }
 
 export default function AiScreen() {
+  const { t, m } = useI18n();
   const { survey, result, supps, addByName, startSurvey, unlockedExprs } = useApp();
   const insets = useSafeAreaInsets();
 
@@ -80,8 +82,8 @@ export default function AiScreen() {
               <Text style={styles.profileLabel}>{result.profileLabel}</Text>
               <Text style={styles.profileMeta}>
                 {daysSince(survey.takenAt) === 0
-                  ? "오늘 받은 결과"
-                  : `${daysSince(survey.takenAt)}일 전에 받은 결과`}
+                  ? t("오늘 받은 결과")
+                  : m("daysAgo", { count: daysSince(survey.takenAt) })}
               </Text>
             </View>
 
@@ -152,6 +154,7 @@ function RecCard({
   added: boolean;
   onAdd: () => void;
 }) {
+  const { t, m } = useI18n();
   const s = rec.supplement;
   const lifts = Object.entries(rec.axisLift) as [Axis, number][];
   const sourceInfo = sourcesFor(s.id);
@@ -192,13 +195,16 @@ function RecCard({
 
       {!!rec.reasons.length && (
         <Text style={styles.cardReason}>
-          이유: {rec.reasons.map((d) => DOMAIN_LABELS[d]).join(" · ")}
+          이유: {formatList(rec.reasons.map((d) => t(DOMAIN_LABELS[d])))}
         </Text>
       )}
 
       {!!rec.overlapsWith.length && (
         <Text style={styles.overlap}>
-          🧩 {joinWithParticle(rec.overlapsWith)} 효능이 겹쳐요. 단독으로는 {rec.soloMatch}%였어요.
+          {m("overlap", {
+            names: formatList(rec.overlapsWith.map(t)),
+            match: rec.soloMatch,
+          })}
         </Text>
       )}
 

@@ -1,0 +1,8 @@
+{
+  "ios": {
+    "CFBundleDisplayName": "Vita Mango"
+  },
+  "android": {
+    "app_name": "Vita Mango"
+  }
+}

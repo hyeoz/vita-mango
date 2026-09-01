@@ -4,10 +4,9 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
   View,
 } from "react-native";
+import { Text, TextInput } from "../i18n/components";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "../theme/colors";
@@ -19,8 +18,10 @@ import SuppEditModal from "../components/SuppEditModal";
 import Bouncy from "../components/Bouncy";
 import Disclaimer from "../components/Disclaimer";
 import { useApp } from "../state/AppContext";
+import { useI18n } from "../i18n";
 
 export default function HomeScreen() {
+  const { language, t, m } = useI18n();
   const {
     progress,
     jellyMood,
@@ -43,38 +44,39 @@ export default function HomeScreen() {
   const [editing, setEditing] = React.useState<number | null>(null);
 
   const confirmRemove = (i: number, name: string) =>
-    Alert.alert(`${name} 삭제`, "이 영양제를 목록에서 지울까요?", [
-      { text: "취소", style: "cancel" },
-      { text: "삭제", style: "destructive", onPress: () => removeSupp(i) },
+    Alert.alert(m("deleteSupplement", { name: t(name) }), t("이 영양제를 목록에서 지울까요?"), [
+      { text: t("취소"), style: "cancel" },
+      { text: t("삭제"), style: "destructive", onPress: () => removeSupp(i) },
     ]);
 
   // Long-press a supplement → edit its time/dose or delete it.
   const openSuppMenu = (i: number, name: string) =>
-    Alert.alert(name, undefined, [
-      { text: "시간·용량 편집", onPress: () => setEditing(i) },
-      { text: "삭제", style: "destructive", onPress: () => confirmRemove(i, name) },
-      { text: "취소", style: "cancel" },
+    Alert.alert(t(name), undefined, [
+      { text: t("시간·용량 편집"), onPress: () => setEditing(i) },
+      { text: t("삭제"), style: "destructive", onPress: () => confirmRemove(i, name) },
+      { text: t("취소"), style: "cancel" },
     ]);
 
   // Date + greeting follow the device's local clock.
   const now = new Date();
-  const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
-  const dateLabel = `${now.getMonth() + 1}월 ${now.getDate()}일 (${
-    WEEKDAYS[now.getDay()]
-  }) · 오늘`;
+  const dateLabel = `${new Intl.DateTimeFormat(language, {
+    month: "long",
+    day: "numeric",
+    weekday: "short",
+  }).format(now)} · ${t("오늘")}`;
   const hour = now.getHours();
   const greeting =
     hour < 6
-      ? "고요한 새벽이에요. 무리하지 말아요 🌙"
+      ? t("고요한 새벽이에요. 무리하지 말아요 🌙")
       : hour < 11
-        ? "해가 떴어요. 천천히 시작해요 🌤️"
+        ? t("해가 떴어요. 천천히 시작해요 🌤️")
         : hour < 14
-          ? "점심시간이에요. 잘 챙겨 먹어요 🍚"
+          ? t("점심시간이에요. 잘 챙겨 먹어요 🍚")
           : hour < 18
-            ? "나른한 오후예요. 조금만 힘내요 ☕"
+            ? t("나른한 오후예요. 조금만 힘내요 ☕")
             : hour < 22
-              ? "저녁이에요. 오늘도 수고했어요 🌆"
-              : "밤이 깊었어요. 곧 푹 쉬어요 🌙";
+              ? t("저녁이에요. 오늘도 수고했어요 🌆")
+              : t("밤이 깊었어요. 곧 푹 쉬어요 🌙");
 
   return (
     <LinearGradient

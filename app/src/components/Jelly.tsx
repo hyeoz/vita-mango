@@ -4,9 +4,9 @@ import {
   Easing,
   Pressable,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
+import { Text } from "../i18n/components";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { colors } from "../theme/colors";

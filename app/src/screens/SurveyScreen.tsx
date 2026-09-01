@@ -7,10 +7,9 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
   View,
 } from "react-native";
+import { Text, TextInput } from "../i18n/components";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
@@ -32,8 +31,8 @@ import {
   type Recommendation,
   type SurveyResult,
 } from "../logic/recommend";
-import { joinWithParticle } from "../logic/korean";
 import { useApp } from "../state/AppContext";
+import { formatList, useI18n } from "../i18n";
 
 type Step = "intro" | "quiz" | "freetext" | "loading" | "result";
 
@@ -57,6 +56,7 @@ const LOADING_LINES = [
 const CONFIRM_MS = 190;
 
 export default function SurveyScreen() {
+  const { t, m } = useI18n();
   const { supps, survey, completeSurvey, unlockedExprs, setScreen } = useApp();
   const insets = useSafeAreaInsets();
 
@@ -200,8 +200,7 @@ export default function SurveyScreen() {
           <Jelly mood="excited" width={122} expressions={unlockedExprs} />
           <Text style={styles.introTitle}>나에게 맞는 영양제 찾기</Text>
           <Text style={styles.introBody}>
-            <Text style={styles.bold}>그렇다 · 모르겠다 · 아니다</Text>로만 답하면 돼.{"\n"}
-            해당 없는 영역은 건너뛰니까 보통 <Text style={styles.bold}>30문항 안팎</Text>이야.
+            그렇다·모르겠다·아니다 중 하나로 답하면 돼요. 해당 없는 영역은 건너뛰어서 보통 30문항 안팎이에요.
           </Text>
           <View style={styles.introFacts}>
             <Fact emoji="🎯" text="답한 내용에 따라 물어보는 질문이 달라져요" />
@@ -244,7 +243,9 @@ export default function SurveyScreen() {
           <Text style={styles.progressText}>
             {progress.answered + 1}
             <Text style={styles.progressTotal}>
-              {progress.exact ? ` / ${progress.estimatedTotal}` : ` / 약 ${progress.estimatedTotal}`}
+              {progress.exact
+                ? ` / ${progress.estimatedTotal}`
+                : m("approxTotal", { count: progress.estimatedTotal })}
             </Text>
           </Text>
         </View>
@@ -423,8 +424,7 @@ export default function SurveyScreen() {
           <>
             <Text style={styles.sectionHead}>추천 조합 {r.recommendations.length}가지</Text>
             <Text style={styles.sectionSub}>
-              효능이 겹치지 않게 골랐어요. 퍼센트는 <Text style={styles.bold}>이 조합에 얼마나
-              보탬이 되는지</Text>예요.
+              효능이 겹치지 않게 골랐어요. 퍼센트는 이 조합에 얼마나 보탬이 되는지를 나타내요.
             </Text>
             {r.recommendations.map((rec) => (
               <RecCard
@@ -459,7 +459,7 @@ export default function SurveyScreen() {
 
         <Bouncy style={styles.cta} haptic="medium" onPress={finish}>
           <Text style={styles.ctaText}>
-            {picked.size > 0 ? `${picked.size}개 담고 시작하기` : "그냥 시작하기"}
+            {picked.size > 0 ? m("selectedStart", { count: picked.size }) : t("그냥 시작하기")}
           </Text>
         </Bouncy>
         <Pressable
@@ -513,6 +513,7 @@ function RecCard({
   checked: boolean;
   onToggle: () => void;
 }) {
+  const { t, m } = useI18n();
   const s = rec.supplement;
   const lifts = Object.entries(rec.axisLift) as [Axis, number][];
   return (
@@ -562,13 +563,16 @@ function RecCard({
 
       {!!rec.reasons.length && (
         <Text style={styles.cardReason}>
-          이유: {rec.reasons.map((d) => DOMAIN_LABELS[d]).join(" · ")}
+          이유: {formatList(rec.reasons.map((d) => t(DOMAIN_LABELS[d])))}
         </Text>
       )}
 
       {!!rec.overlapsWith.length && (
         <Text style={styles.overlap}>
-          🧩 {joinWithParticle(rec.overlapsWith)} 효능이 겹쳐요. 단독으로는 {rec.soloMatch}%였어요.
+          {m("overlap", {
+            names: formatList(rec.overlapsWith.map(t)),
+            match: rec.soloMatch,
+          })}
         </Text>
       )}
 

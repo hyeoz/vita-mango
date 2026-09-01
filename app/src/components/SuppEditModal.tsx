@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Modal, Pressable, StyleSheet, View } from "react-native";
+import { Text } from "../i18n/components";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/fonts";
 import { hardShadow } from "../theme/ui";

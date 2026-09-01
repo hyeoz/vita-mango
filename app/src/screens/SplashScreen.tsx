@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
-import { Animated, Easing, StyleSheet, Text, View } from "react-native";
+import { Animated, Easing, StyleSheet, View } from "react-native";
+import { Text } from "../i18n/components";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 import { colors } from "../theme/colors";
@@ -447,5 +448,12 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.ink,
   },
-  loadingText: { fontSize: 13, color: colors.muted, fontFamily: fonts.body },
+  loadingText: {
+    fontSize: 13,
+    lineHeight: 21,
+    paddingBottom: 2,
+    color: colors.muted,
+    fontFamily: fonts.body,
+    textAlign: "center",
+  },
 });

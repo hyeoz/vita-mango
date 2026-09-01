@@ -5,9 +5,9 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
+import { Text } from "../i18n/components";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "../theme/colors";
@@ -21,6 +21,7 @@ import Disclaimer from "../components/Disclaimer";
 import { useApp } from "../state/AppContext";
 import { COLLECTIBLES } from "../state/gamification";
 import { useAds } from "../ads/AdsContext";
+import { LANGUAGE_NAMES, useI18n, type Language } from "../i18n";
 
 export default function MyScreen() {
   const {
@@ -41,6 +42,7 @@ export default function MyScreen() {
     setScreen,
   } = useApp();
   const { privacyOptionsRequired, showPrivacyOptions } = useAds();
+  const { language, setLanguage, t, m } = useI18n();
   const [pickerOpen, setPickerOpen] = React.useState(false);
   // No account means no profile name to greet with — the mascot's name it is.
   const nickname = "젤리";
@@ -51,11 +53,11 @@ export default function MyScreen() {
 
   const confirmReset = () => {
     Alert.alert(
-      "모든 데이터를 삭제할까요?",
-      "영양제, 복용 기록, 일기, 설문 결과와 젤리 성장 기록이 이 기기에서 지워져요. 서버에 사본이 없어서 되돌릴 수 없어요.",
+      t("모든 데이터를 삭제할까요?"),
+      t("영양제, 복용 기록, 일기, 설문 결과와 젤리 성장 기록이 이 기기에서 지워져요. 서버에 사본이 없어서 되돌릴 수 없어요."),
       [
-        { text: "취소", style: "cancel" },
-        { text: "영구 삭제", style: "destructive", onPress: () => { resetEverything(); } },
+        { text: t("취소"), style: "cancel" },
+        { text: t("영구 삭제"), style: "destructive", onPress: () => { resetEverything(); } },
       ]
     );
   };
@@ -73,11 +75,11 @@ export default function MyScreen() {
     const granted = await toggleNotify(on);
     if (on && !granted) {
       Alert.alert(
-        "알림 권한이 꺼져 있어요",
-        "설정 앱에서 비타망고 알림을 켜주면 복용 시간에 젤리가 알려줄게요.",
+        t("알림 권한이 꺼져 있어요"),
+        t("설정 앱에서 비타망고 알림을 켜주면 복용 시간에 젤리가 알려줄게요."),
         [
-          { text: "나중에", style: "cancel" },
-          { text: "설정 열기", onPress: () => Linking.openSettings() },
+          { text: t("나중에"), style: "cancel" },
+          { text: t("설정 열기"), onPress: () => Linking.openSettings() },
         ]
       );
     }
@@ -111,8 +113,8 @@ export default function MyScreen() {
         <Text style={styles.name}>젤리 · Lv.{level}</Text>
         <Text style={styles.sub}>
           {daysTogether
-            ? `${nickname}님과 함께한 지 ${daysTogether}일째 🎉`
-            : `${nickname}님, 반가워요 🎉`}
+            ? m("daysTogether", { name: t(nickname), count: daysTogether })
+            : m("welcome", { name: t(nickname) })}
         </Text>
 
         <View style={styles.statsRow}>
@@ -132,7 +134,7 @@ export default function MyScreen() {
           style={styles.refsCard}
           onPress={() => setScreen("references")}
           accessibilityRole="button"
-          accessibilityLabel="근거 및 출처 화면 열기"
+          accessibilityLabel={t("근거 및 출처 화면 열기")}
         >
           <Text style={styles.refsIcon}>📚</Text>
           <View style={styles.refsBody}>
@@ -143,6 +145,31 @@ export default function MyScreen() {
           </View>
           <Text style={styles.refsChevron}>›</Text>
         </Bouncy>
+
+        <View style={styles.languageCard}>
+          <Text style={styles.languageTitle}>🌐 앱 언어</Text>
+          <Text style={styles.languageHint}>언어를 선택하면 앱 전체와 알림에 바로 적용돼요.</Text>
+          <View style={styles.languageOptions}>
+            {(Object.keys(LANGUAGE_NAMES) as Language[]).map((item) => {
+              const selected = language === item;
+              return (
+                <Bouncy
+                  key={item}
+                  scaleTo={0.96}
+                  haptic="selection"
+                  onPress={() => setLanguage(item)}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected }}
+                  style={[styles.languageButton, selected && styles.languageButtonOn]}
+                >
+                  <Text style={[styles.languageButtonText, selected && styles.languageButtonTextOn]}>
+                    {LANGUAGE_NAMES[item]}
+                  </Text>
+                </Bouncy>
+              );
+            })}
+          </View>
+        </View>
 
         <Text style={styles.sectionTitle}>영양제 도감 📒</Text>
         <View style={styles.grid}>
@@ -200,8 +227,11 @@ export default function MyScreen() {
           <View style={{ flex: 1 }}>
             <Text style={styles.growthTitle}>
               {nextUnlock
-                ? `Lv.${nextUnlock.minLevel} 달성하면 '${nextUnlock.label}' 표정 해금!`
-                : "모든 표정을 모았어! 최고야 🎉"}
+                ? m("unlockExpression", {
+                    level: nextUnlock.minLevel,
+                    name: t(nextUnlock.label),
+                  })
+                : t("모든 표정을 모았어! 최고야 🎉")}
             </Text>
             <View style={styles.gauge}>
               <View style={[styles.gaugeFill, { width: gaugePct }]} />
@@ -328,8 +358,8 @@ export default function MyScreen() {
             onPress={() => {
               showPrivacyOptions().catch(() => {
                 Alert.alert(
-                  "광고 설정을 열지 못했어요",
-                  "잠시 후 다시 시도해 주세요."
+                  t("광고 설정을 열지 못했어요"),
+                  t("잠시 후 다시 시도해 주세요.")
                 );
               });
             }}
@@ -381,6 +411,29 @@ const styles = StyleSheet.create({
   },
   statValue: { fontFamily: fonts.display, fontSize: 23 },
   statLabel: { fontFamily: fonts.body, fontSize: 11, color: colors.muted, marginTop: 2 },
+  languageCard: {
+    marginTop: 18,
+    padding: 14,
+    borderWidth: 2.5,
+    borderColor: colors.ink,
+    borderRadius: 18,
+    backgroundColor: colors.white,
+    ...hardShadow(3, 4, 0.1),
+  },
+  languageTitle: { fontFamily: fonts.display, fontSize: 16, color: colors.ink },
+  languageHint: { fontFamily: fonts.body, fontSize: 11.5, color: colors.muted2, marginTop: 3 },
+  languageOptions: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 },
+  languageButton: {
+    borderWidth: 2,
+    borderColor: colors.ink,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: colors.white,
+  },
+  languageButtonOn: { backgroundColor: colors.purple },
+  languageButtonText: { fontFamily: fonts.body, fontSize: 12, color: colors.ink },
+  languageButtonTextOn: { color: colors.white },
   sectionTitle: {
     fontFamily: fonts.display,
     fontSize: 17,

@@ -1,8 +1,10 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { Text } from "../i18n/components";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/fonts";
 import { useApp } from "../state/AppContext";
+import { useI18n } from "../i18n";
 
 // One disclaimer, every screen. It used to live only on the survey result and
 // the recommendation tab, so a reviewer who opened the app and stayed on 홈
@@ -23,13 +25,14 @@ export default function Disclaimer({
   style?: object;
 }) {
   const { setScreen } = useApp();
+  const { t } = useI18n();
   return (
     <View style={[styles.wrap, style]}>
       <Text style={styles.text}>{variant === "short" ? SHORT : FULL}</Text>
       <Pressable
         onPress={() => setScreen("references")}
         accessibilityRole="button"
-        accessibilityLabel="근거 및 출처 화면 열기"
+        accessibilityLabel={t("근거 및 출처 화면 열기")}
         hitSlop={8}
       >
         <Text style={styles.link}>📚 근거 및 출처 보기</Text>

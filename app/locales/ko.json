@@ -1,3 +1,8 @@
 {
-  "CFBundleDisplayName": "비타망고"
+  "ios": {
+    "CFBundleDisplayName": "비타망고"
+  },
+  "android": {
+    "app_name": "비타망고"
+  }
 }
