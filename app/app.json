@@ -11,7 +11,8 @@
       "ko": "./locales/ko.json",
       "en": "./locales/en.json",
       "ja": "./locales/ja.json",
-      "fr": "./locales/fr.json"
+      "fr": "./locales/fr.json",
+      "es": "./locales/es.json"
     },
     "icon": "./assets/icon.png",
     "splash": {
@@ -32,7 +33,8 @@
           "ko",
           "en",
           "ja",
-          "fr"
+          "fr",
+          "es"
         ]
       }
     },
@@ -140,7 +142,8 @@
             "ko",
             "en",
             "ja",
-            "fr"
+            "fr",
+            "es"
           ]
         }
       ]

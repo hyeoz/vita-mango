@@ -5,7 +5,7 @@ import { GENERATED_CATALOG } from "./catalog.generated";
 import { OVERRIDES } from "./overrides";
 import { setRuntimeLanguage } from "./runtime";
 
-export type Language = "ko" | "en" | "ja" | "fr";
+export type Language = "ko" | "en" | "ja" | "fr" | "es";
 export type MessageKey =
   | "remaining"
   | "daysAgo"
@@ -30,14 +30,36 @@ export const LANGUAGE_NAMES: Record<Language, string> = {
   en: "English",
   ja: "日本語",
   fr: "Français",
+  es: "Español",
 };
 
 const STORAGE_KEY = "vm.language";
-const SUPPORTED = new Set<Language>(["ko", "en", "ja", "fr"]);
+const SUPPORTED = new Set<Language>(["ko", "en", "ja", "fr", "es"]);
 const REGION_DEFAULTS: Partial<Record<string, Language>> = {
   KR: "ko",
   JP: "ja",
   FR: "fr",
+  ES: "es",
+  MX: "es",
+  AR: "es",
+  BO: "es",
+  CL: "es",
+  CO: "es",
+  CR: "es",
+  CU: "es",
+  DO: "es",
+  EC: "es",
+  GQ: "es",
+  GT: "es",
+  HN: "es",
+  NI: "es",
+  PA: "es",
+  PE: "es",
+  PR: "es",
+  PY: "es",
+  SV: "es",
+  UY: "es",
+  VE: "es",
 };
 
 function deviceLanguage(): Language {
@@ -76,6 +98,7 @@ function translateDynamic(language: Exclude<Language, "ko">, source: string): st
       en: "AIS Supplement Framework",
       ja: "AISサプリメント・フレームワーク",
       fr: "Cadre des compléments de l’AIS",
+      es: "Marco de suplementos del AIS",
     }[language];
     return `${prefix} — Group ${ais[1]}`;
   }
@@ -87,6 +110,7 @@ function translateDynamic(language: Exclude<Language, "ko">, source: string): st
     en: { 정: "tablet(s)", 회: "serving(s)", 포: "sachet(s)" },
     ja: { 정: "錠", 회: "回分", 포: "包" },
     fr: { 정: "comprimé(s)", 회: "portion(s)", 포: "sachet(s)" },
+    es: { 정: "comprimido(s)", 회: "porción(es)", 포: "sobre(s)" },
   };
   return language === "ja"
     ? `${when}・${count}${unit[language][rawUnit]}`
@@ -169,6 +193,25 @@ const MESSAGES: Record<Language, Record<MessageKey, string>> = {
     profileBlurb: "Vos réponses montrent surtout des signaux liés à {domains}. Commençons par là !",
     overlap: "🧩 Ses effets recoupent ceux de {names}. Seul, ce complément obtenait {match}%.",
     approxTotal: " / environ {count}",
+  },
+  es: {
+    remaining: "Quedan {count} suplemento(s) hoy 🌙 ¡No lo olvides!",
+    daysAgo: "Resultados de hace {count} día(s)",
+    daysTogether: "Día {count} con {name} 🎉",
+    welcome: "¡Hola, {name}! 🎉",
+    unlockExpression: "¡Alcanza el nivel {level} para desbloquear la expresión «{name}»!",
+    selectedStart: "Añadir {count} y empezar",
+    deleteSupplement: "Eliminar {name}",
+    notificationBody: "¡Es hora de tomar {name}! ({time})",
+    sourceLink: "Abrir el enlace de {name}",
+    safetyExcluded: "Excluido por: {reasons}",
+    safetyWarning: "Si {reason} se aplica a tu caso, consulta a un profesional sanitario antes de tomarlo.",
+    profileBalanced: "Perfil equilibrado",
+    profileBalancedBlurb: "No destaca ninguna señal. ¡Estás manteniendo bien tu estado actual!",
+    profileLabel: "Enfoque en {domains}",
+    profileBlurb: "Tus respuestas muestran señales más claras en {domains}. ¡Empecemos por ahí!",
+    overlap: "🧩 Sus beneficios se solapan con {names}. Por sí solo, obtuvo un {match}%.",
+    approxTotal: " / aprox. {count}",
   },
 };
 

@@ -9,9 +9,10 @@
     "en-US": "Smarter reminders: a supplement you have already ticked off is skipped for the rest of the day and reminds you again tomorrow, with a per-supplement reminder time. Also restores the animated splash and adds manual supplement selection with search and category filters."
   },
   "1.0.1": {
-    "ko": "영어·일본어·프랑스어를 새롭게 지원해요. 기기 언어와 지역에 맞춰 처음 언어가 선택되고, 마이에서 언제든 바꿀 수 있어요.\n\n스플래시 로딩 문구와 영양제 추가 버튼의 정렬도 다듬었어요.",
-    "en-US": "Vita Mango now supports English, Japanese, and French. Your first language follows your device language and region, and you can switch anytime from My Jelly.\n\nWe also polished the splash loading text and centered the supplement add button.",
-    "ja": "英語・日本語・フランス語に対応しました。初回は端末の言語と地域に合わせて表示され、「マイジェリー」からいつでも変更できます。\n\nスプラッシュ画面の読み込みテキストと、サプリ追加ボタンの配置も整えました。",
-    "fr-FR": "Vita Mango est désormais disponible en anglais, japonais et français. La langue initiale suit celle et la région de l’appareil, puis peut être modifiée à tout moment dans Mon Jelly.\n\nNous avons aussi amélioré le texte de chargement et centré le bouton d’ajout de complément."
+    "ko": "영어·일본어·프랑스어·스페인어를 새롭게 지원해요. 기기 언어와 지역에 맞춰 처음 언어가 선택되고, 마이에서 언제든 바꿀 수 있어요.\n\n스플래시 로딩 문구와 영양제 추가·닫기 버튼의 정렬도 다듬었어요.",
+    "en-US": "Vita Mango now supports English, Japanese, French, and Spanish. Your first language follows your device language and region, and you can switch anytime from My Jelly.\n\nWe also polished the splash loading text and centered the supplement add and close buttons.",
+    "ja": "英語・日本語・フランス語・スペイン語に対応しました。初回は端末の言語と地域に合わせて表示され、「マイジェリー」からいつでも変更できます。\n\nスプラッシュ画面の読み込みテキストと、サプリ追加・閉じるボタンの配置も整えました。",
+    "fr-FR": "Vita Mango est désormais disponible en anglais, japonais, français et espagnol. La langue initiale suit celle et la région de l’appareil, puis peut être modifiée à tout moment dans Mon Jelly.\n\nNous avons aussi amélioré le texte de chargement et centré les boutons d’ajout et de fermeture.",
+    "es-ES": "Vita Mango ya está disponible en inglés, japonés, francés y español. El idioma inicial se adapta al idioma y la región del dispositivo, y puedes cambiarlo en cualquier momento desde Mi Jelly.\n\nTambién hemos mejorado el texto de carga y centrado los botones de añadir y cerrar."
   }
 }

@@ -1,3 +1,3 @@
-Vita Mango est désormais disponible en anglais, japonais et français. La langue initiale suit celle et la région de l’appareil, puis peut être modifiée à tout moment dans Mon Jelly.
+Vita Mango est désormais disponible en anglais, japonais, français et espagnol. La langue initiale suit celle et la région de l’appareil, puis peut être modifiée à tout moment dans Mon Jelly.
 
-Nous avons aussi amélioré le texte de chargement et centré le bouton d’ajout de complément.
+Nous avons aussi amélioré le texte de chargement et centré les boutons d’ajout et de fermeture.

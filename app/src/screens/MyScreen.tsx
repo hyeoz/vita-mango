@@ -424,6 +424,9 @@ const styles = StyleSheet.create({
   languageHint: { fontFamily: fonts.body, fontSize: 11.5, color: colors.muted2, marginTop: 3 },
   languageOptions: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 },
   languageButton: {
+    flexGrow: 1,
+    flexBasis: "30%",
+    alignItems: "center",
     borderWidth: 2,
     borderColor: colors.ink,
     borderRadius: 14,

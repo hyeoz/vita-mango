@@ -3,7 +3,7 @@
 import { GENERATED_CATALOG } from "./catalog.generated";
 import { OVERRIDES } from "./overrides";
 
-export type RuntimeLanguage = "ko" | "en" | "ja" | "fr";
+export type RuntimeLanguage = "ko" | "en" | "ja" | "fr" | "es";
 
 type RuntimeMessage =
   | "safetyExcluded"
@@ -45,6 +45,14 @@ const MESSAGES: Record<RuntimeLanguage, Record<RuntimeMessage, string>> = {
     profileBalancedBlurb: "Aucun signal ne ressort. Vous maintenez bien votre forme actuelle !",
     profileLabel: "Profil axé sur {domains}",
     profileBlurb: "Vos réponses montrent surtout des signaux liés à {domains}. Commençons par là !",
+  },
+  es: {
+    safetyExcluded: "Excluido por: {reasons}",
+    safetyWarning: "Si {reason} se aplica a tu caso, consulta a un profesional sanitario antes de tomarlo.",
+    profileBalanced: "Perfil equilibrado",
+    profileBalancedBlurb: "No destaca ninguna señal. ¡Estás manteniendo bien tu estado actual!",
+    profileLabel: "Enfoque en {domains}",
+    profileBlurb: "Tus respuestas muestran señales más claras en {domains}. ¡Empecemos por ahí!",
   },
 };
 

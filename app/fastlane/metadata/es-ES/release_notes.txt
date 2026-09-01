@@ -1,0 +1,3 @@
+Vita Mango ya está disponible en inglés, japonés, francés y español. El idioma inicial se adapta al idioma y la región del dispositivo, y puedes cambiarlo en cualquier momento desde Mi Jelly.
+
+También hemos mejorado el texto de carga y centrado los botones de añadir y cerrar.
