@@ -146,31 +146,6 @@ export default function MyScreen() {
           <Text style={styles.refsChevron}>›</Text>
         </Bouncy>
 
-        <View style={styles.languageCard}>
-          <Text style={styles.languageTitle}>🌐 앱 언어</Text>
-          <Text style={styles.languageHint}>언어를 선택하면 앱 전체와 알림에 바로 적용돼요.</Text>
-          <View style={styles.languageOptions}>
-            {(Object.keys(LANGUAGE_NAMES) as Language[]).map((item) => {
-              const selected = language === item;
-              return (
-                <Bouncy
-                  key={item}
-                  scaleTo={0.96}
-                  haptic="selection"
-                  onPress={() => setLanguage(item)}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected }}
-                  style={[styles.languageButton, selected && styles.languageButtonOn]}
-                >
-                  <Text style={[styles.languageButtonText, selected && styles.languageButtonTextOn]}>
-                    {LANGUAGE_NAMES[item]}
-                  </Text>
-                </Bouncy>
-              );
-            })}
-          </View>
-        </View>
-
         <Text style={styles.sectionTitle}>영양제 도감 📒</Text>
         <View style={styles.grid}>
           {catalog.map((c) => (
@@ -374,7 +349,32 @@ export default function MyScreen() {
           앱을 삭제하면 함께 지워져요.
         </Text>
 
-        <Disclaimer style={styles.disclaimerBlock} />
+        <Disclaimer style={styles.disclaimerBlock} showSourcesLink={false} />
+
+        <View style={styles.languageCard}>
+          <Text style={styles.languageTitle}>🌐 앱 언어</Text>
+          <Text style={styles.languageHint}>언어를 선택하면 앱 전체와 알림에 바로 적용돼요.</Text>
+          <View style={styles.languageOptions}>
+            {(Object.keys(LANGUAGE_NAMES) as Language[]).map((item) => {
+              const selected = language === item;
+              return (
+                <Bouncy
+                  key={item}
+                  scaleTo={0.96}
+                  haptic="selection"
+                  onPress={() => setLanguage(item)}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected }}
+                  style={[styles.languageButton, selected && styles.languageButtonOn]}
+                >
+                  <Text style={[styles.languageButtonText, selected && styles.languageButtonTextOn]}>
+                    {LANGUAGE_NAMES[item]}
+                  </Text>
+                </Bouncy>
+              );
+            })}
+          </View>
+        </View>
 
         <Pressable style={styles.deleteAccount} onPress={confirmReset}>
           <Text style={styles.deleteAccountText}>모든 데이터 삭제</Text>
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
   statValue: { fontFamily: fonts.display, fontSize: 23 },
   statLabel: { fontFamily: fonts.body, fontSize: 11, color: colors.muted, marginTop: 2 },
   languageCard: {
-    marginTop: 18,
+    marginTop: 14,
     padding: 14,
     borderWidth: 2.5,
     borderColor: colors.ink,

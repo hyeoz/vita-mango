@@ -20,23 +20,29 @@ const SHORT =
 export default function Disclaimer({
   variant = "full",
   style,
+  showSourcesLink = true,
 }: {
   variant?: "full" | "short";
   style?: object;
+  showSourcesLink?: boolean;
 }) {
   const { setScreen } = useApp();
   const { t } = useI18n();
   return (
     <View style={[styles.wrap, style]}>
       <Text style={styles.text}>{variant === "short" ? SHORT : FULL}</Text>
-      <Pressable
-        onPress={() => setScreen("references")}
-        accessibilityRole="button"
-        accessibilityLabel={t("근거 및 출처 화면 열기")}
-        hitSlop={8}
-      >
-        <Text style={styles.link}>📚 근거 및 출처 보기</Text>
-      </Pressable>
+      {showSourcesLink ? (
+        <Pressable
+          onPress={() => setScreen("references")}
+          accessibilityRole="button"
+          accessibilityLabel={t("근거 및 출처 화면 열기")}
+          hitSlop={8}
+          style={styles.linkRow}
+        >
+          <Text style={styles.linkIcon}>📚</Text>
+          <Text style={styles.link}>근거 및 출처 보기</Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -57,10 +63,11 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     color: colors.muted3,
   },
+  linkRow: { flexDirection: "row", alignItems: "center", gap: 2, alignSelf: "flex-start" },
+  linkIcon: { fontSize: 13 },
   link: {
     fontFamily: fonts.display,
     fontSize: 13,
     color: colors.purpleDeep,
-    textDecorationLine: "underline",
   },
 });

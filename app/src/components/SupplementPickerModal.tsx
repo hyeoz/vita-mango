@@ -95,7 +95,10 @@ export default function SupplementPickerModal({
             accessibilityLabel={t("닫기")}
             style={styles.close}
           >
-            <Text style={styles.closeText}>×</Text>
+            <View style={styles.closeIcon}>
+              <View style={[styles.closeStroke, styles.closeStrokeForward]} />
+              <View style={[styles.closeStroke, styles.closeStrokeBackward]} />
+            </View>
           </Pressable>
         </View>
 
@@ -231,7 +234,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  closeText: { fontFamily: fonts.display, fontSize: 24, lineHeight: 27, color: colors.ink },
+  closeIcon: { width: 13, height: 13 },
+  closeStroke: {
+    position: "absolute",
+    top: 5.5,
+    left: 0,
+    width: 13,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: colors.ink,
+  },
+  closeStrokeForward: { transform: [{ rotate: "45deg" }] },
+  closeStrokeBackward: { transform: [{ rotate: "-45deg" }] },
   searchWrap: {
     flexDirection: "row",
     alignItems: "center",
