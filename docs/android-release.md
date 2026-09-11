@@ -5,6 +5,7 @@ Last verified: 2026-09-11
 ## Build identity
 
 - Package: `com.vitamango.app`
+- Play Console app ID: `4972105788129966297`
 - Version: `1.0.1`
 - Version code: `11`
 - Minimum SDK: 24
@@ -62,6 +63,8 @@ Data is encrypted in transit. The health questionnaire and journal are not trans
 ## Assets and listing
 
 Fastlane-compatible Play metadata lives under `app/fastlane/metadata/android/`. The production lane uploads a **draft** release, including listing text and graphics; it never rolls the release out automatically.
+
+This personal developer account requires a closed test with at least 12 opted-in testers for at least 14 continuous days before production access can be requested. The Play Console app record was created on 2026-09-11; tester enrollment has not started yet.
 
 Before review submission, verify in Play Console:
 
