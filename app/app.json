@@ -41,7 +41,13 @@
     "android": {
       "edgeToEdgeEnabled": true,
       "package": "com.vitamango.app",
-      "versionCode": 10,
+      "versionCode": 11,
+      "allowBackup": false,
+      "blockedPermissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.SYSTEM_ALERT_WINDOW"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#fff4ea"
@@ -56,6 +62,11 @@
         {
           "ios": {
             "useFrameworks": "static"
+          },
+          "android": {
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 36,
+            "buildToolsVersion": "35.0.0"
           }
         }
       ],
@@ -120,6 +131,7 @@
         }
       ],
       "./plugins/withDevelopmentTeam",
+      "./plugins/withAndroidReleaseSigning",
       "./plugins/withLocalNotificationsOnly",
       [
         "expo-notifications",

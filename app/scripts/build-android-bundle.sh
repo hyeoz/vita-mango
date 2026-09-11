@@ -23,4 +23,4 @@ export VM_ANDROID_KEY_PASSWORD="${VM_ANDROID_KEY_PASSWORD:-$VM_ANDROID_KEYSTORE_
 
 node -e 'const major=Number(process.versions.node.split(".")[0]); if (major < 20) { throw new Error("Node 20+ is required") }'
 bundle check
-bundle exec fastlane android production
+bundle exec fastlane android bundle

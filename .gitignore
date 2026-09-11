@@ -37,7 +37,6 @@ app/secrets/
 app/fastlane/report.xml
 app/fastlane/Preview.html
 app/fastlane/test_output/
-app/fastlane/metadata/android/
 *.p8
 
 # logs

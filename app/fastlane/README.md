@@ -68,6 +68,14 @@ Upload the already-built .ipa to TestFlight (no rebuild)
 
 ## Android
 
+### android bundle
+
+```sh
+[bundle exec] fastlane android bundle
+```
+
+Build a signed Play-ready Android App Bundle without uploading it
+
 ### android beta
 
 ```sh

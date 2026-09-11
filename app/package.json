@@ -13,6 +13,7 @@
     "asc:publish": "bash scripts/publish-ios-asc.sh",
     "build:ios-keychainless": "bash scripts/build-ios-keychainless.sh",
     "build:ios-prod": "bash scripts/release-ios.sh",
+    "build:android-bundle": "bash scripts/build-android-bundle.sh",
     "build:android-prod": "bash scripts/release-android.sh",
     "verify:engine": "tsx scripts/verify-engine.ts"
   },
@@ -33,7 +34,7 @@
     "expo-status-bar": "~3.0.9",
     "react": "19.1.0",
     "react-native": "0.81.5",
-    "react-native-google-mobile-ads": "^16.4.0",
+    "react-native-google-mobile-ads": "16.3.0",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-svg": "15.12.1"
   },

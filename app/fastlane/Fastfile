@@ -17,6 +17,8 @@ APP_DIR    = File.expand_path("..", __dir__)
 APP_IDENTIFIER = "com.vitamango.app"
 APP_NAME = "비타망고"
 APP_SKU = "vita-mango-ios"
+ANDROID_AAB = File.join(APP_DIR, "build", "android", "vita-mango.aab")
+ANDROID_METADATA = File.expand_path("metadata/android", __dir__)
 
 def app_json
   JSON.parse(File.read(APP_JSON))
@@ -186,6 +188,56 @@ def prebuild(platform)
   # pod/npm step; iOS runs `pod install` explicitly below so failures surface
   # loudly instead of silently leaving no .xcworkspace.
   sh("cd #{APP_DIR.shellescape} && npx expo prebuild -p #{platform} --clean --no-install")
+end
+
+def ensure_android_release_signing!
+  required = %w[
+    VM_ANDROID_KEYSTORE_PATH
+    VM_ANDROID_KEYSTORE_PASSWORD
+    VM_ANDROID_KEY_ALIAS
+    VM_ANDROID_KEY_PASSWORD
+  ]
+  missing = required.select { |name| ENV[name].to_s.strip.empty? }
+  UI.user_error!("Missing Android release-signing variables: #{missing.join(', ')}") unless missing.empty?
+
+  path = File.expand_path(ENV.fetch("VM_ANDROID_KEYSTORE_PATH"), APP_DIR)
+  UI.user_error!("Android upload keystore does not exist: #{path}") unless File.file?(path)
+  ENV["VM_ANDROID_KEYSTORE_PATH"] = path
+end
+
+def write_android_changelogs!
+  version_code = app_json.dig("expo", "android", "versionCode")
+  {
+    "ko-KR" => notes_for("ko"),
+    "en-US" => notes_for("en-US"),
+    "ja-JP" => notes_for("ja"),
+    "fr-FR" => notes_for("fr-FR"),
+    "es-ES" => notes_for("es-ES")
+  }.each do |locale, note|
+    next if note.to_s.strip.empty?
+    dir = File.join(ANDROID_METADATA, locale, "changelogs")
+    FileUtils.mkdir_p(dir)
+    File.write(File.join(dir, "#{version_code}.txt"), note)
+  end
+end
+
+def build_android_aab!
+  ensure_android_release_signing!
+  bump_android_build!
+  prebuild("android")
+  write_android_changelogs!
+  gradle(
+    project_dir: File.join(APP_DIR, "android"),
+    task: "bundle",
+    build_type: "Release"
+  )
+
+  generated = File.join(APP_DIR, "android", "app", "build", "outputs", "bundle", "release", "app-release.aab")
+  UI.user_error!("Android App Bundle was not generated: #{generated}") unless File.file?(generated)
+  FileUtils.mkdir_p(File.dirname(ANDROID_AAB))
+  FileUtils.cp(generated, ANDROID_AAB)
+  UI.success("Built signed Android App Bundle: #{ANDROID_AAB}")
+  ANDROID_AAB
 end
 
 platform :ios do
@@ -424,28 +476,19 @@ platform :ios do
 end
 
 platform :android do
+  desc "Build a signed Play-ready Android App Bundle without uploading it"
+  lane :bundle do
+    build_android_aab!
+  end
+
   desc "Local build → upload to Play internal track with release notes"
   lane :beta do
-    bump_android_build!
-    prebuild("android")
-
-    # Write changelogs where supply reads them (metadata/android/<locale>/changelogs/<versionCode>.txt).
-    version_code = app_json["expo"]["android"]["versionCode"]
-    { "ko-KR" => notes_for("ko"), "en-US" => notes_for("en-US") }.each do |loc, text|
-      dir = File.expand_path("metadata/android/#{loc}/changelogs", __dir__)
-      FileUtils.mkdir_p(dir)
-      File.write(File.join(dir, "#{version_code}.txt"), text)
-    end
-
-    gradle(
-      project_dir: File.join(APP_DIR, "android"),
-      task: "bundle",
-      build_type: "Release"
-    )
+    aab = build_android_aab!
     upload_to_play_store(
       track: "internal",
-      aab: File.join(APP_DIR, "android/app/build/outputs/bundle/release/app-release.aab"),
+      aab: aab,
       json_key: ENV.fetch("PLAY_JSON_KEY_PATH"),
+      metadata_path: ANDROID_METADATA,
       skip_upload_apk: true,
       skip_upload_images: true,
       skip_upload_screenshots: true
@@ -456,20 +499,17 @@ platform :android do
 
   desc "One command: local Android bundle → upload to Play production"
   lane :production do
-    bump_android_build!
-    prebuild("android")
-    gradle(
-      project_dir: File.join(APP_DIR, "android"),
-      task: "bundle",
-      build_type: "Release"
-    )
+    aab = build_android_aab!
     upload_to_play_store(
       track: "production",
-      aab: File.join(APP_DIR, "android/app/build/outputs/bundle/release/app-release.aab"),
+      release_status: "draft",
+      aab: aab,
       json_key: ENV.fetch("PLAY_JSON_KEY_PATH"),
+      metadata_path: ANDROID_METADATA,
       skip_upload_apk: true,
-      skip_upload_images: true,
-      skip_upload_screenshots: true
+      skip_upload_images: false,
+      skip_upload_screenshots: false
     )
+    UI.success("Uploaded a draft production release. Review and submit it in Play Console.")
   end
 end
