@@ -14,7 +14,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as MediaLibrary from "expo-media-library";
 import * as Sharing from "expo-sharing";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { ClipPath, Defs, Path, Rect } from "react-native-svg";
+import Svg, { ClipPath, Defs, Path } from "react-native-svg";
 import ViewShot from "react-native-view-shot";
 
 import { Text } from "../i18n/components";
@@ -27,6 +27,24 @@ import { PillSwatch } from "../components/Pill";
 
 const MANGO_PATH =
   "M104 35 C137 27 169 45 185 78 C204 118 196 171 164 202 C136 229 80 232 48 209 C15 185 14 142 33 108 C44 88 62 76 75 54 C83 42 92 37 104 35 Z";
+
+// Each fill area shares its curved edge with the matching dotted separator.
+// Keeping both from the same coordinates prevents color from bleeding across
+// the visual progress boundary.
+const MANGO_SEPARATORS = [
+  "M0 170 C65 176 150 188 220 178",
+  "M0 135 C65 141 150 153 220 143",
+  "M0 100 C65 106 150 118 220 108",
+  "M0 65 C65 71 150 83 220 73",
+];
+
+const MANGO_SECTIONS = [
+  `${MANGO_SEPARATORS[0]} L220 260 L0 260 Z`,
+  `${MANGO_SEPARATORS[1]} L220 178 C150 188 65 176 0 170 Z`,
+  `${MANGO_SEPARATORS[2]} L220 143 C150 153 65 141 0 135 Z`,
+  `${MANGO_SEPARATORS[3]} L220 108 C150 118 65 106 0 100 Z`,
+  "M0 0 L220 0 L220 73 C150 83 65 71 0 65 Z",
+];
 
 function dotDate(date: Date): string {
   const pad = (value: number) => String(value).padStart(2, "0");
@@ -52,25 +70,18 @@ function MangoProgress({ taken, total, size }: { taken: number; total: number; s
         strokeWidth={8}
         strokeLinejoin="round"
       />
-      <Path d={MANGO_PATH} fill="#fff9ef" />
-      {[0, 1, 2, 3, 4].map((index) => {
-        const y = 205 - index * 35;
-        return (
-          <Rect
-            key={index}
-            x={18}
-            y={y}
-            width={180}
-            height={36}
-            fill={index < filled ? active[index] : muted[index]}
-            clipPath="url(#mango-share-fill)"
-          />
-        );
-      })}
-      {[65, 100, 135, 170].map((y) => (
+      {MANGO_SECTIONS.map((section, index) => (
         <Path
-          key={y}
-          d={`M28 ${y} C80 ${y + 6} 138 ${y + 14} 191 ${y + 8}`}
+          key={section}
+          d={section}
+          fill={index < filled ? active[index] : muted[index]}
+          clipPath="url(#mango-share-fill)"
+        />
+      ))}
+      {MANGO_SEPARATORS.map((separator) => (
+        <Path
+          key={separator}
+          d={separator}
           fill="none"
           stroke="#716992"
           strokeWidth={2.4}
@@ -236,17 +247,18 @@ export default function ShareScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 20 }]}
         showsVerticalScrollIndicator={false}
       >
-        <ViewShot
-          ref={shotRef}
-          options={{ format: "png", quality: 1, result: "tmpfile" }}
-          style={[styles.artwork, { width: artworkWidth }]}
-        >
+        <View style={[styles.artwork, { width: artworkWidth }]}>
           <DecorativePill color="yellow" style={styles.decorativeTopLeft} />
           <DecorativePill color="purple" style={styles.decorativeTopRight} />
           <DecorativePill color="mixed" style={styles.decorativeBottomLeft} />
           <DecorativePill color="cyan" style={styles.decorativeBottomRight} />
 
-          <View style={styles.postcard}>
+          <View style={styles.postcardFrame}>
+            <ViewShot
+              ref={shotRef}
+              options={{ format: "png", quality: 1, result: "tmpfile" }}
+              style={styles.postcard}
+            >
             <Text style={styles.date}>{date}</Text>
 
             <View style={styles.progressRow}>
@@ -278,8 +290,9 @@ export default function ShareScreen() {
               <Text style={styles.footerText}>나만의 영양제 루틴, 비타망고</Text>
               <PillSwatch color="purple" width={30} height={15} border={2} />
             </View>
+            </ViewShot>
           </View>
-        </ViewShot>
+        </View>
 
         <View style={styles.actions}>
           <Pressable
@@ -340,6 +353,10 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     overflow: "hidden",
   },
+  postcardFrame: {
+    transform: [{ rotate: "-0.6deg" }],
+    ...hardShadow(5, 7, 0.18),
+  },
   postcard: {
     backgroundColor: "#fffdfa",
     borderWidth: 3,
@@ -348,8 +365,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 22,
     paddingBottom: 14,
-    transform: [{ rotate: "-0.6deg" }],
-    ...hardShadow(5, 7, 0.18),
+    overflow: "hidden",
   },
   date: { fontFamily: fonts.display, color: "#8b7fb2", fontSize: 22, marginLeft: 4 },
   progressRow: {
