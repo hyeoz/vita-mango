@@ -49,6 +49,26 @@ Notifications.setNotificationHandler({
 });
 
 const ANDROID_CHANNEL = "vm-reminders";
+export const INTAKE_CATEGORY = "VM_INTAKE";
+export const MARK_TAKEN_ACTION = "VM_MARK_TAKEN";
+
+/**
+ * Adds the notification-center action used to record an intake without opening
+ * the app. `opensAppToForeground: false` is the important iOS bit; AppDelegate
+ * persists the response natively so it also survives a terminated JS runtime.
+ */
+async function ensureIntakeCategory(): Promise<void> {
+  if (Platform.OS !== "ios") return;
+  await Notifications.setNotificationCategoryAsync(INTAKE_CATEGORY, [
+    {
+      identifier: MARK_TAKEN_ACTION,
+      buttonTitle: tx("먹었어요"),
+      options: {
+        opensAppToForeground: false,
+      },
+    },
+  ]);
+}
 
 async function ensureAndroidChannel(): Promise<void> {
   if (Platform.OS !== "android") return;
@@ -115,6 +135,7 @@ export async function syncReminders(
   if (!planned.length) return 0;
 
   await ensureAndroidChannel();
+  await ensureIntakeCategory();
 
   let scheduled = 0;
   for (const { supplement: s, plan } of planned) {
@@ -123,7 +144,11 @@ export async function syncReminders(
         content: {
           title: tx("젤리가 알려줄게 🥭"),
           body: msg("notificationBody", { name: tx(s.name), time: tx(s.time) }),
-          data: { name: s.name },
+          data: {
+            name: s.name,
+            ...(s.id ? { supplementId: s.id } : {}),
+          },
+          ...(Platform.OS === "ios" ? { categoryIdentifier: INTAKE_CATEGORY } : {}),
           ...(Platform.OS === "android" ? { channelId: ANDROID_CHANNEL } : {}),
         },
         trigger:

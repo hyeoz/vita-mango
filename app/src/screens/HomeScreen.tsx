@@ -35,6 +35,7 @@ export default function HomeScreen() {
     removeSupp,
     updateSupp,
     unlockedExprs,
+    setScreen,
   } = useApp();
 
   const recent = diaries.slice(0, 3);
@@ -186,8 +187,17 @@ export default function HomeScreen() {
         {/* today schedule */}
         <View style={styles.schedHead}>
           <Text style={styles.schedTitle}>오늘의 복용</Text>
-          <Text style={styles.schedHint}>탭 완료 ✓ · 길게 눌러 편집·삭제</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("섭취 기록 공유")}
+            onPress={() => setScreen("share")}
+            style={({ pressed }) => [styles.shareButton, pressed && styles.shareButtonPressed]}
+          >
+            <Text style={styles.shareIcon}>↗</Text>
+            <Text style={styles.shareLabel}>공유</Text>
+          </Pressable>
         </View>
+        <Text style={styles.schedHint}>탭 완료 ✓ · 길게 눌러 편집·삭제</Text>
         <View style={{ gap: 10 }}>
           {supps.map((item, i) => (
             <Bouncy
@@ -375,11 +385,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginTop: 22,
-    marginBottom: 12,
+    marginBottom: 4,
     paddingHorizontal: 2,
   },
   schedTitle: { fontFamily: fonts.display, fontSize: 18, color: colors.ink },
-  schedHint: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
+  schedHint: { fontFamily: fonts.body, fontSize: 13, color: colors.muted, marginBottom: 12, marginLeft: 2 },
+  shareButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: colors.white,
+    borderWidth: 2,
+    borderColor: colors.ink,
+    borderRadius: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    ...hardShadow(2, 2, 0.16),
+  },
+  shareButtonPressed: { opacity: 0.78, transform: [{ scale: 0.98 }] },
+  shareIcon: { fontFamily: fonts.display, color: colors.purple, fontSize: 16 },
+  shareLabel: { fontFamily: fonts.display, color: colors.ink, fontSize: 13 },
   suppRow: {
     flexDirection: "row",
     alignItems: "center",

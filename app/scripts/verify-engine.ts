@@ -29,6 +29,10 @@ import {
   xpFrom,
 } from "../src/state/gamification";
 import { planReminder, planReminders, type ReminderInput } from "../src/notifications/schedule";
+import {
+  applyPendingTakenActions,
+  type PendingTakenAction,
+} from "../src/notifications/actionLogic";
 
 const ALL_DOMAINS = Object.keys(DOMAIN_LABELS) as Domain[];
 const COLORS = ["pink", "purple", "yellow", "orange", "cyan", "mixed"];
@@ -345,6 +349,54 @@ check(
     // hour NaN → 8시 기본값, 분 99 → 8:99 = 9:39 으로 정규화
     return p?.kind === "daily" && p.hour === 9 && p.minute === 39;
   })()
+);
+
+const takenAction = (
+  over: Partial<PendingTakenAction> = {}
+): PendingTakenAction => ({
+  eventId: "notification-1|1787187600",
+  name: "마그네슘",
+  supplementId: "magnesium",
+  deliveredAt: at(20, 0).getTime(),
+  ...over,
+});
+const actionSupplements = [
+  { id: "magnesium", name: "마그네슘", taken: false },
+  { id: "vitamin-d", name: "비타민 D", taken: false },
+  { name: "직접 추가", taken: false },
+];
+const actionApplied = applyPendingTakenActions(
+  actionSupplements,
+  [takenAction()],
+  at(20, 5)
+);
+check(
+  "알림 액션은 해당 영양제만 복용 완료",
+  actionApplied[0].taken && !actionApplied[1].taken && !actionApplied[2].taken
+);
+check(
+  "기본 영양제는 이름보다 안정적인 id로 매칭",
+  applyPendingTakenActions(
+    actionSupplements,
+    [takenAction({ name: "Magnesium" })],
+    at(20, 5)
+  )[0].taken
+);
+check(
+  "직접 추가한 영양제는 이름으로 매칭",
+  applyPendingTakenActions(
+    actionSupplements,
+    [takenAction({ name: "직접 추가", supplementId: undefined })],
+    at(20, 5)
+  )[2].taken
+);
+check(
+  "전날 알림을 오늘 눌러도 오늘 복용으로 처리하지 않음",
+  !applyPendingTakenActions(
+    actionSupplements,
+    [takenAction({ deliveredAt: new Date(2026, 7, 19, 20, 0).getTime() })],
+    at(20, 5)
+  )[0].taken
 );
 
 console.log(

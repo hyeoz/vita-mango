@@ -18,6 +18,7 @@ import MyScreen from "./src/screens/MyScreen";
 import SurveyScreen from "./src/screens/SurveyScreen";
 import SplashScreen from "./src/screens/SplashScreen";
 import ReferencesScreen from "./src/screens/ReferencesScreen";
+import ShareScreen from "./src/screens/ShareScreen";
 import { I18nProvider } from "./src/i18n";
 
 // The branded splash animation runs on a 3.4 second cycle. Keep it on screen
@@ -35,7 +36,7 @@ function Screens() {
   const { screen, subscribed } = useApp();
   const { ready: adsReady } = useAds();
   // The survey owns the full screen — no nav bar, no banner competing with it.
-  const showNav = screen !== "survey";
+  const showNav = screen !== "survey" && screen !== "share";
   const showAds = adsReady && showNav && !subscribed;
   return (
     <>
@@ -46,6 +47,7 @@ function Screens() {
         {screen === "my" && <MyScreen />}
         {screen === "survey" && <SurveyScreen />}
         {screen === "references" && <ReferencesScreen />}
+        {screen === "share" && <ShareScreen />}
       </View>
       {showAds && <AdBanner />}
       {showNav && <BottomNav />}

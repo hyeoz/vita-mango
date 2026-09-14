@@ -2,7 +2,7 @@
   "expo": {
     "name": "비타망고",
     "slug": "vita-mango",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "scheme": "vitamango",
@@ -46,7 +46,11 @@
       "blockedPermissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.SYSTEM_ALERT_WINDOW"
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO"
       ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
@@ -157,6 +161,14 @@
             "fr",
             "es"
           ]
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "비타망고가 공유 이미지를 사진 보관함에서 확인할 수 있도록 허용해 주세요.",
+          "savePhotosPermission": "비타망고가 섭취 기록 공유 이미지를 사진 보관함에 저장하도록 허용해 주세요.",
+          "granularPermissions": []
         }
       ]
     ]

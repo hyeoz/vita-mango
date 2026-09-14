@@ -18,6 +18,10 @@ import {
   type StoredSurvey,
 } from "../storage/local";
 import { syncReminders, requestPermission, setTakenToday } from "../notifications/reminders";
+import {
+  applyPendingTakenActions,
+  consumePendingTakenActions,
+} from "../notifications/actions";
 import { recommend, type Answers, type Recommendation, type SurveyResult } from "../logic/recommend";
 import { findSupplement } from "../data/supplements";
 import { TIME_SLOTS } from "../data/types";
@@ -36,7 +40,7 @@ import { msg, useI18n } from "../i18n";
 
 export type Supplement = StoredSupplement;
 
-export type Screen = "survey" | "home" | "record" | "ai" | "my" | "references";
+export type Screen = "survey" | "home" | "record" | "ai" | "my" | "references" | "share";
 
 export type JellyMood =
   | "happy"
@@ -186,17 +190,38 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     (async () => {
       const p = await loadProfile();
+      const pendingTakenActions = await consumePendingTakenActions();
       if (cancelled) return;
       const today = dayKey();
-      setSupps(
-        // New day since last open → clear the daily "taken" checkmarks.
+      // New day since last open → clear yesterday's checkmarks before applying
+      // any notification-center actions that were delivered today.
+      const dailySupplements =
         p.lastActiveDate !== today
           ? p.supplements.map((s) => ({ ...s, taken: false }))
-          : p.supplements
-      );
+          : p.supplements;
+      const supplements = applyPendingTakenActions(dailySupplements, pendingTakenActions);
+      const allTaken = supplements.length > 0 && supplements.every((s) => s.taken);
+      const nextDoseLog =
+        allTaken && !p.doseLog.includes(today) ? [...p.doseLog, today] : p.doseLog;
+
+      // The ordinary persistence effect skips hydration itself, so commit a
+      // consumed native action now instead of risking it being lost on a crash.
+      if (
+        supplements !== p.supplements ||
+        nextDoseLog !== p.doseLog ||
+        p.lastActiveDate !== today
+      ) {
+        await saveProfile({
+          supplements,
+          doseLog: nextDoseLog,
+          lastActiveDate: today,
+        });
+      }
+      if (cancelled) return;
+      setSupps(supplements);
       setDiaries(p.diaries);
       setSurvey(p.survey);
-      setDoseLog(p.doseLog);
+      setDoseLog(nextDoseLog);
       setLastActiveDate(today);
       lastActiveRef.current = today;
       setOnboarded(p.onboarded);
@@ -249,11 +274,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
 
+  const consumeNotificationActions = useCallback(async () => {
+    const actions = await consumePendingTakenActions();
+    if (!actions.length) return;
+    setSupps((prev) => applyPendingTakenActions(prev, actions));
+  }, []);
+
   useEffect(() => {
     if (!hydrated) return;
     const sub = RNAppState.addEventListener("change", (next) => {
       if (next !== "active") return;
       rollOverIfNeeded();
+      void consumeNotificationActions();
       // Even with an unchanged list the right schedule may have changed: a
       // supplement taken before its time got a one-off for tomorrow, and once
       // that time passes it can go back to a self-sustaining daily trigger.
@@ -267,7 +299,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       sub.remove();
       clearInterval(midnight);
     };
-  }, [hydrated, rollOverIfNeeded]);
+  }, [hydrated, rollOverIfNeeded, consumeNotificationActions]);
 
   // Reminders mirror the supplement list *and* today's checkmarks — rebuild
   // whenever either changes. Debounced because `taken` now feeds the schedule,
