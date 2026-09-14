@@ -1,3 +1,3 @@
-Vita Mango ya está disponible en inglés, japonés, francés y español. El idioma inicial se adapta al idioma y la región del dispositivo, y puedes cambiarlo en cualquier momento desde Mi Jelly.
+Guarda y comparte la toma de suplementos de hoy como una imagen de postal, con los suplementos tomados, los pendientes y el progreso diario de un vistazo.
 
-También hemos mejorado el texto de carga y centrado los botones de añadir y cerrar.
+En iOS, toca « Tomado » en un recordatorio para registrar la toma sin abrir la app.

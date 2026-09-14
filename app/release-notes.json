@@ -21,5 +21,12 @@
     "ja": "今日のサプリ摂取記録をポストカード画像として保存・共有できるようになりました。摂取済み・未摂取のサプリと今日の進捗をひと目で確認できます。\n\niOSでは、通知の「飲みました」をタップすると、アプリを開かずに摂取完了として記録できます。",
     "fr-FR": "Enregistrez et partagez la prise de compléments du jour sous forme de carte postale, avec les compléments pris, ceux qui restent et la progression quotidienne.\n\nSur iOS, touchez « Pris » dans un rappel pour enregistrer la prise sans ouvrir l’app.",
     "es-ES": "Guarda y comparte la toma de suplementos de hoy como una imagen de postal, con los suplementos tomados, los pendientes y el progreso diario de un vistazo.\n\nEn iOS, toca « Tomado » en un recordatorio para registrar la toma sin abrir la app."
+  },
+  "1.1.0": {
+    "ko": "오늘의 영양제 섭취 기록을 엽서 이미지로 저장하고 공유할 수 있어요. 복용한 영양제와 남은 영양제, 오늘의 진행률을 한눈에 확인해 보세요.\n\niOS에서는 알림의 ‘먹었어요’를 눌러 앱을 열지 않고도 복용 완료로 기록할 수 있어요.",
+    "en-US": "Save and share today’s supplement intake as a postcard image, with completed and remaining supplements and daily progress at a glance.\n\nOn iOS, tap ‘Taken’ from a reminder to log a supplement without opening the app.",
+    "ja": "今日のサプリ摂取記録をポストカード画像として保存・共有できるようになりました。摂取済み・未摂取のサプリと今日の進捗をひと目で確認できます。\n\niOSでは、通知の「飲みました」をタップすると、アプリを開かずに摂取完了として記録できます。",
+    "fr-FR": "Enregistrez et partagez la prise de compléments du jour sous forme de carte postale, avec les compléments pris, ceux qui restent et la progression quotidienne.\n\nSur iOS, touchez « Pris » dans un rappel pour enregistrer la prise sans ouvrir l’app.",
+    "es-ES": "Guarda y comparte la toma de suplementos de hoy como una imagen de postal, con los suplementos tomados, los pendientes y el progreso diario de un vistazo.\n\nEn iOS, toca « Tomado » en un recordatorio para registrar la toma sin abrir la app."
   }
 }

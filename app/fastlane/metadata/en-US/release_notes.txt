@@ -1,3 +1,3 @@
-Vita Mango now supports English, Japanese, French, and Spanish. Your first language follows your device language and region, and you can switch anytime from My Jelly.
+Save and share today’s supplement intake as a postcard image, with completed and remaining supplements and daily progress at a glance.
 
-We also polished the splash loading text and centered the supplement add and close buttons.
+On iOS, tap ‘Taken’ from a reminder to log a supplement without opening the app.
