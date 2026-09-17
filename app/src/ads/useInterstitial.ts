@@ -1,65 +1,50 @@
-import { useEffect, useRef, useState, useCallback } from "react";
-import {
-  AdEventType,
-  InterstitialAd,
-} from "react-native-google-mobile-ads";
-import { adUnitIds } from "./config";
+import { useCallback, useEffect, useRef } from 'react';
+import { AppState } from 'react-native';
+import Storage from '@react-native-async-storage/async-storage';
+import { AdEventType, InterstitialAd } from 'react-native-google-mobile-ads';
+import { useAds } from './AdsContext';
+import { adUnitIds } from './config';
+import { createInterstitialPolicy } from './interstitialPolicy';
+import { createInterstitialController } from './interstitialController';
 
-// Loads an interstitial ad and hands back a `show()` you can call at a natural
-// break (e.g. after the user triggers a re-analysis). The ad preloads on mount
-// and re-preloads itself after each show, so `show()` is instant when ready.
-// If no ad is loaded yet, `show()` is a no-op and never blocks the UX.
+// Shared by every hook instance; remounts do not reset frequency limits.
+const policy = createInterstitialPolicy(Storage, 1);
+const events = {
+  loaded: AdEventType.LOADED,
+  opened: AdEventType.OPENED,
+  closed: AdEventType.CLOSED,
+  error: AdEventType.ERROR,
+};
+
 export function useInterstitial(enabled = true) {
-  const adRef = useRef<InterstitialAd | null>(null);
-  // Mirror readiness in a ref so `show` stays stable and always reads the
-  // current value, even when captured in a memoized callback elsewhere.
-  const readyRef = useRef(false);
-  const [ready, setReady] = useState(false);
-
-  const setReadyBoth = (v: boolean) => {
-    readyRef.current = v;
-    setReady(v);
-  };
-
+  const { ready: canRequestAds } = useAds();
+  const allowed = enabled && canRequestAds && !!adUnitIds.interstitial;
+  const allowedRef = useRef(allowed);
+  allowedRef.current = allowed;
+  const controller = useRef<ReturnType<typeof createInterstitialController> | null>(null);
+  if (!controller.current) {
+    controller.current = createInterstitialController({
+      createAd: () => {
+        const ad = InterstitialAd.createForAdRequest(adUnitIds.interstitial, {
+          requestNonPersonalizedAdsOnly: true,
+        });
+        return {
+          listen: (event, callback) => ad.addAdEventListener(events[event], callback),
+          load: () => ad.load(),
+          show: () => ad.show(),
+        };
+      },
+      reserve: available => policy.reserve(available && allowedRef.current),
+      isActive: () => allowedRef.current && AppState.currentState === 'active',
+    });
+  }
   useEffect(() => {
-    if (!enabled) {
-      setReadyBoth(false);
-      adRef.current = null;
-      return;
-    }
+    const current = controller.current!;
+    if (allowed) current.start();
+    else current.stop();
+    return () => current.stop();
+  }, [allowed]);
 
-    const ad = InterstitialAd.createForAdRequest(adUnitIds.interstitial, {
-      requestNonPersonalizedAdsOnly: true,
-    });
-    adRef.current = ad;
-
-    const onLoaded = ad.addAdEventListener(AdEventType.LOADED, () =>
-      setReadyBoth(true)
-    );
-    const onClosed = ad.addAdEventListener(AdEventType.CLOSED, () => {
-      setReadyBoth(false);
-      ad.load(); // preload the next one
-    });
-    const onError = ad.addAdEventListener(AdEventType.ERROR, () =>
-      setReadyBoth(false)
-    );
-
-    ad.load();
-
-    return () => {
-      setReadyBoth(false);
-      adRef.current = null;
-      onLoaded();
-      onClosed();
-      onError();
-    };
-  }, [enabled]);
-
-  const show = useCallback(() => {
-    if (readyRef.current && adRef.current) {
-      adRef.current.show();
-    }
-  }, []);
-
-  return { show, ready };
+  const show = useCallback(() => controller.current!.show(), []);
+  return { show };
 }

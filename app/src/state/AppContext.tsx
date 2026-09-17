@@ -182,8 +182,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Kept as a field so the ad gating below stays a single, obvious switch.
   const subscribed = false;
 
-  const { show: showLevelUpAd } = useInterstitial();
-  const prevLevelRef = useRef<number | null>(null);
+  const { show: showRoutineAd } = useInterstitial(hydrated && onboarded && !subscribed);
+  const completedRoutineDay = useRef<string | null>(null);
+  const navigating = useRef(false);
 
   // ── hydrate from device storage ──
   useEffect(() => {
@@ -349,16 +350,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, [survey, supps, diaries, language]);
 
-  useEffect(() => {
-    if (!hydrated) return;
-    const lvl = levelInfo.level;
-    if (prevLevelRef.current === null) {
-      prevLevelRef.current = lvl;
+  // Only a foreground tap can arm this transition. Hydration, notification
+  // actions, a level change, editing/deleting supplements and undo never do.
+  const navigateScreen = (next: Screen) => {
+    if (navigating.current) return;
+    const completed = completedRoutineDay.current === dayKey() &&
+      supps.length > 0 && supps.every(item => item.taken);
+    if (screen === "home" && completed && ["record", "ai", "my"].includes(next)) {
+      completedRoutineDay.current = null;
+      navigating.current = true;
+      void showRoutineAd().finally(() => {
+        navigating.current = false;
+        setScreen(next);
+      });
       return;
     }
-    if (lvl > prevLevelRef.current && !subscribed) showLevelUpAd();
-    prevLevelRef.current = lvl;
-  }, [hydrated, levelInfo.level, subscribed, showLevelUpAd]);
+    // Do not carry a deferred ad into a later, unrelated navigation flow.
+    completedRoutineDay.current = null;
+    setScreen(next);
+  };
 
   const submitDiary = () => {
     const t = diary.trim().slice(0, 200);
@@ -368,8 +378,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setJustLogged(true);
   };
 
-  const toggleSupp = (i: number) =>
-    setSupps((prev) => prev.map((s, idx) => (idx === i ? { ...s, taken: !s.taken } : s)));
+  const toggleSupp = (i: number) => {
+    const next = supps.map((s, idx) => (idx === i ? { ...s, taken: !s.taken } : s));
+    completedRoutineDay.current = supps[i] && !supps[i].taken &&
+      next.every(s => s.taken) && !doseLog.includes(dayKey()) ? dayKey() : null;
+    setSupps(next);
+  };
 
   const removeSupp = (i: number) => setSupps((prev) => prev.filter((_, idx) => idx !== i));
 
@@ -448,7 +462,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const value: AppState = {
     screen,
-    setScreen,
+    setScreen: navigateScreen,
     diary,
     setDiary,
     diaries,
