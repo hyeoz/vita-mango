@@ -21,7 +21,7 @@ cd app
 npm run build:android-bundle
 ```
 
-The command increments `android.versionCode`, regenerates the native Android project, signs the release with the upload key, and copies the result into `app/build/android/`.
+Set the next `android.versionCode` and version in `app/app.json`, run `bundle exec fastlane android prepare_notes`, and commit the release changes to `main` first. The build command verifies the committed app source, regenerates the native Android project, signs the release with the upload key, and copies the result into `app/build/android/`. It does not increment versions during the build.
 
 ## Play Console answers
 
