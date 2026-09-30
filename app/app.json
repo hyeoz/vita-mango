@@ -41,7 +41,7 @@
     "android": {
       "edgeToEdgeEnabled": true,
       "package": "com.vitamango.app",
-      "versionCode": 11,
+      "versionCode": 12,
       "allowBackup": false,
       "blockedPermissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
