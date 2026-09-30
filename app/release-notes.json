@@ -28,5 +28,12 @@
     "ja": "今日のサプリ摂取記録をポストカード画像として保存・共有できるようになりました。摂取済み・未摂取のサプリと今日の進捗をひと目で確認できます。\n\niOSでは、通知の「飲みました」をタップすると、アプリを開かずに摂取完了として記録できます。",
     "fr-FR": "Enregistrez et partagez la prise de compléments du jour sous forme de carte postale, avec les compléments pris, ceux qui restent et la progression quotidienne.\n\nSur iOS, touchez « Pris » dans un rappel pour enregistrer la prise sans ouvrir l’app.",
     "es-ES": "Guarda y comparte la toma de suplementos de hoy como una imagen de postal, con los suplementos tomados, los pendientes y el progreso diario de un vistazo.\n\nEn iOS, toca « Tomado » en un recordatorio para registrar la toma sin abrir la app."
+  },
+  "1.2.0": {
+    "ko": "잠금화면과 다이내믹 아일랜드에서 오늘의 영양제 섭취 현황을 확인하고 바로 체크할 수 있어요. 홈의 ‘잠금화면 섭취 체크’에서 시작해 보세요. (iOS 17 이상)\n\n섭취 기록 공유와 앱 안정성도 개선했어요.",
+    "en-US": "Check your daily supplement progress and record intake directly from the Lock Screen and Dynamic Island. Start from the Live Activity control on Home. Requires iOS 17 or later.\n\nWe also improved intake sharing and app stability.",
+    "ja": "ロック画面とDynamic Islandで今日のサプリ摂取状況を確認し、その場で記録できます。ホーム画面からライブアクティビティを開始してください。iOS 17以降に対応しています。\n\n摂取記録の共有とアプリの安定性も改善しました。",
+    "fr-FR": "Consultez votre progression et enregistrez vos prises directement depuis l’écran verrouillé et la Dynamic Island. Lancez l’activité en direct depuis l’accueil. Nécessite iOS 17 ou une version ultérieure.\n\nLe partage des prises et la stabilité ont aussi été améliorés.",
+    "es-ES": "Consulta tu progreso y registra las tomas desde la pantalla bloqueada y la Dynamic Island. Inicia la actividad en directo desde Inicio. Requiere iOS 17 o posterior.\n\nTambién mejoramos el uso compartido de las tomas y la estabilidad."
   }
 }

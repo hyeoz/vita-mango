@@ -55,6 +55,14 @@ end
 # runs just before it and *creates* the record when we pass this hash — so
 # always pass it.
 REVIEW_NOTES = <<~NOTES.strip
+  NEW IN 1.2.0: Interactive Live Activities (iOS 17 and later).
+  Add at least one supplement, then open Home -> "잠금화면 섭취 체크"
+  (Lock Screen intake) -> Start. Lock the iPhone to see the intake card.
+  Tap a supplement on the card or expanded Dynamic Island to record it
+  without opening the app. Completed progress syncs when the app returns.
+  Live Activities last up to 8 hours and can be restarted from Home.
+  No account, server, push notification setup, or special access is required.
+
   RESPONSE TO GUIDELINE 1.4.1 (build 18 rejection: health information without
   citations). This build adds citations with working links throughout the app.
 
@@ -283,7 +291,7 @@ platform :ios do
       metadata_path: File.join(APP_DIR, "fastlane", "metadata"),
       skip_screenshots: true,
       submit_for_review: true,
-      automatic_release: false,
+      automatic_release: ENV["VM_AUTOMATIC_RELEASE"] == "true",
       force: true,
       run_precheck_before_submit: false,
       app_review_information: app_review_information_hash,
@@ -318,7 +326,7 @@ platform :ios do
       screenshots_path: File.join(APP_DIR, "fastlane", "screenshots"),
       overwrite_screenshots: true,
       submit_for_review: true,
-      automatic_release: false,
+      automatic_release: ENV["VM_AUTOMATIC_RELEASE"] == "true",
       force: true,
       run_precheck_before_submit: false,
       app_review_information: app_review_information_hash,
@@ -350,7 +358,7 @@ platform :ios do
       metadata_path: File.join(APP_DIR, "fastlane", "metadata"),
       skip_screenshots: true,
       submit_for_review: true,
-      automatic_release: false,
+      automatic_release: ENV["VM_AUTOMATIC_RELEASE"] == "true",
       force: true,
       run_precheck_before_submit: false,
       app_review_information: app_review_information_hash,
@@ -383,7 +391,7 @@ platform :ios do
       metadata_path: File.join(APP_DIR, "fastlane", "metadata"),
       skip_screenshots: true,
       submit_for_review: true,
-      automatic_release: false,
+      automatic_release: ENV["VM_AUTOMATIC_RELEASE"] == "true",
       force: true,
       run_precheck_before_submit: false,
       app_review_information: app_review_information_hash,
