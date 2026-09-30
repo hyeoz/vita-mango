@@ -15,6 +15,14 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 ## iOS
 
+### ios archive_release
+
+```sh
+[bundle exec] fastlane ios archive_release
+```
+
+Archive the committed version with separate app and Live Activity profiles
+
 ### ios beta
 
 ```sh
@@ -67,6 +75,14 @@ Upload the already-built .ipa to TestFlight (no rebuild)
 
 
 ## Android
+
+### android prepare_notes
+
+```sh
+[bundle exec] fastlane android prepare_notes
+```
+
+Prepare release notes before committing the Android release
 
 ### android bundle
 
