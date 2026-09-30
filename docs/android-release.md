@@ -1,13 +1,13 @@
 # Android release handoff
 
-Last verified: 2026-09-11
+Last verified: 2026-09-30
 
 ## Build identity
 
 - Package: `com.vitamango.app`
 - Play Console app ID: `4972105788129966297`
-- Version: `1.0.1`
-- Version code: `11`
+- Version: `1.1.0`
+- Version code: `12`
 - Minimum SDK: 24
 - Compile / target SDK: 36 (Android 16)
 - Output: `app/build/android/vita-mango.aab`
@@ -64,7 +64,7 @@ Data is encrypted in transit. The health questionnaire and journal are not trans
 
 Fastlane-compatible Play metadata lives under `app/fastlane/metadata/android/`. The production lane uploads a **draft** release, including listing text and graphics; it never rolls the release out automatically.
 
-This personal developer account requires a closed test with at least 12 opted-in testers for at least 14 continuous days before production access can be requested. The Play Console app record was created on 2026-09-11; tester enrollment has not started yet.
+This personal developer account requires a closed test with at least 12 opted-in testers for at least 14 continuous days before production access can be requested. The Play Console app record was created on 2026-09-11. Internal testing is active; version 1.1.0 (12) was confirmed available to internal testers on 2026-09-30 at 19:11 KST. Closed-test enrollment status was not checked during this release.
 
 Before review submission, verify in Play Console:
 
@@ -83,3 +83,13 @@ The first Play upload establishes this upload key. Back up the `.jks` in a secur
 ## Known dependency audit
 
 `npm audit --omit=dev` currently reports 21 moderate/high findings through Expo CLI and Metro build-time dependencies. Expo Doctor passes all checks, and the signed release installs and runs normally. The available aggregate fix upgrades to Expo SDK 57, so do not run `npm audit fix --force` during this release; handle that SDK migration as a separate tested upgrade.
+
+## 2026-09-30 internal release
+
+- Source commit: `21046d0` on `main` (subsequent commits only updated release documentation).
+- Signed AAB built successfully; JAR signature verification passed.
+- SHA-256: `fd096e87d7308c71f5a8e558b6a98f077d3537eda76bdb87bd4ff12ebd1cf33d`.
+- Play Console: internal track active, latest release `1.1.0 (12)`, available to internal testers. No production release was made.
+- Play reported no newly unsupported devices. The only warning was the absence of an R8/ProGuard deobfuscation mapping file.
+- Includes intake postcard sharing and the current consent-gated advertising flow. Live Activities are iOS-only.
+- iOS release pending a replacement version number: App Store Connect already lists 1.1.0 (26) as READY_FOR_DISTRIBUTION. The new iOS build has not been uploaded or submitted.
