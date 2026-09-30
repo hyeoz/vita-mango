@@ -120,6 +120,15 @@ export async function saveProfile(p: Partial<LocalProfile>): Promise<void> {
   await Promise.all(writes);
 }
 
+/** Live Activity recovery events may be acknowledged only after this succeeds. */
+export async function saveIntakeState(supplements: StoredSupplement[], doseLog: string[], day: string): Promise<void> {
+  await AsyncStorage.multiSet([
+    [KEYS.supplements, JSON.stringify(supplements)],
+    [KEYS.doseLog, JSON.stringify(doseLog)],
+    [KEYS.lastActive, JSON.stringify(day)],
+  ]);
+}
+
 /** Wipes everything — backs the "데이터 전체 삭제" button on the my page. */
 export async function clearProfile(): Promise<void> {
   try {

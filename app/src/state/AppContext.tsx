@@ -8,7 +8,7 @@ import React, {
   useState,
 } from "react";
 // Aliased: `AppState` is already this file's own context-value type.
-import { ActivityIndicator, AppState as RNAppState, StyleSheet, View } from "react-native";
+import { ActivityIndicator, AppState as RNAppState, Linking, StyleSheet, View } from "react-native";
 import { colors, suppColor } from "../theme/colors";
 import {
   clearProfile,
@@ -37,6 +37,9 @@ import {
   Collectible,
 } from "./gamification";
 import { msg, useI18n } from "../i18n";
+import { useLiveActivity } from "../liveActivity/useLiveActivity";
+import { readLiveEvents } from "../liveActivity/native";
+import { mergeIntakeEvents, mergeCompletionDays, type IntakeEvent } from "../liveActivity/logic";
 
 export type Supplement = StoredSupplement;
 
@@ -113,6 +116,7 @@ export function suppFromName(name: string, i = 0): Supplement {
 }
 
 type AppState = {
+  liveActivity: ReturnType<typeof useLiveActivity>;
   screen: Screen;
   setScreen: (s: Screen) => void;
 
@@ -177,6 +181,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Mirrors `lastActiveDate` so the rollover check can read it without making
   // every listener re-subscribe on each state change.
   const lastActiveRef = useRef("");
+  const liveEvents = useRef<IntakeEvent[]>([]);
+  const liveActivity = useLiveActivity({ hydrated, supps, doseLog, day: lastActiveDate,
+    language, translate: t, events: liveEvents, tick: resyncTick });
 
   // No server means no verified purchase, so nothing can grant ad-free yet.
   // Kept as a field so the ad gating below stays a single, obvious switch.
@@ -192,6 +199,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (async () => {
       const p = await loadProfile();
       const pendingTakenActions = await consumePendingTakenActions();
+      const pendingLiveEvents = await readLiveEvents().catch(() => [] as IntakeEvent[]);
+      liveEvents.current = pendingLiveEvents;
       if (cancelled) return;
       const today = dayKey();
       // New day since last open → clear yesterday's checkmarks before applying
@@ -200,10 +209,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         p.lastActiveDate !== today
           ? p.supplements.map((s) => ({ ...s, taken: false }))
           : p.supplements;
-      const supplements = applyPendingTakenActions(dailySupplements, pendingTakenActions);
+      const supplements = mergeIntakeEvents(applyPendingTakenActions(dailySupplements, pendingTakenActions), pendingLiveEvents, today);
       const allTaken = supplements.length > 0 && supplements.every((s) => s.taken);
+      const recoveredDoseLog = mergeCompletionDays(p.doseLog, pendingLiveEvents);
       const nextDoseLog =
-        allTaken && !p.doseLog.includes(today) ? [...p.doseLog, today] : p.doseLog;
+        allTaken && !recoveredDoseLog.includes(today) ? [...recoveredDoseLog, today] : recoveredDoseLog;
 
       // The ordinary persistence effect skips hydration itself, so commit a
       // consumed native action now instead of risking it being lost on a crash.
@@ -277,8 +287,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const consumeNotificationActions = useCallback(async () => {
     const actions = await consumePendingTakenActions();
-    if (!actions.length) return;
-    setSupps((prev) => applyPendingTakenActions(prev, actions));
+    const events = await readLiveEvents().catch(() => [] as IntakeEvent[]);
+    liveEvents.current = events;
+    if (actions.length || events.length) {
+      setSupps((prev) => mergeIntakeEvents(applyPendingTakenActions(prev, actions), events, dayKey()));
+      setDoseLog((prev) => mergeCompletionDays(prev, events));
+    }
   }, []);
 
   useEffect(() => {
@@ -301,6 +315,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       clearInterval(midnight);
     };
   }, [hydrated, rollOverIfNeeded, consumeNotificationActions]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const openHome = ({ url }: { url: string }) => {
+      if (url === "vitamango://home" && onboarded) setScreen("home");
+    };
+    const link = Linking.addEventListener("url", openHome);
+    void Linking.getInitialURL().then(url => { if (url) openHome({ url }); });
+    return () => link.remove();
+  }, [hydrated, onboarded]);
+
+  // An island action can run while this app remains visible. Foreground-only
+  // polling also catches that case without starting JS for background taps.
+  useEffect(() => {
+    if (!hydrated || !liveActivity.status.active) return;
+    const timer = setInterval(() => {
+      if (RNAppState.currentState !== "active") return;
+      void consumeNotificationActions().then(() => setResyncTick(n => n + 1));
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [hydrated, liveActivity.status.active, consumeNotificationActions]);
 
   // Reminders mirror the supplement list *and* today's checkmarks — rebuild
   // whenever either changes. Debounced because `taken` now feeds the schedule,
@@ -433,6 +468,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const resetEverything = useCallback(async () => {
+    await liveActivity.reset();
     await clearProfile();
     await syncReminders([], false);
     setSupps([]);
@@ -443,7 +479,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setOnboarded(false);
     setCreatedAt(Date.now());
     setScreen("survey");
-  }, []);
+  }, [liveActivity.reset]);
 
   const lastDiary = diaries[0] || "";
   const jellyMood: JellyMood = justLogged
@@ -461,6 +497,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     : t("오늘 영양제 다 챙겼어! 최고야 🎉");
 
   const value: AppState = {
+    liveActivity,
     screen,
     setScreen: navigateScreen,
     diary,

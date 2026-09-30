@@ -137,6 +137,7 @@
       "./plugins/withDevelopmentTeam",
       "./plugins/withAndroidReleaseSigning",
       "./plugins/withLocalNotificationsOnly",
+      "./plugins/withLiveActivity",
       [
         "expo-notifications",
         {

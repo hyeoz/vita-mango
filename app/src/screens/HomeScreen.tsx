@@ -19,6 +19,7 @@ import Bouncy from "../components/Bouncy";
 import Disclaimer from "../components/Disclaimer";
 import { useApp } from "../state/AppContext";
 import { useI18n } from "../i18n";
+import LiveActivityControl from "../components/LiveActivityControl";
 
 export default function HomeScreen() {
   const { language, t, m } = useI18n();
@@ -185,6 +186,7 @@ export default function HomeScreen() {
         </LinearGradient>
 
         {/* today schedule */}
+        <LiveActivityControl />
         <View style={styles.schedHead}>
           <Text style={styles.schedTitle}>오늘의 복용</Text>
           <Pressable
