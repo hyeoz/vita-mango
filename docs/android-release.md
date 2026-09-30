@@ -64,7 +64,7 @@ Data is encrypted in transit. The health questionnaire and journal are not trans
 
 Fastlane-compatible Play metadata lives under `app/fastlane/metadata/android/`. The production lane uploads a **draft** release, including listing text and graphics; it never rolls the release out automatically.
 
-This personal developer account requires a closed test with at least 12 opted-in testers for at least 14 continuous days before production access can be requested. The Play Console app record was created on 2026-09-11. Internal testing is active; version 1.1.0 (12) was confirmed available to internal testers on 2026-09-30 at 19:11 KST. Closed-test enrollment status was not checked during this release.
+This personal developer account requires a closed test with at least 12 opted-in testers for at least 14 continuous days before production access can be requested. The Play Console app record was created on 2026-09-11. Internal testing is active; version 1.2.0 (13) was confirmed available to internal testers on 2026-09-30 at 19:16 KST. Closed-test enrollment status was not checked during this release.
 
 Before review submission, verify in Play Console:
 
@@ -100,3 +100,5 @@ The first Play upload establishes this upload key. Back up the `.jks` in a secur
 - Source commit: `3006876`; signed build and JAR signature verification passed.
 - SHA-256: `8527b71af21f8a383217adb81214d302b70c4a7f23a4e01ac8f41c77a9b10a54`.
 - Play Console confirmed `1.2.0 (13)` as the active latest internal release, available to internal testers at 19:16 KST.
+
+Final iOS and Android status: [1.2.0 release record](release-1.2.0.md). The earlier iOS version-number blocker has been resolved.

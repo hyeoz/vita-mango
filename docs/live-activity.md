@@ -38,7 +38,7 @@ xcrun swiftc native/live-activity/VMIntakeModels.swift scripts/test-live-activit
 - 별도로 만든 `Vita Mango Live Activity QA` 시뮬레이터에서 예시 데이터로 시작·종료·다시 표시, 잠금화면 및 기본 아일랜드 표시를 확인.
 - 앱 프로세스를 종료한 뒤 잠금화면 버튼으로 `2/5 → 3/5` 기록. 앱 재실행 시 `3/5` 복원, AsyncStorage 저장 후 저널의 pending 이벤트가 0개가 되는 것 확인.
 - `5/5` 완료 메시지와 완료 날짜 저장 확인. 카드 높이 전환 중 하단 잘림을 발견해 SwiftUI의 intrinsic size와 뷰 identity를 고정하고 재검증.
-- 캡처: `review-previews/live-activity-implementation-review.png`. **실기기 검증 및 TestFlight/App Store 업로드는 미실행.** 확장 아일랜드는 네이티브 빌드에 포함되며, 실제 길게 누르기 및 확장 화면 체크는 실기기 검증 항목으로 남긴다.
+- 캡처: `review-previews/live-activity-implementation-review.png`. **실기기 검증은 미실행.** TestFlight/App Store 배포 결과는 [1.2.0 릴리스 기록](release-1.2.0.md)에 정리했다. 확장 아일랜드는 네이티브 빌드에 포함되며, 실제 길게 누르기 및 확장 화면 체크는 실기기 검증 항목으로 남긴다.
 
 ## 스토어 서명
 
