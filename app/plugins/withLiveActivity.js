@@ -28,6 +28,31 @@ function configureProject(project, iosRoot, projectName, config) {
     project.addBuildPhase([], 'PBXFrameworksBuildPhase', 'Frameworks', added.uuid);
     project.addBuildPhase([], 'PBXResourcesBuildPhase', 'Resources', added.uuid);
   }
+  // xcode's addBuildPhase reuses PBXBuildFile objects across targets. Xcode
+  // accepts this, but CocoaPods/xcodeproj requires each build file to have one
+  // parent phase. Share file references, not build-file entries.
+  const objects = project.hash.project.objects;
+  const group = project.pbxGroupByName(projectName);
+  const phases = objects.PBXSourcesBuildPhase;
+  for (const phaseRef of target[1].buildPhases) {
+    const phase = phases[phaseRef.value];
+    if (!phase) continue;
+    for (const entry of phase.files) {
+      const shared = Object.entries(phases).some(([id, other]) =>
+        id !== phaseRef.value && !id.endsWith('_comment') &&
+        other.files?.some(file => file.value === entry.value));
+      if (shared) {
+        const original = entry.value;
+        entry.value = project.generateUuid();
+        objects.PBXBuildFile[entry.value] = { ...objects.PBXBuildFile[original] };
+        objects.PBXBuildFile[`${entry.value}_comment`] = objects.PBXBuildFile[`${original}_comment`];
+      }
+      const fileRef = objects.PBXBuildFile[entry.value].fileRef;
+      const grouped = Object.entries(objects.PBXGroup).some(([id, value]) =>
+        !id.endsWith('_comment') && value.children?.some(child => child.value === fileRef));
+      if (!grouped) group.children.push({ value: fileRef, comment: objects.PBXFileReference[`${fileRef}_comment`] });
+    }
+  }
   const list = project.pbxXCConfigurationList()[target[1].buildConfigurationList];
   const first = project.getFirstTarget().firstTarget;
   const appList = project.pbxXCConfigurationList()[first.buildConfigurationList];
