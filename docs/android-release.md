@@ -6,8 +6,8 @@ Last verified: 2026-09-30
 
 - Package: `com.vitamango.app`
 - Play Console app ID: `4972105788129966297`
-- Version: `1.1.0`
-- Version code: `12`
+- Version: `1.2.0`
+- Version code: `13`
 - Minimum SDK: 24
 - Compile / target SDK: 36 (Android 16)
 - Output: `app/build/android/vita-mango.aab`
@@ -93,3 +93,10 @@ The first Play upload establishes this upload key. Back up the `.jks` in a secur
 - Play reported no newly unsupported devices. The only warning was the absence of an R8/ProGuard deobfuscation mapping file.
 - Includes intake postcard sharing and the current consent-gated advertising flow. Live Activities are iOS-only.
 - iOS release pending a replacement version number: App Store Connect already lists 1.1.0 (26) as READY_FOR_DISTRIBUTION. The new iOS build has not been uploaded or submitted.
+
+## 2026-09-30 corrected 1.2.0 internal release
+
+- Replaces the earlier 1.1.0 internal rollout following the explicit instruction to use 1.2.0 on both platforms.
+- Source commit: `3006876`; signed build and JAR signature verification passed.
+- SHA-256: `8527b71af21f8a383217adb81214d302b70c4a7f23a4e01ac8f41c77a9b10a54`.
+- Play Console confirmed `1.2.0 (13)` as the active latest internal release, available to internal testers at 19:16 KST.
