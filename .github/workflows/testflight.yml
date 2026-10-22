@@ -1,0 +1,72 @@
+# main에 앱 변경이 머지되면 macOS 러너에서 iOS를 빌드해 테스트플라이트에 올린다.
+# 로컬 릴리스와 같은 fastlane 경로(expo prebuild → xcodebuild)를 쓰고, EAS는 쓰지 않는다.
+# 필요한 저장소 Secrets: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8,
+# IOS_DIST_CERT_P12_BASE64, IOS_DIST_CERT_PASSWORD (app/fastlane/SETUP.md 참고)
+name: TestFlight
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - ".github/workflows/testflight.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: testflight
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: app
+    env:
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+      APPLE_TEAM_ID: 25KGF8Y83H
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_PATH: ${{ runner.temp }}/AuthKey.p8
+      IOS_DIST_CERT_PATH: ${{ runner.temp }}/dist.p12
+      IOS_DIST_CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+          working-directory: app
+
+      - run: npm ci
+
+      - name: 검사
+        run: |
+          npx tsc --noEmit
+          npm run verify:engine
+          npm run test:ads
+          npx tsx scripts/test-live-activity.ts
+
+      - name: 서명 키 준비
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          IOS_DIST_CERT_P12_BASE64: ${{ secrets.IOS_DIST_CERT_P12_BASE64 }}
+        run: |
+          printf '%s' "$ASC_KEY_P8" > "$ASC_KEY_PATH"
+          printf '%s' "$IOS_DIST_CERT_P12_BASE64" | base64 --decode > "$IOS_DIST_CERT_PATH"
+
+      - name: 빌드 + 테스트플라이트 업로드
+        run: bundle exec fastlane ios ci_beta

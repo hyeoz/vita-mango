@@ -94,3 +94,26 @@ listing fields are complete.
 Edit [`../release-notes.json`](../release-notes.json). Add a block keyed by the
 `app.json` version for version-specific notes, or rely on `default` (the generic
 "안정성 개선 및 버그 수정" note) for routine updates.
+
+## Automatic TestFlight on merge to main
+
+`.github/workflows/testflight.yml` runs on every push to `main` that touches
+`app/` (docs-only commits are skipped) and can also be started by hand from the
+Actions tab. On a macOS runner it runs the type check and script tests, then
+`fastlane ios ci_beta`: the same prebuild → archive path as `beta`, with the
+build number set to one past the latest App Store Connect / `app.json` build.
+That number is not committed back; `app.json` keeps the last manual release's.
+
+One-time setup, in GitHub → Settings → Secrets and variables → Actions:
+
+| Secret | Value |
+| --- | --- |
+| `ASC_KEY_ID` | Same as `ASC_KEY_ID` in `app/.env` |
+| `ASC_ISSUER_ID` | Same as `ASC_ISSUER_ID` in `app/.env` |
+| `ASC_KEY_P8` | Full text of the `.p8` file (`cat app/secrets/AuthKey_*.p8`) |
+| `IOS_DIST_CERT_P12_BASE64` | Apple Distribution certificate + private key exported from Keychain Access as `.p12`, then `base64 -i dist.p12 \| pbcopy` |
+| `IOS_DIST_CERT_PASSWORD` | Password chosen when exporting the `.p12` |
+
+TestFlight only accepts builds for a version that has not been approved yet.
+After a version ships, bump `expo.version` in `app.json` (and add its notes to
+`release-notes.json`) before the next merge, or the upload is rejected.
