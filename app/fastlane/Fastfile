@@ -157,6 +157,16 @@ def apple_team_id
   ENV.fetch("APPLE_TEAM_ID")
 end
 
+# The build to send to App Review: the latest TestFlight upload of the current
+# version. CI uploads don't commit their build number, so app.json can lag.
+def review_build_number(api_key)
+  build_number = latest_testflight_build_number(
+    api_key: api_key, app_identifier: APP_IDENTIFIER, version: app_version
+  ).to_s
+  UI.user_error!("No TestFlight build for v#{app_version}") if build_number.strip.empty?
+  build_number
+end
+
 def ensure_connect_app!(api_key)
   # app_store_connect_api_key configures Spaceship's Connect API token.
   app = Spaceship::ConnectAPI::App.find(APP_IDENTIFIER)
@@ -311,8 +321,7 @@ platform :ios do
   lane :submit do
     key = asc_api_key
     ensure_connect_app!(key)
-    build_number = app_json.dig("expo", "ios", "buildNumber")
-    UI.user_error!("No iOS build number in app.json") if build_number.to_s.strip.empty?
+    build_number = review_build_number(key)
 
     upload_to_app_store(
       api_key: key,
@@ -346,7 +355,7 @@ platform :ios do
   lane :screenshots do
     key = asc_api_key
     ensure_connect_app!(key)
-    build_number = app_json.dig("expo", "ios", "buildNumber")
+    build_number = review_build_number(key)
     sh("cd #{APP_DIR.shellescape} && bundle exec ruby scripts/replace-ios-store-screenshots.rb")
     upload_to_app_store(
       api_key: key,
@@ -378,8 +387,7 @@ platform :ios do
   lane :resubmit do
     key = asc_api_key
     ensure_connect_app!(key)
-    build_number = app_json.dig("expo", "ios", "buildNumber")
-    UI.user_error!("No iOS build number in app.json") if build_number.to_s.strip.empty?
+    build_number = review_build_number(key)
 
     upload_to_app_store(
       api_key: key,

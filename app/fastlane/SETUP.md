@@ -114,6 +114,14 @@ One-time setup, in GitHub → Settings → Secrets and variables → Actions:
 | `IOS_DIST_CERT_P12_BASE64` | Apple Distribution certificate + private key exported from Keychain Access as `.p12`, then `base64 -i dist.p12 \| pbcopy` |
 | `IOS_DIST_CERT_PASSWORD` | Password chosen when exporting the `.p12` |
 
-TestFlight only accepts builds for a version that has not been approved yet.
-After a version ships, bump `expo.version` in `app.json` (and add its notes to
-`release-notes.json`) before the next merge, or the upload is rejected.
+Release flow:
+
+1. Merge to `main` → a new TestFlight build of the same version (build number +1).
+2. Check it in TestFlight. If something is wrong, fix it and merge again; the
+   version stays, only the build number goes up.
+3. Once it is good, send it to App Review from a Mac:
+   `cd app && bundle exec fastlane ios submit`. `submit`, `resubmit` and
+   `screenshots` pick the latest TestFlight build of the current version.
+4. After the version is approved, bump `expo.version` in `app.json` (and add its
+   notes to `release-notes.json`) before the next merge. TestFlight rejects
+   uploads for an already-approved version.
