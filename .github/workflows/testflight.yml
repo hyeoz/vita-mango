@@ -29,8 +29,6 @@ jobs:
       APPLE_TEAM_ID: 25KGF8Y83H
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-      ASC_KEY_PATH: ${{ runner.temp }}/AuthKey.p8
-      IOS_DIST_CERT_PATH: ${{ runner.temp }}/dist.p12
       IOS_DIST_CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
@@ -64,9 +62,14 @@ jobs:
         env:
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
           IOS_DIST_CERT_P12_BASE64: ${{ secrets.IOS_DIST_CERT_P12_BASE64 }}
+        # runner 컨텍스트는 job env에서 못 쓰므로 경로는 여기서 정해 넘긴다
         run: |
+          ASC_KEY_PATH="$RUNNER_TEMP/AuthKey.p8"
+          IOS_DIST_CERT_PATH="$RUNNER_TEMP/dist.p12"
           printf '%s' "$ASC_KEY_P8" > "$ASC_KEY_PATH"
           printf '%s' "$IOS_DIST_CERT_P12_BASE64" | base64 --decode > "$IOS_DIST_CERT_PATH"
+          echo "ASC_KEY_PATH=$ASC_KEY_PATH" >> "$GITHUB_ENV"
+          echo "IOS_DIST_CERT_PATH=$IOS_DIST_CERT_PATH" >> "$GITHUB_ENV"
 
       - name: 빌드 + 테스트플라이트 업로드
         run: bundle exec fastlane ios ci_beta
