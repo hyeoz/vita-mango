@@ -38,7 +38,7 @@ export default function LiveActivityControl() {
   </View>;
 }
 const styles = StyleSheet.create({
-  card: { marginBottom: 16, padding: 15, borderRadius: 18, backgroundColor: '#fff2d6', borderWidth: 1, borderColor: '#f1d3a4', gap: 8 },
+  card: { marginTop: 18, marginBottom: 16, padding: 15, borderRadius: 18, backgroundColor: '#fff2d6', borderWidth: 1, borderColor: '#f1d3a4', gap: 8 },
   heading: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center', justifyContent: 'space-between' },
   title: { color: colors.ink, fontSize: 16, fontWeight: '700' }, active: { color: '#5d6933', fontSize: 12 },
   description: { color: colors.muted3, fontSize: 13, lineHeight: 19 },

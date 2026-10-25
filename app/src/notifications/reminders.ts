@@ -113,9 +113,19 @@ export async function cancelAll(): Promise<void> {
   }
 }
 
+// Rebuilds run one at a time. "Cancel everything, then re-add" is only
+// idempotent if two passes never interleave: pass A cancels, pass B cancels,
+// then both add their full list and every reminder fires twice. Overlap is easy
+// to hit — the foreground resync, the Live Activity poll and a taken change can
+// all land within one rebuild's native round-trips. A request that arrives
+// mid-rebuild waits, and only the newest waiting request actually runs.
+let rebuildQueue: Promise<unknown> = Promise.resolve();
+let latestRequest = 0;
+
 /**
  * Rebuilds the whole schedule from the current supplement list. Safe to call on
- * every change — it cancels first, so it can never double-book.
+ * every change — rebuilds are serialized and each one cancels first, so it can
+ * never double-book.
  *
  * Because a taken supplement is skipped for the rest of today, this is no longer
  * only a function of the list: it also depends on the wall clock and on today's
@@ -123,10 +133,28 @@ export async function cancelAll(): Promise<void> {
  * app returns to the foreground, and when the day rolls over — AppContext does
  * all three.
  */
-export async function syncReminders(
+export function syncReminders(
   supplements: StoredSupplement[],
   enabled: boolean,
-  now: Date = new Date()
+  now?: Date
+): Promise<number> {
+  const request = ++latestRequest;
+  const run = rebuildQueue.then(() =>
+    request === latestRequest ? rebuildReminders(supplements, enabled, now ?? new Date()) : 0
+  );
+  rebuildQueue = run.catch(() => undefined);
+  return run;
+}
+
+/** Stable per reminder, so a stray second add replaces instead of stacking. */
+function reminderId(s: StoredSupplement, hour: number, minute: number): string {
+  return `vm-reminder:${s.id ?? s.name}:${hour}:${minute}`;
+}
+
+async function rebuildReminders(
+  supplements: StoredSupplement[],
+  enabled: boolean,
+  now: Date
 ): Promise<number> {
   await cancelAll();
   if (!enabled) return 0;
@@ -141,6 +169,7 @@ export async function syncReminders(
   for (const { supplement: s, plan } of planned) {
     try {
       await Notifications.scheduleNotificationAsync({
+        identifier: reminderId(s, plan.hour, plan.minute),
         content: {
           title: tx("젤리가 알려줄게 🥭"),
           body: msg("notificationBody", { name: tx(s.name), time: tx(s.time) }),
