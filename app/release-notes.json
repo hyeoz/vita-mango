@@ -35,5 +35,12 @@
     "ja": "ロック画面とDynamic Islandで今日のサプリ摂取状況を確認し、その場で記録できます。ホーム画面からライブアクティビティを開始してください。iOS 17以降に対応しています。\n\n摂取記録の共有とアプリの安定性も改善しました。",
     "fr-FR": "Consultez votre progression et enregistrez vos prises directement depuis l’écran verrouillé et la Dynamic Island. Lancez l’activité en direct depuis l’accueil. Nécessite iOS 17 ou une version ultérieure.\n\nLe partage des prises et la stabilité ont aussi été améliorés.",
     "es-ES": "Consulta tu progreso y registra las tomas desde la pantalla bloqueada y la Dynamic Island. Inicia la actividad en directo desde Inicio. Requiere iOS 17 o posterior.\n\nTambién mejoramos el uso compartido de las tomas y la estabilidad."
+  },
+  "1.2.1": {
+    "ko": "같은 영양제 알림이 두 번씩 오던 문제를 고쳤어요. 홈의 ‘잠금화면 섭취 체크’ 카드 위쪽 간격도 다듬었어요.",
+    "en-US": "Fixed an issue where the same supplement reminder could arrive twice. We also adjusted the spacing above the Live Activity control on Home.",
+    "ja": "同じサプリの通知が2回届くことがある問題を修正しました。ホーム画面のライブアクティビティカードの余白も調整しました。",
+    "fr-FR": "Correction d’un problème qui pouvait envoyer deux fois le même rappel de complément. L’espacement de la carte d’activité en direct sur l’accueil a aussi été ajusté.",
+    "es-ES": "Corregimos un problema por el que el mismo recordatorio de suplemento podía llegar dos veces. También ajustamos el espaciado de la tarjeta de actividad en directo en Inicio."
   }
 }

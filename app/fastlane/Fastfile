@@ -55,7 +55,11 @@ end
 # runs just before it and *creates* the record when we pass this hash — so
 # always pass it.
 REVIEW_NOTES = <<~NOTES.strip
-  NEW IN 1.2.0: Interactive Live Activities (iOS 17 and later).
+  1.2.1 IS A BUG-FIX UPDATE: a supplement reminder could be delivered twice,
+  and the Lock Screen intake card on Home had too little space above it.
+  No new features or permissions.
+
+  INTERACTIVE LIVE ACTIVITIES (added in 1.2.0, iOS 17 and later):
   Add at least one supplement, then open Home -> "잠금화면 섭취 체크"
   (Lock Screen intake) -> Start. Lock the iPhone to see the intake card.
   Tap a supplement on the card or expanded Dynamic Island to record it

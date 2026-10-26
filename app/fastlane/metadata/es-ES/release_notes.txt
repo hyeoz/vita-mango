@@ -1,3 +1,1 @@
-Consulta tu progreso y registra las tomas desde la pantalla bloqueada y la Dynamic Island. Inicia la actividad en directo desde Inicio. Requiere iOS 17 o posterior.
-
-También mejoramos el uso compartido de las tomas y la estabilidad.
+Corregimos un problema por el que el mismo recordatorio de suplemento podía llegar dos veces. También ajustamos el espaciado de la tarjeta de actividad en directo en Inicio.
