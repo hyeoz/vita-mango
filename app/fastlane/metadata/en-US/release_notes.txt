@@ -1,3 +1,1 @@
-Check your daily supplement progress and record intake directly from the Lock Screen and Dynamic Island. Start from the Live Activity control on Home. Requires iOS 17 or later.
-
-We also improved intake sharing and app stability.
+Fixed an issue where the same supplement reminder could arrive twice. We also adjusted the spacing above the Live Activity control on Home.

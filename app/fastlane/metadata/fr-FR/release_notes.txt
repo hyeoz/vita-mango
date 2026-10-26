@@ -1,3 +1,1 @@
-Consultez votre progression et enregistrez vos prises directement depuis l’écran verrouillé et la Dynamic Island. Lancez l’activité en direct depuis l’accueil. Nécessite iOS 17 ou une version ultérieure.
-
-Le partage des prises et la stabilité ont aussi été améliorés.
+Correction d’un problème qui pouvait envoyer deux fois le même rappel de complément. L’espacement de la carte d’activité en direct sur l’accueil a aussi été ajusté.
