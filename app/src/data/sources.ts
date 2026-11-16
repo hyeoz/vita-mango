@@ -212,6 +212,7 @@ export const SUPPLEMENT_SOURCES: Record<string, Source[]> = {
   sawPalmetto: [nccih("Saw Palmetto", "/saw-palmetto", NIH_NOTE)],
   maca: [],
   cranberry: [nccih("Cranberry", "/cranberry", NIH_NOTE)],
+  inositol: [],
   phosphatidylserine: [],
 };
 
