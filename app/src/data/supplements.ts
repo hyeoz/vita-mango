@@ -951,6 +951,24 @@ export const SUPPLEMENTS: Supplement[] = [
     avoidIf: [],
     warnIf: ["anticoagulant"],
   },
+  {
+    id: "inositol",
+    name: "이노시톨",
+    aliases: ["inositol", "마이오이노시톨", "미오이노시톨", "myoinositol", "디카이로이노시톨", "dchiroinositol"],
+    category: "여성",
+    color: "pink",
+    domains: { womens: 0.75, bloodsugar: 0.45, mood: 0.25 },
+    evidence: "B",
+    dose: "마이오이노시톨 2,000~4,000mg",
+    slot: "morningAfter",
+    unitsPerTake: 1,
+    unitNoun: "포",
+    benefit: "다낭성 난소 증후군(PCOS) 관리와 임신 준비에 많이 찾는 비타민 유사 성분이에요.",
+    cautions: ["고용량에서는 메스꺼움이나 묽은 변이 생길 수 있어요.", "난임·PCOS 치료 중이라면 담당 의사와 상의하세요."],
+    interactions: ["당뇨약과 함께 먹으면 혈당이 더 내려갈 수 있어요."],
+    avoidIf: [],
+    warnIf: ["pregnancy"],
+  },
 
   // ── 인지 ──
   {

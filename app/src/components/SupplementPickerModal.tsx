@@ -39,7 +39,7 @@ export default function SupplementPickerModal({
   onAdd,
   onClose,
 }: Props) {
-  const { t } = useI18n();
+  const { t, m } = useI18n();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState(ALL);
 
@@ -86,7 +86,7 @@ export default function SupplementPickerModal({
         <View style={styles.header}>
           <View>
             <Text style={styles.title}>영양제 직접 추가하기</Text>
-            <Text style={styles.subtitle}>53종에서 검색하거나 카테고리로 골라보세요.</Text>
+            <Text style={styles.subtitle}>{m("pickerSubtitle", { count: SUPPLEMENTS.length })}</Text>
           </View>
           <Pressable
             onPress={onClose}

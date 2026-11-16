@@ -23,7 +23,8 @@ export type MessageKey =
   | "profileLabel"
   | "profileBlurb"
   | "overlap"
-  | "approxTotal";
+  | "approxTotal"
+  | "pickerSubtitle";
 
 export const LANGUAGE_NAMES: Record<Language, string> = {
   ko: "한국어",
@@ -136,6 +137,7 @@ const MESSAGES: Record<Language, Record<MessageKey, string>> = {
     profileBlurb: "답변을 보니 {domains} 쪽 신호가 제일 뚜렷해. 거기부터 챙겨보자!",
     overlap: "🧩 {names} 효능이 겹쳐요. 단독으로는 {match}%였어요.",
     approxTotal: " / 약 {count}",
+    pickerSubtitle: "{count}종에서 검색하거나 카테고리로 골라보세요.",
   },
   en: {
     remaining: "{count} supplement(s) left today 🌙 Don't forget!",
@@ -155,6 +157,7 @@ const MESSAGES: Record<Language, Record<MessageKey, string>> = {
     profileBlurb: "Your answers show the clearest signals around {domains}. Let's start there!",
     overlap: "🧩 Its benefits overlap with {names}. On its own, it scored {match}%.",
     approxTotal: " / about {count}",
+    pickerSubtitle: "Search {count} supplements or browse by category.",
   },
   ja: {
     remaining: "今日のサプリはあと{count}個 🌙 忘れずに！",
@@ -174,6 +177,7 @@ const MESSAGES: Record<Language, Record<MessageKey, string>> = {
     profileBlurb: "回答では{domains}のサインが最もはっきりしています。まずそこから整えましょう！",
     overlap: "🧩 {names}と働きが重なります。単独では{match}%でした。",
     approxTotal: " / 約{count}",
+    pickerSubtitle: "{count}種類から検索するか、カテゴリから選んでください。",
   },
   fr: {
     remaining: "Il reste {count} complément(s) aujourd'hui 🌙 N'oubliez pas !",
@@ -193,6 +197,7 @@ const MESSAGES: Record<Language, Record<MessageKey, string>> = {
     profileBlurb: "Vos réponses montrent surtout des signaux liés à {domains}. Commençons par là !",
     overlap: "🧩 Ses effets recoupent ceux de {names}. Seul, ce complément obtenait {match}%.",
     approxTotal: " / environ {count}",
+    pickerSubtitle: "Recherchez parmi {count} compléments ou parcourez par catégorie.",
   },
   es: {
     remaining: "Quedan {count} suplemento(s) hoy 🌙 ¡No lo olvides!",
@@ -212,6 +217,7 @@ const MESSAGES: Record<Language, Record<MessageKey, string>> = {
     profileBlurb: "Tus respuestas muestran señales más claras en {domains}. ¡Empecemos por ahí!",
     overlap: "🧩 Sus beneficios se solapan con {names}. Por sí solo, obtuvo un {match}%.",
     approxTotal: " / aprox. {count}",
+    pickerSubtitle: "Busca entre {count} suplementos o explora por categoría.",
   },
 };
 
